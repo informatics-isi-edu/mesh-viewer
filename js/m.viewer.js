@@ -98,6 +98,10 @@ window.console.log("current mouse position is.."+_pos);
   }
 
   ren3d.render();
+
+  ren3d.onShowtime = function(){
+    hlite(meshs[1]);
+  }
 }
 
 //http://stackoverflow.com/questions/11871077/proper-way-to-detect-webgl-support
@@ -224,10 +228,29 @@ function showLabel(tval,jval) {
     dialogClass: 'myDialogClass',
     open: function() {
      var _p=jQuery('#dtext');
-var _nn='<p id="dtext">'+JSON.stringify(jval)+'</p>';
+var _nn='<p id="dtext">'+jval+'</p>';
 window.console.log(_nn);
      _p.replaceWith(_nn);
     }
   });//dialog
 }
 
+function hlite(mesh) {
+  var numberOfPoints = mesh.points.count;
+window.console.log("mesh--> count "+numberOfPoints);
+  for ( var j = 0; j < numberOfPoints - 1; j++) {
+    if( (j % 1000) != 0) {
+      continue;
+    }
+    var currentPoint = mesh.points.get(j);
+window.console.log("add a point.."+currentPoint[0]+" "+currentPoint[1]+" "+currentPoint[2]);
+
+    var newSphere = new X.sphere();
+    newSphere.center = [currentPoint[0], currentPoint[1], currentPoint[2]];
+    newSphere.color = [1, 0, 0];
+    newSphere.radius = .05;
+    var msg='x:  '+String(currentPoint[0])+'<br>y: '+String(currentPoint[1])+'<br>z: '+String(currentPoint[2]);
+    newSphere.caption = { "type":"POINT","data": msg };
+    ren3d.add(newSphere);
+  }
+};
