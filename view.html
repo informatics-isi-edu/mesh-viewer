@@ -36,10 +36,20 @@
 <div id='3mesh' style='background-color:black; border:solid 2px grey;  float: left; width:600px; height:500px; margin:10px;' ></div>
 <div id='control' style='margin-top:20px;'>
   <input id="labelbtn" type="button" value="label" onclick="toggleLabel();"/>
-  <input id="refreshbtn" type="button" value="refresh"  onclick="refreshMesh();"/>
-  <input id="excludebtn" type="button" value="exclude"  onclick="excludeMesh();"/>
-  <input id="lastbtn" type="button" value="addLast"  onclick="loadLastMesh();"/>
-  <div id='meshlist'>
+  <input id="volbtn" type="button" value="addVol" onclick="loadVol();"/>
+  <div id='forVolume'>
+    <input id="3dbtn" type="button" value="3dVol"  onclick="toggle3D();"/>
+    <input id="visbtn" type="button" value="visVol"  onclick="toggleVolume();"/>
+    <div id='opacity-volume'
+         style='margin-left: 10px; margin-top: 4px; float: right;'></div>
+    </div>
+  </div>
+  <div id='forMesh'>
+    <input id="refreshbtn" type="button" value="refreshMesh"  onclick="refreshMesh();"/>
+    <input id="excludebtn" type="button" value="excludeMesh"  onclick="excludeMesh();"/>
+    <input id="lastbtn" type="button" value="addLastMesh"  onclick="loadLastMesh();"/>
+    <div id='meshlist'></div>
+  </div>
 </div>
 <div id='loading'>
   <h3 class='onair' 

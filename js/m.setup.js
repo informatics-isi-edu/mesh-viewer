@@ -72,7 +72,6 @@ var anno_json='\
 }';
 
 function anno_load() {
-//window.console.log("anno_json=>"+anno_json); 
    return $.parseJSON(anno_json);
 }
 
@@ -102,11 +101,23 @@ var last_mesh_json='\
 }';
 
 function mesh_load() {
-//window.console.log("mesh_json=>"+mesh_json);
    var _m=$.parseJSON(mesh_json);
-//window.console.log("last_mesh_json=>"+last_mesh_json);
    var _mm=$.parseJSON(last_mesh_json);
    return [_m, _mm];
+}
+
+var vol_json='\
+{ "volume" : [\
+  {\
+    "url": "http://'+hostname+'/data/3mesh/JI296CCMB_Control_P0_Hard_Tissue.transformed.nii",\
+    "color": [0.00, 0.00, 0.00],\
+    "caption": { "type": "Volume", "data":"nifti vol file for JI296CCMB" }\
+  }\
+ ]\
+}';
+
+function vol_load() {
+   return $.parseJSON(vol_json);
 }
 
 

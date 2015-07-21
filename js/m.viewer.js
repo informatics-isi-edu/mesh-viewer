@@ -11,53 +11,59 @@
 // global scoped data
 var meshs=[];
 var ren3d=null;
+var vol=null;
 
 var mesh_list;
 var last_mesh_list;
-var anno_list;
 
 var saved_color=null;
 var saved_id=null;
 var show_caption=false;
 
+var first_time=true;
+var skip_vol=true;
+
+
 window.onload = function() {
 
-  var _m=mesh_load();
-  mesh_list=_m[0], last_mesh_list=_m[1];
-  anno_list=anno_load();
-  
   if (webgl_detect() == false) {
     alertify.confirm("There is no webgl!!");
     throw new Error("WebGL is not enabled!");
     return;
   }
 
+  var _m=mesh_load();
+  mesh_list=_m[0], last_mesh_list=_m[1];
+  var _v=null;
+
   initRenderer();
+
+  if (_v && !skip_vol) {
+    _v=vol_load();
+    addVolume(_v['volume'][0]); // one and only one
+    document.getElementById('volbtn').style.visibility = 'hidden';
+    } else {
+      document.getElementById('volbtn').style.visibility = 'visible';
+      document.getElementById('3dbtn').style.visibility = 'hidden';
+      document.getElementById('visbtn').style.visibility = 'hidden';
+      document.getElementById('opacity-volume').style.visibility = 'hidden';
+  }
 
   for (var i=0;i<mesh_list['mesh'].length;i++) {
      addMesh(mesh_list['mesh'][i]);
   }
-
-  // zoom in alittle
-  var _camera=ren3d.camera.position;
-  ren3d.camera.position = [ 0, 10, 0];
 
 // stackoverflow.com/question/17462936/xtk-flickering-in-overlay-mesh
 // resolve multiple mesh transparent object being rendered causing flickering
 // effect
   ren3d.config.ORDERING_ENABLED=false;
 
-// disable caption 
+// disable default tooltip-caption 
   ren3d.interactor.config.HOVERING_ENABLED = false;
   show_caption=false;
 
-
-  ren3d.onRender = function(){
-    var loadingDiv = document.getElementById('loading');
-    loadingDiv.style.display = 'none';
-  }
-
   ren3d.interactor.onMouseDown = function() {
+window.console.log("mouse down..")
     if(saved_color != null) {
       ren3d.get(saved_id).color = saved_color;
 //      ren3d.get(saved_id).transform.translateY(-1);
@@ -66,32 +72,46 @@ window.onload = function() {
     // grab the current mouse position
     var _pos = ren3d.interactor.mousePosition;
 
-window.console.log("current mouse position is.."+_pos);
+window.console.log("  current mouse position is.."+_pos);
 
     // pick the current object
     var _id = ren3d.pick(_pos[0], _pos[1]);
 
     if (_id != 0) {
-      if(show_caption && ren3d.get(_id).caption) {
-        var _j=ren3d.get(_id).caption;
-        showLabel(_j['type'],_j['data']);
+      if(show_caption) {
+        if(ren3d.get(_id).caption) {
+          var _j=ren3d.get(_id).caption;
+          showLabel(_j['type'],_j['data']);
+          } else { 
+window.console.log("  this object "+_id+ " does not have caption..");
+        }
         } else {
-          // grab the object and turn it red
-//window.console.log("picking obj .."+_id);
+// grab the object and turn it white, only if it has caption,
+          if(ren3d.get(_id).caption) {
+window.console.log("  picking obj .."+_id);
           saved_color=ren3d.get(_id).color;
+          var obj=ren3d.get(_id);
+window.console.log("  saving color "+saved_color);
           saved_id=_id;
-          ren3d.get(_id).color = [1, 0, 0];
+          ren3d.get(_id).color = [1, 1, 1];
 //      ren3d.get(saved_id).transform.translateY(1);
+            } else {
+window.console.log(" picking "+_id+ " no change since no stored caption");
+          }
       }
+    } else {
+window.console.log("  did not pick anything");
     }
   }
 
   ren3d.interactor.onMouseUp = function() {
+window.console.log("mouse up..");
     if(saved_color == null) {
       return;
     }
     // grab the object and turn it red
     ren3d.get(saved_id).color = saved_color;
+window.console.log("  reset "+saved_id + " with "+saved_color);
 //    ren3d.get(saved_id).transform.translateY(-1);
     saved_color=null;
     saved_id=null;
@@ -100,7 +120,22 @@ window.console.log("current mouse position is.."+_pos);
   ren3d.render();
 
   ren3d.onShowtime = function(){
-    hlite(meshs[1]);
+    var loadingDiv = document.getElementById('loading');
+    loadingDiv.style.display = 'none';
+// zoom in alittle
+    var _camera=ren3d.camera.position;
+    if( first_time ) {
+      first_time=false;
+      if (_v) { // use bounding box
+        var _y=(vol.bbox[3] - vol.bbox[2] + 1)*2;
+        ren3d.camera.position = [ 0, _y, 0];
+        } else {
+          ren3d.camera.position = [ 0, 10, 0];
+      }
+    }
+    if(meshs.length > 0) {
+      hlite(meshs[0]);
+    }
   }
 }
 
@@ -175,6 +210,14 @@ function refreshMesh()
   }
 }
 
+function toggle3D() {
+  vol.volumeRendering= ! vol.volumeRendering;
+}
+
+function toggleVolume() {
+  vol.visible= ! vol.visible;
+}
+
 function toggleMesh(i) {
   var _mesh=meshs[i];
   _mesh.visible = !_mesh.visible;
@@ -189,11 +232,20 @@ function toggleLabel() {
   }
 }
 
+function addVolume(t) { // color, url, caption, <id/new>
+  var _vol = new X.volume();
+  _vol.file = encodeURI(t['url']);
+  _vol.caption = t['caption'];
+  _vol.color=t['color'];
+  vol = _vol;
+  ren3d.add(_vol);
+}
+
 // create mesh object 
 //    add to the local mesh list
 //    add to 3D renderer
 //    add to ui's meshlist 
-function addMesh(t) { // color, url, caption, id
+function addMesh(t) { // color, url, caption
   var _mesh = new X.mesh();
   _mesh.color = t['color'];
   _mesh.file = encodeURI(t['url']);
@@ -203,7 +255,6 @@ function addMesh(t) { // color, url, caption, id
   loadingDiv.style.display ='';
   ren3d.add(_mesh);
   addListEntry(t['url'],_cnt,t['color']);
-  t['id']=_mesh._id;
 }
 
 // testing adding a new mesh after rendering
@@ -212,6 +263,18 @@ function loadLastMesh() {
      addMesh(last_mesh_list['mesh'][i]);
   }
   document.getElementById('lastbtn').style.visibility = 'hidden';
+}
+
+function loadVol() {
+  var _v=vol_load();
+  addVolume(_v['volume'][0]); // one and only one
+  skip_vol=false;
+  document.getElementById('volbtn').style.visibility = 'hidden';
+  var loadingDiv = document.getElementById('loading');
+  loadingDiv.style.display = '';
+  document.getElementById('3dbtn').style.visibility = 'visible';
+  document.getElementById('visbtn').style.visibility = 'visible';
+  document.getElementById('opacity-volume').style.visibility = 'visible';
 }
 
 //
@@ -235,22 +298,96 @@ window.console.log(_nn);
   });//dialog
 }
 
-function hlite(mesh) {
-  var numberOfPoints = mesh.points.count;
-window.console.log("mesh--> count "+numberOfPoints);
-  for ( var j = 0; j < numberOfPoints - 1; j++) {
-    if( (j % 1000) != 0) {
-      continue;
-    }
-    var currentPoint = mesh.points.get(j);
-window.console.log("add a point.."+currentPoint[0]+" "+currentPoint[1]+" "+currentPoint[2]);
+function addSphere(mesh, pt, color, radius) {
+  var loc=mesh.points.get(pt);
+//  window.console.log(loc);
+  var newSphere = new X.sphere();
+  newSphere.center = loc;
+  newSphere.color = color;
+  newSphere.radius = radius;
+  var msg='pt: '+String(pt)+'<br>x: '+String(loc[0])+'<br>y: '+String(loc[1])+'<br>z: '+String(loc[2]);
+  newSphere.caption = { "type":"POINT","data": msg };
+  ren3d.add(newSphere);
+}
 
-    var newSphere = new X.sphere();
-    newSphere.center = [currentPoint[0], currentPoint[1], currentPoint[2]];
-    newSphere.color = [1, 0, 0];
-    newSphere.radius = .05;
-    var msg='x:  '+String(currentPoint[0])+'<br>y: '+String(currentPoint[1])+'<br>z: '+String(currentPoint[2]);
-    newSphere.caption = { "type":"POINT","data": msg };
-    ren3d.add(newSphere);
+function hlite(mesh) {
+
+  var numberOfPoints = mesh.points.count;
+window.console.log("mesh--> point count "+numberOfPoints);
+  var max0,min0,max1,min1,max2,min2;
+  var max0_j, min0_j, max1_j, min1_j, max2_j, min2_j;
+  var currentPoint;
+  var lim = Math.floor(numberOfPoints / 200);
+
+  for ( var j = 0; j < numberOfPoints-1; j++) {
+    currentPoint = mesh.points.get(j);
+    if(j==0) {
+       max0=min0=currentPoint[0]; max0_j=min0_j=0;
+       max1=min1=currentPoint[1]; max1_j=min1_j=0;
+       max2=min2=currentPoint[2]; max2_j=min2_j=0;
+window.console.log("first point.."+currentPoint[0]+" "+currentPoint[1]+" "+currentPoint[2]);
+//       addSphere(mesh,j, [1,1,1], 0.08);
+       continue;
+       } else {
+           if (j % lim == 0 ) {
+             addSphere(mesh,j, [0,0,1], 0.05);
+           }
+           if(currentPoint[0]>max0) 
+             { max0=currentPoint[0]; max0_j=j; }
+           if(currentPoint[0]<min0) 
+             { min0=currentPoint[0]; min0_j=j; }
+           if(currentPoint[1]>max1) 
+             { max1=currentPoint[1]; max1_j=j; }
+           if(currentPoint[1]<min1) 
+             { min1=currentPoint[1]; min1_j=j; }
+           if(currentPoint[2]>max2) 
+             { max2=currentPoint[2]; max2_j=j; }
+           if(currentPoint[2]<min2) 
+             { min2=currentPoint[2]; min2_j=j; }
+    
+    }
   }
+  window.console.log("max0 j "+max0_j + "min0 j "+min0_j);
+  window.console.log("max1 j "+max1_j + "min1 j "+min1_j);
+  window.console.log("max2 j "+max2_j + "min2 j "+min2_j);
+
+console.log("max-min -- start");
+addSphere(mesh,max0_j, [1,0,0], 0.05);
+addSphere(mesh,min0_j, [1,0,0], 0.05);
+addSphere(mesh,max1_j, [1,0,0], 0.05);
+addSphere(mesh,min1_j, [1,0,0], 0.05);
+addSphere(mesh,max2_j, [1,0,0], 0.05);
+addSphere(mesh,min2_j, [1,0,0], 0.05);
+console.log("max-min -- end");
+
+var t=numberOfPoints-1;
+console.log("last -- start");
+for(var i=0; i<10; i++) {
+addSphere(mesh,t-i, [1,0,1], 0.05);
+}
+console.log("last -- end");
+console.log("begin -- start");
+for(var i=0; i<10; i++) {
+addSphere(mesh,i, [0,1,1], 0.05);
+}
+console.log("begin -- end");
+
+  /* add a boundary cube.. */
+  window.console.log("line0, max "+max0+" min "+min0);
+  window.console.log("line1, max "+max1+" min "+min1);
+  window.console.log("line2, max "+max2+" min "+min2);
 };
+
+
+function opacityVolume(event, ui) {
+  if (!vol) { return; }
+  vol.opacity = ui.value / 100;
+}
+
+//  setup slider
+jQuery('#opacity-volume').slider({
+    slide: opacityVolume 
+});
+jQuery('#opacity-volume').width(140);
+
+
