@@ -13,15 +13,15 @@ var meshs=[];
 var ren3d=null;
 var vol=null;
 
+var initial_mesh_list;
 var mesh_list;
-var last_mesh_list;
 
 var saved_color=null;
 var saved_id=null;
 var show_caption=false;
 
 var first_time=true;
-var skip_vol=true;
+var first_time_vol=true;
 
 
 window.onload = function() {
@@ -33,24 +33,21 @@ window.onload = function() {
   }
 
   var _m=mesh_load();
-  mesh_list=_m[0], last_mesh_list=_m[1];
-  var _v=null;
+  initial_mesh_list=_m[0], mesh_list=_m[1];
+
+//  setup slider
+jQuery('#opacity-volume').slider({
+    slide: opacityVolume
+});
+jQuery('#opacity-volume').width(100);
+jQuery('#opacity-volume').height(10);
+
+  setupSliders();
 
   initRenderer();
 
-  if (_v && !skip_vol) {
-    _v=vol_load();
-    addVolume(_v['volume'][0]); // one and only one
-    document.getElementById('volbtn').style.visibility = 'hidden';
-    } else {
-      document.getElementById('volbtn').style.visibility = 'visible';
-      document.getElementById('3dbtn').style.visibility = 'hidden';
-      document.getElementById('visbtn').style.visibility = 'hidden';
-      document.getElementById('opacity-volume').style.visibility = 'hidden';
-  }
-
-  for (var i=0;i<mesh_list['mesh'].length;i++) {
-     addMesh(mesh_list['mesh'][i]);
+  for (var i=0;i<initial_mesh_list['mesh'].length;i++) {
+     addMesh(initial_mesh_list['mesh'][i]);
   }
 
 // stackoverflow.com/question/17462936/xtk-flickering-in-overlay-mesh
@@ -81,7 +78,7 @@ window.console.log("  current mouse position is.."+_pos);
       if(show_caption) {
         if(ren3d.get(_id).caption) {
           var _j=ren3d.get(_id).caption;
-          showLabel(_j['type'],_j['data']);
+          showLabel(_j['type'],_j['data'],_j['link']);
           } else { 
 window.console.log("  this object "+_id+ " does not have caption..");
         }
@@ -105,13 +102,13 @@ window.console.log("  did not pick anything");
   }
 
   ren3d.interactor.onMouseUp = function() {
-window.console.log("mouse up..");
+//window.console.log("mouse up..");
     if(saved_color == null) {
       return;
     }
     // grab the object and turn it red
     ren3d.get(saved_id).color = saved_color;
-window.console.log("  reset "+saved_id + " with "+saved_color);
+//window.console.log("  reset "+saved_id + " with "+saved_color);
 //    ren3d.get(saved_id).transform.translateY(-1);
     saved_color=null;
     saved_id=null;
@@ -120,21 +117,26 @@ window.console.log("  reset "+saved_id + " with "+saved_color);
   ren3d.render();
 
   ren3d.onShowtime = function(){
+//window.console.log("XXX calling onShowtime");
     var loadingDiv = document.getElementById('loading');
     loadingDiv.style.display = 'none';
 // zoom in alittle
     var _camera=ren3d.camera.position;
     if( first_time ) {
       first_time=false;
-      if (_v) { // use bounding box
+      if (vol) { // use bounding box if vol exists
         var _y=(vol.bbox[3] - vol.bbox[2] + 1)*2;
         ren3d.camera.position = [ 0, _y, 0];
         } else {
           ren3d.camera.position = [ 0, 10, 0];
       }
+      if(meshs.length > 0) {
+        hlite(meshs[0]);
+      }
     }
-    if(meshs.length > 0) {
-      hlite(meshs[0]);
+    if(first_time_vol && vol) {
+      first_time_vol=false;
+      initSliders();
     }
   }
 }
@@ -227,8 +229,10 @@ function toggleLabel() {
   show_caption=!show_caption;
   if(show_caption) {
     jQuery('#labelbtn').css('border-color','red');
+    jQuery('#labelbtn').prop('value','offLabel');
     } else {
       jQuery('#labelbtn').css('border-color','');
+      jQuery('#labelbtn').prop('value','showLabel');
   }
 }
 
@@ -239,6 +243,7 @@ function addVolume(t) { // color, url, caption, <id/new>
   _vol.color=t['color'];
   vol = _vol;
   ren3d.add(_vol);
+  vol = _vol;
 }
 
 // create mesh object 
@@ -257,28 +262,26 @@ function addMesh(t) { // color, url, caption
   addListEntry(t['url'],_cnt,t['color']);
 }
 
-// testing adding a new mesh after rendering
-function loadLastMesh() {
-  for (var i=0;i<last_mesh_list['mesh'].length;i++) {
-     addMesh(last_mesh_list['mesh'][i]);
+// adding a new mesh after rendering
+function loadMesh() {
+  for (var i=0;i<mesh_list['mesh'].length;i++) {
+     addMesh(mesh_list['mesh'][i]);
   }
-  document.getElementById('lastbtn').style.visibility = 'hidden';
+  document.getElementById('lastbtn').style.display = 'none';
 }
 
+// adding volume after initial rendering
 function loadVol() {
   var _v=vol_load();
   addVolume(_v['volume'][0]); // one and only one
-  skip_vol=false;
-  document.getElementById('volbtn').style.visibility = 'hidden';
+  document.getElementById('volbtn').style.display = 'none';
   var loadingDiv = document.getElementById('loading');
   loadingDiv.style.display = '';
-  document.getElementById('3dbtn').style.visibility = 'visible';
-  document.getElementById('visbtn').style.visibility = 'visible';
-  document.getElementById('opacity-volume').style.visibility = 'visible';
+  jQuery('#forVolume').show();
 }
 
 //
-function showLabel(tval,jval) {
+function showLabel(tval,jval,lval) {
   if ($("#dialog-label").dialog("instance") &&
                        $("#dialog-label").dialog("isOpen")) {
     $("#dialog-label").dialog("close");
@@ -291,8 +294,14 @@ function showLabel(tval,jval) {
     dialogClass: 'myDialogClass',
     open: function() {
      var _p=jQuery('#dtext');
-var _nn='<p id="dtext">'+jval+'</p>';
-window.console.log(_nn);
+     var _nn='<p id="dtext">'+jval+'</p>';
+     _p.replaceWith(_nn);
+      _p=jQuery('#dlink');
+     if (typeof lval != "undefined") {
+       _nn='<a id="dlink" href="'+lval+'">Gene expression</a>'
+       } else {
+       _nn='<a id="dlink" href=""></a>'
+     }
      _p.replaceWith(_nn);
     }
   });//dialog
@@ -312,8 +321,10 @@ function addSphere(mesh, pt, color, radius) {
 
 function hlite(mesh) {
 
+  var _f=mesh.file;
+  var _n=_f.split('/').pop().toLowerCase().split('.').shift();
   var numberOfPoints = mesh.points.count;
-window.console.log("mesh--> point count "+numberOfPoints);
+window.console.log("mesh of "+_n+" --> point count "+numberOfPoints);
   var max0,min0,max1,min1,max2,min2;
   var max0_j, min0_j, max1_j, min1_j, max2_j, min2_j;
   var currentPoint;
@@ -347,47 +358,76 @@ window.console.log("first point.."+currentPoint[0]+" "+currentPoint[1]+" "+curre
     
     }
   }
-  window.console.log("max0 j "+max0_j + "min0 j "+min0_j);
-  window.console.log("max1 j "+max1_j + "min1 j "+min1_j);
-  window.console.log("max2 j "+max2_j + "min2 j "+min2_j);
+  window.console.log("max0 j "+max0_j + " min0 j "+min0_j);
+  window.console.log("max1 j "+max1_j + " min1 j "+min1_j);
+  window.console.log("max2 j "+max2_j + " min2 j "+min2_j);
 
-console.log("max-min -- start");
+//console.log("max-min -- start");
 addSphere(mesh,max0_j, [1,0,0], 0.05);
 addSphere(mesh,min0_j, [1,0,0], 0.05);
 addSphere(mesh,max1_j, [1,0,0], 0.05);
 addSphere(mesh,min1_j, [1,0,0], 0.05);
 addSphere(mesh,max2_j, [1,0,0], 0.05);
 addSphere(mesh,min2_j, [1,0,0], 0.05);
-console.log("max-min -- end");
+//console.log("max-min -- end");
 
 var t=numberOfPoints-1;
-console.log("last -- start");
+//console.log("last -- start");
 for(var i=0; i<10; i++) {
 addSphere(mesh,t-i, [1,0,1], 0.05);
 }
-console.log("last -- end");
-console.log("begin -- start");
+//console.log("last -- end");
+//console.log("begin -- start");
 for(var i=0; i<10; i++) {
 addSphere(mesh,i, [0,1,1], 0.05);
 }
-console.log("begin -- end");
+//console.log("begin -- end");
 
-  /* add a boundary cube.. */
   window.console.log("line0, max "+max0+" min "+min0);
   window.console.log("line1, max "+max1+" min "+min1);
   window.console.log("line2, max "+max2+" min "+min2);
 };
 
 
+
+// volume's control
 function opacityVolume(event, ui) {
   if (!vol) { return; }
   vol.opacity = ui.value / 100;
+  vol.modified;
 }
 
-//  setup slider
-jQuery('#opacity-volume').slider({
-    slide: opacityVolume 
-});
-jQuery('#opacity-volume').width(140);
+function thresholdVolume(event, ui) {
+  if (!vol) { return; }
+window.console.log("in here..");
+  vol.lowerThreshold = ui.values[0];
+  vol.upperThreshold = ui.values[1];
+  vol.modified;
+}
 
+function setupSliders() {
+  jQuery('#opacity-volume').slider({ slide: opacityVolume });
+  jQuery('#opacity-volume').width(100);
 
+  jQuery('#threshold-volume').dragslider({
+    range: true,
+    rangeDrag: true,
+    values: [0, 100],
+    slide: thresholdVolume
+  });
+  jQuery('#threshold-volume').width(100);
+}
+
+function initSliders() {
+window.console.log("calling initSlider..");
+  if(!vol) { return; }
+
+  jQuery('#opacity-volume').slider("option", "value", 80);
+  vol.opacity = 0.8; // re-propagate
+  vol.modified();
+
+  jQuery('#threshold-volume').dragslider("option", "max", vol.max);
+  jQuery('#threshold-volume').dragslider("option", "min", vol.min);
+  jQuery('#threshold-volume').dragslider("option", "values",
+        [vol.min, vol.max]);
+}

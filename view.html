@@ -4,7 +4,7 @@
 <head>
 <title >3D mesh Viewer</title>
 <link href='css/bootstrap.css' rel='stylesheet' />
-<link href='css/jquery-ui.css' rel='stylesheet' />
+<link href='css/jquery-ui.min.css' rel='stylesheet' />
 <link href='css/jquery-ui.theme.min.css' rel='stylesheet' />
 <link href='css/alertify.default.css' rel='stylesheet' />
 <link href='css/alertify.core.css' rel='stylesheet' />
@@ -16,7 +16,8 @@
 </style>
 
 <script type='text/javascript' src='js/jquery.js'></script>
-<script type='text/javascript' src='js/jquery-ui.js'></script>
+<script type='text/javascript' src='js/jquery-ui.min.js'></script>
+<script type='text/javascript' src='js/jquery.ui.slider.js'></script>
 <script type='text/javascript' src='js/alertify.min.js'></script>
 
 <!-- for view_debug.html
@@ -32,22 +33,29 @@
 <body>
 <div id="dialog-label" style="display: none;">
    <p id="dtext">PPP</p>
+   <br>
+   <div style="background:#d9d9d9">
+     <a id="dlink" href="">Gene expression</a>
+   </div>
 </div>
 <div id='3mesh' style='background-color:black; border:solid 2px grey;  float: left; width:600px; height:500px; margin:10px;' ></div>
 <div id='control' style='margin-top:20px;'>
-  <input id="labelbtn" type="button" value="label" onclick="toggleLabel();"/>
+  <input id="labelbtn" type="button" value="showLabel" onclick="toggleLabel();"/>
   <input id="volbtn" type="button" value="addVol" onclick="loadVol();"/>
-  <div id='forVolume'>
+  <input id="lastbtn" type="button" value="addMesh"  onclick="loadMesh();"/>
+  <div id='forVolume' style="margin:2px;display:none;">
     <input id="3dbtn" type="button" value="3dVol"  onclick="toggle3D();"/>
     <input id="visbtn" type="button" value="visVol"  onclick="toggleVolume();"/>
-    <div id='opacity-volume'
-         style='margin-left: 10px; margin-top: 4px; float: right;'></div>
+    <div id='sliders' style='width:300; margin-left:650px;'>
+      <p>Volume Opacity</p>
+      <div id='opacity-volume' style='margin-left: 10px; background:blue;'></div>
+      <p>Volume Thresholds</p>
+      <div id='threshold-volume' style='margin-left: 10px;'></div>
     </div>
   </div>
-  <div id='forMesh'>
+  <div id='forMesh' style='margin-top:10px;'>
     <input id="refreshbtn" type="button" value="refreshMesh"  onclick="refreshMesh();"/>
     <input id="excludebtn" type="button" value="excludeMesh"  onclick="excludeMesh();"/>
-    <input id="lastbtn" type="button" value="addLastMesh"  onclick="loadLastMesh();"/>
     <div id='meshlist'></div>
   </div>
 </div>

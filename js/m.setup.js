@@ -75,34 +75,40 @@ function anno_load() {
    return $.parseJSON(anno_json);
 }
 
-var mesh_json='\
+var initial_mesh_json='\
 { "mesh" : [\
   {\
     "url": "http://'+hostname+'/data/3mesh/JI296CCMB.obj",\
     "color": [1.00, 0.80, 0.40],\
-    "caption": { "type": "JI296CCMB", "data":"a skull mesh " }\
+    "caption": { "type": "JI296CCMB",\
+                 "data":"a skull mesh",\
+                 "link":"http://'+hostname+'/meshviewer/gene.html"}\
   },\
   {\
     "url": "http://'+hostname+'/data/3mesh/Mandible.obj",\
     "color": [0.53, 0.90, 0.90],\
-    "caption": { "type": "Mandible", "data":"a Mandible mesh " }\
+    "caption": { "type": "Mandible",\
+                 "data":"a Mandible mesh",\
+                 "link":"http://'+hostname+'/meshviewer/gene.html"}\
   }\
  ]\
 }';
 
-var last_mesh_json='\
+var mesh_json='\
 { "mesh" : [\
   {\
     "url": "http://'+hostname+'/data/3mesh/Maxilla.obj",\
     "color": [1.00, 0.46, 0.19],\
-    "caption": { "type": "Maxilla", "data":"a Mandible Maxilla" }\
+    "caption": { "type": "Maxilla",\
+                 "data":"a Mandible Maxilla",\
+                 "link":"http://'+hostname+'/meshviewer/gene.html"}\
   }\
  ]\
 }';
 
 function mesh_load() {
-   var _m=$.parseJSON(mesh_json);
-   var _mm=$.parseJSON(last_mesh_json);
+   var _m=$.parseJSON(initial_mesh_json);
+   var _mm=$.parseJSON(mesh_json);
    return [_m, _mm];
 }
 
@@ -120,6 +126,30 @@ function vol_load() {
    return $.parseJSON(vol_json);
 }
 
+var landmark_json='\
+{ "landmark" : [\
+  {\
+    "color": [0, 0, 0],\
+    "radius": 0.06, \
+    "point": [xx,yy,zz], \
+    "caption": { "type": "Maxilla", "data":"Topmost of Maxilla" }\
+  },\
+  {\
+    "color": [0, 0, 0],\
+    "radius": 0.06, \
+    "point": [xx,yy,zz], \
+    "caption": { "type": "Maxilla", "data":"Lower most of Maxilla" }\
+  },\
+  {\
+    "color": [1, 0, 0],\
+    "radius": 0.06, \
+    "point": [xx,yy,zz], \
+    "caption": { "type": "Mandible", "data":"Lower most of Mandible" }\
+  }\
+ ]\
+}';
 
-
+function landmark_load() {
+   return $.parseJSON(landmark_json);
+}
 
