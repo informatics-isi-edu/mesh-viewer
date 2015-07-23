@@ -3,6 +3,129 @@
 //**************************************************************
 var hostname=window.location.hostname;
 
+var initial_mesh_json='\
+{ "mesh" : [\
+  {\
+    "url": "http://'+hostname+'/data/3mesh/JI296CCMB.obj",\
+    "color": [1.00, 0.80, 0.40],\
+    "caption": { "type": "JI296CCMB",\
+                 "data":"a skull mesh",\
+                 "link": { "label":"gene expression",\
+                           "url":"http://'+hostname+'/meshviewer/gene.html"}\
+                }\
+  },\
+  {\
+    "url": "http://'+hostname+'/data/3mesh/Mandible.obj",\
+    "color": [0.53, 0.90, 0.90],\
+    "caption": { "type": "Mandible",\
+                 "data":"a Mandible mesh",\
+                 "link": { "label":"gene expression",\
+                           "url":"http://'+hostname+'/meshviewer/gene.html"}\
+                }\
+  }\
+ ]\
+}';
+
+var mesh_json='\
+{ "mesh" : [\
+  {\
+    "url": "http://'+hostname+'/data/3mesh/Maxilla.obj",\
+    "color": [1.00, 0.46, 0.19],\
+    "caption": { "type": "Maxilla",\
+                 "data":"a Mandible Maxilla",\
+                 "link": { "label":"gene expression",\
+                           "url":"http://'+hostname+'/meshviewer/gene.html"}\
+                }\
+  }\
+ ]\
+}';
+
+function mesh_load() {
+   var _m=$.parseJSON(initial_mesh_json);
+   var _mm=$.parseJSON(mesh_json);
+   return [_m, _mm];
+}
+
+var vol_json='\
+{ "volume" : [\
+  {\
+    "url": "http://'+hostname+'/data/3mesh/JI296CCMB_Control_P0_Hard_Tissue.transformed.nii",\
+    "color": [0.00, 0.00, 0.00],\
+    "caption": { "type": "Volume",\
+                 "data":"nifti vol file for JI296CCMB" }\
+  }\
+ ]\
+}';
+
+function vol_load() {
+   return $.parseJSON(vol_json);
+}
+
+var landmark_json='\
+{ "landmark" : [\
+  {\
+    "group": "JI296CCMB", \
+    "color": [1, 0, 0],\
+    "radius": 0.1, \
+    "point": [8.502269744873047, 6.578330039978027, 69.94249725341797],\
+    "caption": { "type":"Landmark",\
+                 "data":"Tail end of Skull"\
+               }\
+  },\
+  {\
+    "group": "JI296CCMB", \
+    "color": [1, 0, 0],\
+    "radius": 0.1, \
+    "point": [15.606300354003906, 9.819620132446289,71.14600372314453],\
+    "caption": { "type":"Landmark",\
+                 "data":"Front tip of Skull",\
+                 "link": { "label":"point expression",\
+                           "url":"http://'+hostname+'/meshviewer/gene.html"}\
+               }\
+  },\
+  {\
+    "group": "JI296CCMB", \
+    "color": [1, 0, 0],\
+    "radius": 0.1, \
+    "point": [7.819620132446289,10.14050006866455,67.17459869384766],\
+    "caption": { "type":"Landmark",\
+                 "data":"Lowermost tip of Skull",\
+                 "link": { "label":"point expression",\
+                           "url":"http://'+hostname+'/meshviewer/gene.html"}\
+               }\
+  },\
+  {\
+    "group": "Maxilla", \
+    "color": [1, 0, 0],\
+    "radius": 0.1, \
+    "point": [13.516400337219238,11.584600448608398,70.9854965209961],\
+    "caption": { "type": "Landmark", "data":"Lower most of Maxilla" }\
+  },\
+  {\
+    "group": "Mandible", \
+    "color": [1, 0, 0],\
+    "radius": 0.1, \
+    "point": [11.42609977722168,12.432299613952637,70.46399688720703],\
+    "caption": { "type": "Landmark", "data":"Top tip of Mandible" }\
+  },\
+  {\
+    "group": "Mandible", \
+    "color": [1, 0, 0],\
+    "radius": 0.1, \
+    "point": [15.551799774169922,9.578940391540527,69.4209976196289],\
+    "caption": { "type": "Landmark", "data":"Front tip of Mandible" }\
+  }\
+ ]\
+}';
+
+function landmark_load() {
+   return $.parseJSON(landmark_json);
+}
+
+
+/**************
+**************/
+
 var anno_json='\
 { "annotation" : [\
   {\
@@ -75,81 +198,4 @@ function anno_load() {
    return $.parseJSON(anno_json);
 }
 
-var initial_mesh_json='\
-{ "mesh" : [\
-  {\
-    "url": "http://'+hostname+'/data/3mesh/JI296CCMB.obj",\
-    "color": [1.00, 0.80, 0.40],\
-    "caption": { "type": "JI296CCMB",\
-                 "data":"a skull mesh",\
-                 "link":"http://'+hostname+'/meshviewer/gene.html"}\
-  },\
-  {\
-    "url": "http://'+hostname+'/data/3mesh/Mandible.obj",\
-    "color": [0.53, 0.90, 0.90],\
-    "caption": { "type": "Mandible",\
-                 "data":"a Mandible mesh",\
-                 "link":"http://'+hostname+'/meshviewer/gene.html"}\
-  }\
- ]\
-}';
-
-var mesh_json='\
-{ "mesh" : [\
-  {\
-    "url": "http://'+hostname+'/data/3mesh/Maxilla.obj",\
-    "color": [1.00, 0.46, 0.19],\
-    "caption": { "type": "Maxilla",\
-                 "data":"a Mandible Maxilla",\
-                 "link":"http://'+hostname+'/meshviewer/gene.html"}\
-  }\
- ]\
-}';
-
-function mesh_load() {
-   var _m=$.parseJSON(initial_mesh_json);
-   var _mm=$.parseJSON(mesh_json);
-   return [_m, _mm];
-}
-
-var vol_json='\
-{ "volume" : [\
-  {\
-    "url": "http://'+hostname+'/data/3mesh/JI296CCMB_Control_P0_Hard_Tissue.transformed.nii",\
-    "color": [0.00, 0.00, 0.00],\
-    "caption": { "type": "Volume", "data":"nifti vol file for JI296CCMB" }\
-  }\
- ]\
-}';
-
-function vol_load() {
-   return $.parseJSON(vol_json);
-}
-
-var landmark_json='\
-{ "landmark" : [\
-  {\
-    "color": [0, 0, 0],\
-    "radius": 0.06, \
-    "point": [xx,yy,zz], \
-    "caption": { "type": "Maxilla", "data":"Topmost of Maxilla" }\
-  },\
-  {\
-    "color": [0, 0, 0],\
-    "radius": 0.06, \
-    "point": [xx,yy,zz], \
-    "caption": { "type": "Maxilla", "data":"Lower most of Maxilla" }\
-  },\
-  {\
-    "color": [1, 0, 0],\
-    "radius": 0.06, \
-    "point": [xx,yy,zz], \
-    "caption": { "type": "Mandible", "data":"Lower most of Mandible" }\
-  }\
- ]\
-}';
-
-function landmark_load() {
-   return $.parseJSON(landmark_json);
-}
 

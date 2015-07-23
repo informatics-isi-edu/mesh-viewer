@@ -40,9 +40,13 @@
 </div>
 <div id='3mesh' style='background-color:black; border:solid 2px grey;  float: left; width:600px; height:500px; margin:10px;' ></div>
 <div id='control' style='margin-top:20px;'>
-  <input id="labelbtn" type="button" value="showLabel" onclick="toggleLabel();"/>
+
+  <div id='onLabel' >
+    <input id="labelbtn" type="button" value="showLabel" onclick="toggleLabel();"/>
+  </div>
   <input id="volbtn" type="button" value="addVol" onclick="loadVol();"/>
   <input id="lastbtn" type="button" value="addMesh"  onclick="loadMesh();"/>
+  <input id="landmarkbtn" type="button" value="addLandmark" style="display:none"  onclick="loadLandmark();"/>
   <div id='forVolume' style="margin:2px;display:none;">
     <input id="3dbtn" type="button" value="3dVol"  onclick="toggle3D();"/>
     <input id="visbtn" type="button" value="visVol"  onclick="toggleVolume();"/>
@@ -57,6 +61,12 @@
     <input id="refreshbtn" type="button" value="refreshMesh"  onclick="refreshMesh();"/>
     <input id="excludebtn" type="button" value="excludeMesh"  onclick="excludeMesh();"/>
     <div id='meshlist'></div>
+  </div>
+  <div id='forLandmark' style="margin-top:10px;display:none;">
+    <input id="refreshLandmarkbtn" type="button" value="refreshLandmark"  onclick="refreshLandmark();"/>
+    <input id="excludeLandmarkbtn" type="button" value="excludeLandmark"  onclick="excludeLandmark();"/>
+    <input id="autoLandmarkbtn" type="button" value="testAuto"  onclick="autoLandmark();"/>
+    <div id='landmarklist'></div>
   </div>
 </div>
 <div id='loading'>
