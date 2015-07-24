@@ -167,6 +167,23 @@ function webgl_detect()
   return false;
 }
 
+var log_view_matrix = new Float32Array(16);
+function logView() {
+/* copy it over */
+for(var i=0; i< ren3d.camera.view.length; i++)
+  log_view_matrix[i]=ren3d.camera.view[i];
+}
+
+function goView() {
+    for(var i=0; i< log_view_matrix.length; i++)
+       ren3d.camera.view[i]=log_view_matrix[i];
+    ren3d.render();
+}
+
+function resetView() {
+    ren3d.resetViewAndRender();
+}
+
 function initRenderer() {
   // do it once only
   if( ren3d != null ) {
