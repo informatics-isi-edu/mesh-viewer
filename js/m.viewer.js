@@ -16,7 +16,6 @@ var vol=null;   // volume objects
 var landmarks=[];
 var landmarks_cnt=0;
 
-
 var initial_mesh_list;
 var mesh_list;
 
@@ -27,6 +26,8 @@ var show_caption=false;
 var first_time=true;
 var first_time_vol=true;
 
+var save_view_matrix = new Float32Array(16);
+var spin_view=false;
 
 window.onload = function() {
 
@@ -134,12 +135,21 @@ window.console.log("  this object "+_id+ " does not have caption..");
         } else {
           ren3d.camera.position = [ 0, 10, 0];
       }
+      saveView();
     }
     if(first_time_vol && vol) {
+
       first_time_vol=false;
       initSliders();
     }
-  }
+  };
+
+  ren3d.onRender = function() {
+    // rotate the camera in X-direction
+    if(spin_view) {
+      ren3d.camera.rotate([1, 0]);
+    }
+  };
 }
 
 //http://stackoverflow.com/questions/11871077/proper-way-to-detect-webgl-support
@@ -167,21 +177,52 @@ function webgl_detect()
   return false;
 }
 
-var log_view_matrix = new Float32Array(16);
-function logView() {
-/* copy it over */
-for(var i=0; i< ren3d.camera.view.length; i++)
-  log_view_matrix[i]=ren3d.camera.view[i];
+function stringIt(v) {
+  var str="{";
+  for(var i=0; i<v.length; i++) {
+    str=str+" "+v[i].toString();
+    if(i!=v.length-1) {
+       str=str+",";
+    } else {
+          str=str+"}";
+    }
+  }
+  window.console.log(str);
+}
+
+function saveView() {
+  /* copy it over */
+  for(var i=0; i< ren3d.camera.view.length; i++)
+    save_view_matrix[i]=ren3d.camera.view[i];
+//  stringIt(save_view_matrix);
 }
 
 function goView() {
-    for(var i=0; i< log_view_matrix.length; i++)
-       ren3d.camera.view[i]=log_view_matrix[i];
-    ren3d.render();
+  for(var i=0; i< save_view_matrix.length; i++)
+    ren3d.camera.view[i]=save_view_matrix[i];
+  ren3d.render();
 }
 
 function resetView() {
-    ren3d.resetViewAndRender();
+  ren3d.resetViewAndRender();
+}
+
+function loadView() {
+  var _v = view_load();
+  for(var i=0; i< _v.length; i++) 
+    ren3d.camera.view[i]=_v[i];
+  ren3d.render();
+}
+
+function spinView() {
+  spin_view = !spin_view;
+  if(spin_view) {
+    jQuery('#spinbtn').css('border-color','red');
+    jQuery('#spinbtn').prop('value','stop');
+    } else {
+      jQuery('#spinbtn').css('border-color','');
+      jQuery('#spinbtn').prop('value','spin');
+  }
 }
 
 function initRenderer() {
