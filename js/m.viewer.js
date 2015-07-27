@@ -13,19 +13,26 @@ var ren3d=null; // 3d renderer
 
 var meshs=[];   // mesh objects
 var vol=null;   // volume objects
-var landmarks=[];
-var landmarks_cnt=0;
+var landmarks=[];  // sphere objects
+var first_time=true;
+var first_time_vol=true;
 
+//==== Mesh ====
 var initial_mesh_list;
 var mesh_list;
+var show_mesh = true;
 
+//==== Landmark ====
+var calcDistance = false;
+var points=[]; // only keeps last two
+var show_landmark = true;
+
+//==== Label/Picking ====
 var saved_color=null;
 var saved_id=null;
 var show_caption=false;
 
-var first_time=true;
-var first_time_vol=true;
-
+//==== View/Tracking ====
 var save_view_matrix = new Float32Array(16);
 var spin_view=false;
 
@@ -248,56 +255,64 @@ function addMeshListEntry(fname,i,color)
 {
   var _idx=i-1;
   var _n=fname.split('/').pop().toLowerCase().split('.').shift();
-  var _nn='<button class="btn" disabled=true style="background-color:'+RGBTohex(color)+';"/><input id='+_n+' type=checkbox checked="" onClick=toggleMesh('+_idx+') value='+_idx+' name="mesh">'+_n+'</input><br>'
+  var _nn='<button class="btn" disabled=true style="background-color:'+RGBTohex(color)+';"/><input id='+_n+' type=checkbox checked="" onClick=toggleMesh('+_idx+') value='+_idx+' name="mesh">'+_n+'</input><br>';
   jQuery('#meshlist').append(_nn);
 //window.console.log(_nn);
 }
 
-function addLandmarkListEntry(name,i,color)
+function addLandmarkListEntry(name,i,color,label)
 {
-  var _nn='<button class="btn" disabled=true style="background-color:'+RGBTohex(color)+';"/><input id='+name+'_'+i+' type=checkbox checked="" onClick=toggleLandmark("'+name+'",'+i+') value='+i+' name="landmark">'+i+'</input><br>'
+  var _nn='<button class="btn" disabled=true style="background-color:'+RGBTohex(color)+';"/><input type="checkbox" class="mychkbox" id="'+name+'_'+i+'d" onClick="toggleDistance(\''+name+'\','+i+');"/><label for="'+name+'_'+i+'d" style="display:none" name="distance"></label><input id='+name+'_'+i+' type=checkbox checked="" onClick="toggleLandmark(\''+name+'\','+i+');" value='+i+' name="landmark">'+label+'</input><br>';
   jQuery('#landmarklist').append(_nn);
-//window.console.log(_nn);
+window.console.log(_nn);
 }
 
-
-function excludeLandmark()
+function selectLandmark()
 {
+  /* by default, replace all distance selection */
+  jQuery('#calcbtn').css('border-color','grey');
+  noDistance();
+  computeDistance();
+
+  show_landmark = !show_landmark;
   var _list=document.getElementsByName("landmark");
-  for (var i=0; i<_list.length;i++) {
-     _list[i].checked=false;
-     var _g=(_list[i].id).split('_').shift();
-     var _i=_list[i].value-1;
-     landmarks[_g][_i].visible=false;
+  if(show_landmark) {
+    jQuery('#selectlandmarkbtn').prop('value','excludeLandmark');
+    for (var i=0; i<_list.length;i++) {
+      _list[i].checked=false;
+      var _g=(_list[i].id).split('_').shift();
+      var _i=_list[i].value-1;
+      _list[i].checked=true;
+      landmarks[_g][_i].visible=true;
+    }
+    } else {
+      jQuery('#selectlandmarkbtn').prop('value','selectLandmark');
+      for (var i=0; i<_list.length;i++) {
+        _list[i].checked=true;
+        var _g=(_list[i].id).split('_').shift();
+        var _i=_list[i].value-1;
+        _list[i].checked=false;
+        landmarks[_g][_i].visible=false;
+      }
   }
 }
 
-function refreshLandmark()
+function selectMesh()
 {
-  var _list=document.getElementsByName("landmark");
-  for (var i=0; i<_list.length;i++) {
-     _list[i].checked=true;
-     var _g=(_list[i].id).split('_').shift();
-     var _i=_list[i].value-1;
-     landmarks[_g][_i].visible=true;
-  }
-}
-
-function excludeMesh()
-{
+  show_mesh = ! show_mesh;
   var _list=document.getElementsByName("mesh");
-  for (var i=0; i<_list.length;i++) {
-     _list[i].checked=false;
-     meshs[_list[i].value].visible=false;
-  }
-}
-
-function refreshMesh()
-{
-  var _list=document.getElementsByName("mesh");
-  for (var i=0; i<_list.length;i++) {
-     _list[i].checked=true;
-     meshs[_list[i].value].visible=true;
+  if (show_mesh) {
+    jQuery('#selectmeshbtn').prop('value','excludeMesh');
+    for (var i=0; i<_list.length;i++) {
+       _list[i].checked=true;
+       meshs[_list[i].value].visible=true;
+    }
+    } else {
+      jQuery('#selectmeshbtn').prop('value','selectMesh');
+      for (var i=0; i<_list.length;i++) {
+        _list[i].checked=false;
+        meshs[_list[i].value].visible=false;
+      }
   }
 }
 
@@ -314,10 +329,170 @@ function toggleMesh(i) {
   _mesh.visible = !_mesh.visible;
 }
 
+// check with points
+function notSelected(g,i) {
+  for(var j=0; j< points.length; j++) {
+    var _g=points[j]['g'];
+    var _i=points[j]['i'];
+    if( g == _g && i == _i ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function uncheckLandmark(g,i) {
+    var _n=g+'_'+i;
+    var _bb=document.getElementById(_n);
+    _bb.checked="";
+}
+
+function checkLandmark(g,i) {
+    var _n=g+'_'+i;
+    var _bb=document.getElementById(_n);
+    _bb.checked="none";
+}
+
+
+// g, i
+function disableDistance(g,i) {
+/* if it is one of the selected.. can not disable it */
+  if( notSelected(g,i) ) {
+    var _n=g+'_'+i+'d';
+    var _bb=document.getElementById(_n);
+    _bb.disabled=true;
+    return true;
+    } else {
+       window.console.log("CAN not disable this distance..");
+       return false;
+  }
+}
+
+function enableDistance(g,i) {
+  var _n=g+'_'+i+'d';
+  var _bb=document.getElementById(_n);
+  _bb.disabled=false;
+  return true;
+}
+
+function uncheckDistance(g,i) {
+  var _n=g+'_'+i+'d';
+  var _bb=document.getElementById(_n);
+  _bb.checked=false;
+}
+
+function computeDistance() {
+  var p = document.getElementById("result");
+  if(points.length == 2) {
+    var _s="New:"+points[0]['g']+"/"+points[0]['i']+
+    "to "+points[1]['g']+"/"+points[1]['i'];
+    p.innerHTML = _s;
+    } else {
+      p.innerHTML = "";
+  }
+}
+
+function toggleDistance(g,i) {
+/* If the landmark is visible, track the last two */
+  var _i=i-1;
+  var p=landmarks[g][_i].visible;
+  if (landmarks[g][_i].visible) { 
+    var _a=g+'_'+i+'d';
+    var _aa=document.getElementById(_a);
+    if(_aa.checked) {
+      points.push({g,i});
+      if(points.length > 2) {
+        var _b=points.shift();
+        var _n=_b['g']+'_'+_b['i']+'d';
+        var _bb=document.getElementById(_n);
+        _bb.checked=false;
+      }
+      } else { // got unchecked, so remove from the points
+        var _b=points.shift();
+        if (_b['g'] == g && _b['i']== i) {
+          // is the first one
+          var _n=_b['g']+'_'+_b['i']+'d';
+          var _bb=document.getElementById(_n);
+          _bb.checked=false;
+          } else {
+            points.push({g,i});
+            var _b=points.shift(); // it is the second one
+            var _n=_b['g']+'_'+_b['i']+'d';
+            var _bb=document.getElementById(_n);
+            _bb.checked=false;
+        }
+    }
+  } else {
+// landmark is not visible.. can I add ??
+    window.console.log(" where is this ???");
+  }
+  computeDistance();
+}
+
+// turn on/off the options
+function noDistance()
+{
+  var _list=document.getElementsByName("distance");
+  for (var i=0; i<_list.length;i++) {
+     _list[i].style.display="none";
+  }
+  var _s=points.length;
+  for(var j=0;j<_s;j++) {
+    var _b=points.shift();
+    var _n=_b['g']+'_'+_b['i']+'d';
+    var _bb=document.getElementById(_n);
+    _bb.checked=false;
+  }
+}
+
+function showDistance()
+{
+  var _list=document.getElementsByName("distance");
+  for (var i=0; i<_list.length;i++) {
+     _list[i].style.display="";
+  }
+  // set to the right state..
+  var _list=document.getElementsByName("landmark");
+  for (var j=0; j<_list.length; j++) {
+    var _g=(_list[j].id).split('_').shift();
+    var _i=_list[j].value;
+    var _n=_g+'_'+_i;
+    var _nn=_g+'_'+_i+'d';
+    var _b=document.getElementById(_n);
+    var _bb=document.getElementById(_nn);
+    if(_b.checked) {  // landmark is visible
+      _bb.disabled=false;
+      } else {  // if landmark is not visible
+        _bb.disabled=true;
+    }
+  }
+}
+
+function toggleCalcDistance() {
+  calcDistance = ! calcDistance;
+  if(calcDistance) {
+    jQuery('#calcbtn').css('border-color','red');
+    showDistance();
+    } else {
+      jQuery('#calcbtn').css('border-color','grey');
+      noDistance();
+  }
+  computeDistance();
+}
+
 function toggleLandmark(g,i) {
   var _i=i-1;
   landmarks[g][_i].visible = !landmarks[g][_i].visible;
-//window.console.log("total landmarks count is "+landmarks_cnt);
+  if(calcDistance) {
+     if(landmarks[g][_i].visible) {
+       enableDistance(g,i);
+       } else {
+         if( !disableDistance(g,i) ) { // reset, if failed to disable
+           landmarks[g][_i].visible = !landmarks[g][_i].visible;
+           checkLandmark(g,i);
+         }
+     }
+  }
 }
 
 function toggleLabel() {
@@ -398,6 +573,7 @@ function addLandmark(p) {
   var _r=p['radius'];
   var _loc=p['point'];
   var _cap=p['caption'];
+  var _label=p['label'];
   var _s=addSphere(_loc, _c, _r, _cap);
 
   if( landmarks[_g] == null ) {
@@ -406,7 +582,7 @@ function addLandmark(p) {
     } else {
       landmarks[_g].push(_s);
   }
-  addLandmarkListEntry(_g,landmarks[_g].length,_mesh.color);
+  addLandmarkListEntry(_g,landmarks[_g].length,_mesh.color,_label);
 }
 
 // adding landmarks after initial rendering
@@ -417,6 +593,7 @@ function loadLandmark() {
   }
   document.getElementById('landmarkbtn').style.display = 'none';
   jQuery('#forLandmark').show();
+  jQuery('#forDistance').show();
 }
 
 function autoLandmark(){
@@ -462,7 +639,6 @@ function addSphereByIdx(mesh, pt, color, radius) {
 }
 
 function addSphere(loc, color, radius, caption) {
-  landmarks_cnt++;
   var newSphere = new X.sphere();
   newSphere.center = loc;
   caption['data']=caption['data']+'<br>x: '+String(loc[0])+'<br>y: '+String(loc[1])+'<br>z: '+String(loc[2]);

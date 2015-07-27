@@ -66,6 +66,7 @@ var landmark_json='\
   {\
     "group": "JI296CCMB", \
     "color": [1, 0, 0],\
+    "label": "Posterior point of something",\
     "radius": 0.1, \
     "point": [8.502269744873047, 6.578330039978027, 69.94249725341797],\
     "caption": { "type":"Landmark",\
@@ -75,6 +76,7 @@ var landmark_json='\
   {\
     "group": "JI296CCMB", \
     "color": [1, 0, 0],\
+    "label": "Most anterior superior point of premaxilla",\
     "radius": 0.1, \
     "point": [15.606300354003906, 9.819620132446289,71.14600372314453],\
     "caption": { "type":"Landmark",\
@@ -86,6 +88,7 @@ var landmark_json='\
   {\
     "group": "JI296CCMB", \
     "color": [1, 0, 0],\
+    "label": "Anterior point of something",\
     "radius": 0.1, \
     "point": [7.819620132446289,10.14050006866455,67.17459869384766],\
     "caption": { "type":"Landmark",\
@@ -97,6 +100,7 @@ var landmark_json='\
   {\
     "group": "Maxilla", \
     "color": [1, 0, 0],\
+    "label": "Anterior-medial point to zygomatic process",\
     "radius": 0.1, \
     "point": [13.516400337219238,11.584600448608398,70.9854965209961],\
     "caption": { "type": "Landmark", "data":"Lower most of Maxilla" }\
@@ -104,6 +108,7 @@ var landmark_json='\
   {\
     "group": "Mandible", \
     "color": [1, 0, 0],\
+    "label": "Superior tip of coronary process",\
     "radius": 0.1, \
     "point": [11.42609977722168,12.432299613952637,70.46399688720703],\
     "caption": { "type": "Landmark", "data":"Top tip of Mandible" }\
@@ -111,6 +116,7 @@ var landmark_json='\
   {\
     "group": "Mandible", \
     "color": [1, 0, 0],\
+    "label": "Most anterior point of mandible",\
     "radius": 0.1, \
     "point": [15.551799774169922,9.578940391540527,69.4209976196289],\
     "caption": { "type": "Landmark", "data":"Front tip of Mandible" }\
