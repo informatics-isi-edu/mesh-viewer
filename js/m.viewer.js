@@ -400,7 +400,7 @@ function toggleDistance(g,i) {
     var _a=g+'_'+i+'d';
     var _aa=document.getElementById(_a);
     if(_aa.checked) {
-      points.push({g,i});
+      points.push({'g':g,'i':i});
       if(points.length > 2) {
         var _b=points.shift();
         var _n=_b['g']+'_'+_b['i']+'d';
@@ -415,7 +415,7 @@ function toggleDistance(g,i) {
           var _bb=document.getElementById(_n);
           _bb.checked=false;
           } else {
-            points.push({g,i});
+            points.push({'g':g,'i':i});
             var _b=points.shift(); // it is the second one
             var _n=_b['g']+'_'+_b['i']+'d';
             var _bb=document.getElementById(_n);
