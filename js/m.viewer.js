@@ -13,6 +13,9 @@ var ren3d=null; // 3d renderer
 
 var meshs=[];   // mesh objects
 var vol=null;   // volume objects
+var sliceAx=null;
+var sliceSag=null;
+var sliceCor=null;
 var landmarks=[];  // sphere objects
 var first_time=true;
 var first_time_vol=true;
@@ -47,15 +50,7 @@ window.onload = function() {
   var _m=mesh_load();
   initial_mesh_list=_m[0], mesh_list=_m[1];
 
-//  setup slider
-jQuery('#opacity-volume').slider({
-    slide: opacityVolume
-});
-jQuery('#opacity-volume').width(100);
-jQuery('#opacity-volume').height(10);
-
   setupSliders();
-
   initRenderer();
 
   for (var i=0;i<initial_mesh_list['mesh'].length;i++) {
@@ -147,6 +142,7 @@ window.console.log("  this object "+_id+ " does not have caption..");
     if(first_time_vol && vol) {
 
       first_time_vol=false;
+      initSlicers();
       initSliders();
     }
   };
@@ -238,7 +234,7 @@ function initRenderer() {
       return;
   }
   ren3d = new X.renderer3D();
-  ren3d.container='3mesh';
+  ren3d.container='mainView';
   ren3d.init();
 }
 
@@ -317,11 +313,27 @@ function selectMesh()
 }
 
 function toggle3D() {
-  vol.volumeRendering= ! vol.volumeRendering;
+  if(vol.visible) {
+    vol.volumeRendering= ! vol.volumeRendering;
+    if(vol.volumeRendering) {
+      jQuery('#3dbtn').prop('value','2dVol');
+      } else {
+        jQuery('#3dbtn').prop('value','3dVol');
+    }
+  }
 }
 
 function toggleVolume() {
   vol.visible= ! vol.visible;
+  if(vol.visible) {
+    jQuery('#2dViews').show();
+    jQuery('#visbtn').prop('value','noVol');
+    jQuery('#3dbtn').prop('disabled',false);
+    } else {
+      jQuery('#2dViews').hide();
+      jQuery('#visbtn').prop('value','vizVol');
+      jQuery('#3dbtn').prop('disabled',true);
+  }
 }
 
 function toggleMesh(i) {
@@ -352,7 +364,6 @@ function checkLandmark(g,i) {
     var _bb=document.getElementById(_n);
     _bb.checked="none";
 }
-
 
 // g, i
 function disableDistance(g,i) {
@@ -387,6 +398,7 @@ function computeDistance() {
     var _s="New:"+points[0]['g']+"/"+points[0]['i']+
     "to "+points[1]['g']+"/"+points[1]['i'];
     p.innerHTML = _s;
+/* update the color of the landmark..?? */
     } else {
       p.innerHTML = "";
   }
@@ -506,14 +518,56 @@ function toggleLabel() {
   }
 }
 
+function initSlicers() { 
+  sliceAx = new X.renderer2D();
+  sliceAx.container = 'sliceAx';
+  sliceAx.orientation = 'AXIAL';
+  sliceAx.init();
+  sliceAx.onSliceNavigation = onSliceNavigation;
+
+  sliceSag = new X.renderer2D();
+  sliceSag.container = 'sliceSag';
+  sliceSag.orientation = 'SAGITTAL';
+  sliceSag.init();
+  sliceSag.onSliceNavigation = onSliceNavigation;
+
+  sliceCor = new X.renderer2D();
+  sliceCor.container = 'sliceCor';
+  sliceCor.orientation = 'CORONAL';
+  sliceCor.init();
+  sliceCor.onSliceNavigation = onSliceNavigation;
+
+  sliceAx.add(vol);
+  sliceAx.add(meshs[0]);
+  sliceAx.add(meshs[1]);
+  sliceSag.add(vol);
+  sliceSag.add(meshs[0]);
+  sliceSag.add(meshs[1]);
+  sliceCor.add(vol);
+  sliceCor.add(meshs[0]);
+  sliceCor.add(meshs[1]);
+
+  sliceAx.render();
+  sliceSag.render();
+  sliceCor.render();
+
+sliceAx.onScroll = updateAx;
+sliceSag.onScroll = updateSag;
+sliceCor.onScroll = updateCor;
+
+sliceAx.onWindowLevel = updateWLSlider;
+sliceSag.onWindowLevel = updateWLSlider;
+sliceCor.onWindowLevel = updateWLSlider;
+
+}
+
 function addVolume(t) { // color, url, caption, <id/new>
-  var _vol = new X.volume();
-  _vol.file = encodeURI(t['url']);
-  _vol.caption = t['caption'];
-  _vol.color=t['color'];
-  vol = _vol;
-  ren3d.add(_vol);
-  vol = _vol;
+  vol = new X.volume();
+  vol.file = encodeURI(t['url']);
+  vol.caption = t['caption'];
+  vol.color=t['color'];
+  ren3d.add(vol);
+  jQuery('#2dViews').show();
 }
 
 // create mesh object 
@@ -734,7 +788,29 @@ window.console.log("in here..");
   vol.modified;
 }
 
+function windowLevelVolume(event, ui) {
+  if (!vol) { return; }
+  vol.windowLow = ui.values[0];
+  vol.windowHigh = ui.values[1];
+}
+
+function volumeslicingSag(event, ui) {
+  if (!vol) { return; }
+  vol.indexX = Math.floor(jQuery('#Sag_slider').slider("option", "value"));
+}
+
+function volumeslicingAx(event, ui) {
+  if (!vol) { return; }
+  vol.indexZ = Math.floor(jQuery('#Ax_slider').slider("option", "value"));
+}
+
+function volumeslicingCor(event, ui) {
+  if (!vol) { return; }
+  vol.indexY = Math.floor(jQuery('#Cor_slider').slider("option", "value"));
+}
+
 function setupSliders() {
+
   jQuery('#opacity-volume').slider({ slide: opacityVolume });
   jQuery('#opacity-volume').width(100);
 
@@ -745,10 +821,25 @@ function setupSliders() {
     slide: thresholdVolume
   });
   jQuery('#threshold-volume').width(100);
+
+  // create the 2d sliders
+  jQuery("#Ax_slider").slider({
+    slide: volumeslicingAx
+  });
+  jQuery("#Ax_slider .ui-slider-handle").unbind('keydown');
+
+  jQuery("#Sag_slider").slider({
+    slide: volumeslicingSag
+  });
+  jQuery("#Sag_slider .ui-slider-handle").unbind('keydown');
+
+  jQuery("#Cor_slider").slider({
+    slide: volumeslicingCor
+  });
+  jQuery("#Cor_slider .ui-slider-handle").unbind('keydown');
 }
 
 function initSliders() {
-window.console.log("calling initSlider..");
   if(!vol) { return; }
 
   jQuery('#opacity-volume').slider("option", "value", 80);
@@ -759,4 +850,50 @@ window.console.log("calling initSlider..");
   jQuery('#threshold-volume').dragslider("option", "min", vol.min);
   jQuery('#threshold-volume').dragslider("option", "values",
         [vol.min, vol.max]);
+
+    // update 2d slice sliders
+    var dim = vol.range;
+
+    // ax
+    jQuery("#Ax_slider").slider("option", "disabled", false);
+    jQuery("#Ax_slider").slider("option", "min", 0);
+    jQuery("#Ax_slider").slider("option", "max", dim[2] - 1);
+    jQuery("#Ax_slider").slider("option", "value", vol.indexZ);
+
+    // sag
+    jQuery("#Sag_slider").slider("option", "disabled", false);
+    jQuery("#Sag_slider").slider("option", "min", 0);
+    jQuery("#Sag_slider").slider("option", "max", dim[0] - 1);
+    jQuery("#Sag_slider").slider("option", "value", vol.indexX);
+
+    // cor
+    jQuery("#Cor_slider").slider("option", "disabled", false);
+    jQuery("#Cor_slider").slider("option", "min", 0);
+    jQuery("#Cor_slider").slider("option", "max", dim[1] - 1);
+    jQuery("#Cor_slider").slider("option", "value", vol.indexY);
+
 }
+
+  // LINK THE RENDERERS
+  //
+  // link the 2d renderers to the 3d one by setting the onScroll
+  // method. this means, once you scroll in 2d, it upates 3d as well
+function updateSag() {
+  jQuery('#Sag_slider').slider("option", "value",vol.indexX);
+};
+function updateAx() {
+  jQuery('#Ax_slider').slider("option", "value",vol.indexZ);
+};
+function updateCor() {
+  jQuery('#Cor_slider').slider("option", "value",vol.indexY);
+};
+
+function updateWLSlider() {
+  jQuery('#windowlevel-volume').dragslider("option", "values", [vol.windowLow, vol.windowHigh]);
+}
+
+function onSliceNavigation() {
+  jQuery('#Sag_slider').slider("option", "value",volume.indexX);
+  jQuery('#Ax_slider').slider("option", "value",volume.indexY);
+  jQuery('#Cor_slider').slider("option", "value",volume.indexZ);
+};

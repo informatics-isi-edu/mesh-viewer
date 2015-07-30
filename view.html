@@ -40,9 +40,12 @@
      <a id="dlink" href="">Gene expression</a>
    </div>
 </div>
-<div id='3mesh' style='background-color:black; border:solid 2px grey;  float: left; width:600px; height:500px; margin:10px;' ></div>
+<div id='mainView' style='background-color:black; border:solid 2px grey;  float: left; width:630px; height:500px; margin:10px;' ></div>
+<div id='loading'>
+  <h3 class='onair' 
+     style="position:absolute; height:400px; width:430px; text-align:right; color:white; margin-top:150px;">Loading data...</h3>
+</div>
 <div id='control' style='margin-top:20px;'>
-
   <id id='forLabel'>
     <input id="labelbtn" type="button" value="showLabel" onclick="toggleLabel();"/>
     <input id="spinbtn" type="button" value="spin" onclick="spinView();"/>
@@ -53,8 +56,8 @@
     <input id="landmarkbtn" type="button" value="addLandmark" style="display:none"  onclick="loadLandmark();"/>
   </div>
   <div id='forVolume' style="margin-top:10px;display:none;">
-    <input id="3dbtn" type="button" value="3dVol"  onclick="toggle3D();"/>
-    <input id="visbtn" type="button" value="visVol"  onclick="toggleVolume();"/>
+    <input id="3dbtn" type="button" value="3dVol" onclick="toggle3D();"/>
+    <input id="visbtn" type="button" value="noVol"  onclick="toggleVolume();"/>
     <div id='sliders' style='width:300; margin-left:650px;'>
       <p>Volume Opacity</p>
       <div id='opacity-volume' style='margin-left: 10px; background:blue;'></div>
@@ -81,10 +84,16 @@
     <input id="resetbtn" type="button" value="resetView" onclick="resetView();"/>
     <input id="loadbtn" type="button" value="loadView" onclick="loadView();"/>
   </div>
-</div>
-<div id='loading'>
-  <h3 class='onair' 
-     style="position:absolute; height:400px; width:400px; text-align:right; color:white;">Loading data...</h3>
+<div id='2dViews' style="width:700px; display:none;">
+    <div id='sliceSag' style='background-color:black; border:solid 2px grey;  float: left; width:200px; height:200px; margin:10px;' >
+      <div id='Sag_slider' style="background:red;"></div>
+    </div>
+    <div id='sliceAx' style='background-color:black; border:solid 2px grey;  float: left; width:200px; height:200px; margin:10px;' >
+      <div id='Ax_slider' style="background:blue;"></div>
+    </div>
+    <div id='sliceCor' style='background-color:black; border:solid 2px grey;  float: left; width:200px; height:200px; margin:10px;' >
+      <div id='Cor_slider' style="background:green;"></div>
+    </div>
 </div>
 </body>
 </html>

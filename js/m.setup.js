@@ -161,51 +161,11 @@ var anno_json='\
           "camera": [0, 10, 0],\
           "center": [10.45, 9.94, 70.44],\
           "viewport": { "width": 500, "height": 400 },\
-          "mesh" : "url=http://'+hostname+'/data/3mesh/JI296CCMB.obj&url=http://'+hostname+'/data/3mesh/Mandible.obj&url=http://'+hostname+'/data/3mesh/Maxilla.obj"\
+          "mesh" : "url=http://'+hostname+'/data/3mesh/JI296CCMB.obj&url=http://'+hostname+'/data/3mesh/Mandible.obj&url=http://'+hostname+'/data/3mesh/Maxilla.obj",\
+          "volume" : "url=http://'+hostname+'/data/3mesh/JI296CCMB.nii",\
+          "view" : { "matrix" : [ 0.3939458131790161, -0.14428237080574036, 0.9077383279800415, 0, 0.6927173733711243, -0.6025053858757019, -0.3963961601257324, 0, 0.6041101813316345, 0.784964919090271, -0.13740763068199158, 0, 0, 0, -10, 1 ] }\
       },\
       "text": "this is a annotation for skull of JI296CCMB",\
-      "shape": "rect",\
-      "x": 0,\
-      "y": 0,\
-      "width": 0,\
-      "height": 0\
-    }\
-  },\
-  {\
-    "type": "xtk_mesh",\
-    "id": 4124939460,\
-    "event": "INFO",\
-    "data": {\
-      "src": "Mandible",\
-      "context": {\
-          "url":"http://'+hostname+'/MeshViewer/view.html",\
-          "camera": [0, 10, 0],\
-          "center": [10.45, 9.94, 70.44],\
-          "viewport": { "width": 500, "height": 400 },\
-          "mesh" : "url=http://'+hostname+'/data/3mesh/JI296CCMB.obj&url=http://'+hostname+'/data/3mesh/Mandible.obj&url=http://'+hostname+'/data/3mesh/Maxilla.obj"\
-      },\
-      "text": "this is a Mandible annotation",\
-      "shape": "rect",\
-      "x": 0,\
-      "y": 0,\
-      "width": 0,\
-      "height": 0\
-    }\
-  },\
-  {\
-    "type": "xtk_mesh",\
-    "id": 4124939461,\
-    "event": "INFO",\
-    "data": {\
-      "src": "Maxilla",\
-      "context": {\
-          "url":"http://'+hostname+'/MeshViewer/view.html",\
-          "camera": [0, 10, 0],\
-          "center": [10.45, 9.94, 70.44],\
-          "viewport": { "width": 500, "height": 400 },\
-          "mesh" : "url=http://'+hostname+'/data/3mesh/JI296CCMB.obj&url=http://'+hostname+'/data/3mesh/Mandible.obj&url=http://'+hostname+'/data/3mesh/Maxilla.obj"\
-      },\
-      "text": "this is a Maxilla annotation",\
       "shape": "rect",\
       "x": 0,\
       "y": 0,\
