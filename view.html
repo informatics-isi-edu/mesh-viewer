@@ -21,15 +21,16 @@
 <script type='text/javascript' src='js/jquery.ui.slider.js'></script>
 <script type='text/javascript' src='js/alertify.min.js'></script>
 
-<!-- for view_debug.html 
+<!-- for debug 
 <script type="text/javascript" src="X/lib/google-closure-library/closure/goog/base.js"></script>
 <script type="text/javascript" src="X/xtk-deps.js"></script>
 <script type="text/javascript" src="js/default.js"></script>
 -->
-<!-- --> 
+<!-- for regular --> 
 <script type="text/javascript" src="js/xtk.js"></script>
 
 <script type="text/javascript" src="js/m.viewer.js"></script>
+<script type="text/javascript" src="js/m.control.js"></script>
 <script type="text/javascript" src="js/m.setup.js"></script>
 </head>
 <body>
@@ -63,6 +64,10 @@
       <div id='opacity-volume' style='margin-left: 10px; background:blue;'></div>
       <p>Volume Thresholds</p>
       <div id='threshold-volume' style='margin-left: 10px;'></div>
+      <p>Clip Plane
+      <input id="clipbtn" type="button" value="reset"  style="margin-top:4px;" onclick="reset_clipPlane();"/>
+</p>
+      <div id='clip-plane' style='margin-left: 10px; background:yellow;'> </div>
     </div>
   </div>
   <div id='forMesh' style='margin-top:10px;'>

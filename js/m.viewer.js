@@ -50,7 +50,6 @@ window.onload = function() {
   var _m=mesh_load();
   initial_mesh_list=_m[0], mesh_list=_m[1];
 
-  setupSliders();
   initRenderer();
 
   for (var i=0;i<initial_mesh_list['mesh'].length;i++) {
@@ -127,7 +126,21 @@ window.console.log("  this object "+_id+ " does not have caption..");
 //window.console.log("XXX calling onShowtime");
     var loadingDiv = document.getElementById('loading');
     loadingDiv.style.display = 'none';
+
 // zoom in alittle
+// replace default X camera's zoom,
+    ren3d.camera.zoomIn = function(fast) {
+      var zoomStep = 20;
+      if (goog.isDefAndNotNull(fast) && !fast) {
+        zoomStep = 1;
+      }
+      ren3d.camera.view[14] += zoomStep;
+      if(ren3d.camera.view[14] > 0) {
+// window.console.log("calling my zoomIn.. cap it..");
+        ren3d.camera.view[14]=0;
+      } 
+    };
+
     var _camera=ren3d.camera.position;
     if( first_time ) {
       first_time=false;
@@ -142,13 +155,17 @@ window.console.log("  this object "+_id+ " does not have caption..");
     if(first_time_vol && vol) {
 
       first_time_vol=false;
-      initSlicers();
-      initSliders();
+      setupSlicers();
+      setup3dSliders();
+      init3dSliders();
+      setup2dSliders();
+      init2dSliders();
+      makeBBox(ren3d,vol);
     }
   };
 
   ren3d.onRender = function() {
-    // rotate the camera in X-direction
+// rotate the camera in X-direction
     if(spin_view) {
       ren3d.camera.rotate([1, 0]);
     }
@@ -180,7 +197,7 @@ function webgl_detect()
   return false;
 }
 
-function stringIt(v) {
+function stringIt(msg, v) {
   var str="{";
   for(var i=0; i<v.length; i++) {
     str=str+" "+v[i].toString();
@@ -190,14 +207,14 @@ function stringIt(v) {
           str=str+"}";
     }
   }
-  window.console.log(str);
+  window.console.log(msg+" "+str);
 }
 
 function saveView() {
   /* copy it over */
   for(var i=0; i< ren3d.camera.view.length; i++)
     save_view_matrix[i]=ren3d.camera.view[i];
-//  stringIt(save_view_matrix);
+  stringIt("saveView", save_view_matrix);
 }
 
 function goView() {
@@ -234,6 +251,7 @@ function initRenderer() {
       return;
   }
   ren3d = new X.renderer3D();
+
   ren3d.container='mainView';
   ren3d.init();
 }
@@ -518,7 +536,7 @@ function toggleLabel() {
   }
 }
 
-function initSlicers() { 
+function setupSlicers() { 
   sliceAx = new X.renderer2D();
   sliceAx.container = 'sliceAx';
   sliceAx.orientation = 'AXIAL';
@@ -538,14 +556,8 @@ function initSlicers() {
   sliceCor.onSliceNavigation = onSliceNavigation;
 
   sliceAx.add(vol);
-  sliceAx.add(meshs[0]);
-  sliceAx.add(meshs[1]);
   sliceSag.add(vol);
-  sliceSag.add(meshs[0]);
-  sliceSag.add(meshs[1]);
   sliceCor.add(vol);
-  sliceCor.add(meshs[0]);
-  sliceCor.add(meshs[1]);
 
   sliceAx.render();
   sliceSag.render();
@@ -554,11 +566,6 @@ function initSlicers() {
 sliceAx.onScroll = updateAx;
 sliceSag.onScroll = updateSag;
 sliceCor.onScroll = updateCor;
-
-sliceAx.onWindowLevel = updateWLSlider;
-sliceSag.onWindowLevel = updateWLSlider;
-sliceCor.onWindowLevel = updateWLSlider;
-
 }
 
 function addVolume(t) { // color, url, caption, <id/new>
@@ -771,129 +778,70 @@ addSphereByIdx(mesh,i, [1,0.5,0], 0.04);
   window.console.log("line2, max "+max2+" min "+min2);
 };
 
-
-
-// volume's control
-function opacityVolume(event, ui) {
-  if (!vol) { return; }
-  vol.opacity = ui.value / 100;
-  vol.modified;
+function clip3d(near) {
+  var _width = jQuery(mainView).width();
+  var _height = jQuery(mainView).height();
+  if(near < 0) { // reset 
+    ren3d.camera.clip(_width,_height,1);
+    return;
+  }
+  var _range= (vol.bbox[3] - vol.bbox[2] + 1)/2;
+  var _start=Math.abs(ren3d.camera.view[14]);
+  var _near= Math.round((near * _range) + _start);
+//window.console.log("clip3d, start "+_start+" and to "+_range+ " on target "+_near);
+  if(_start == _near) {
+    ren3d.camera.clip(_width,_height,1);
+    } else {
+      ren3d.camera.clip(_width,_height,_near);
+  }
 }
 
-function thresholdVolume(event, ui) {
-  if (!vol) { return; }
-window.console.log("in here..");
-  vol.lowerThreshold = ui.values[0];
-  vol.upperThreshold = ui.values[1];
-  vol.modified;
-}
+function makeBBox(r,v) {
+// CREATE Bounding Box
+    var res = [v.bbox[0],v.bbox[2],v.bbox[4]];
+    var res2 = [v.bbox[1],v.bbox[3],v.bbox[5]];
 
-function windowLevelVolume(event, ui) {
-  if (!vol) { return; }
-  vol.windowLow = ui.values[0];
-  vol.windowHigh = ui.values[1];
-}
+    box = new X.object();
+    box.points = new X.triplets(72);
+    box.normals = new X.triplets(72);
+    box.type = 'LINES';
+    box.points.add(res2[0], res[1], res2[2]);
+    box.points.add(res[0], res[1], res2[2]);
+    box.points.add(res2[0], res2[1], res2[2]);
+    box.points.add(res[0], res2[1], res2[2]);
+    box.points.add(res2[0], res[1], res[2]);
+    box.points.add(res[0], res[1], res[2]);
+    box.points.add(res2[0], res2[1], res[2]);
+    box.points.add(res[0], res2[1], res[2]);
+    box.points.add(res2[0], res[1], res2[2]);
+    box.points.add(res2[0], res[1], res[2]);
+    box.points.add(res[0], res[1], res2[2]);
+    box.points.add(res[0], res[1], res[2]);
+    box.points.add(res2[0], res2[1], res2[2]);
+    box.points.add(res2[0], res2[1], res[2]);
+    box.points.add(res[0], res2[1], res2[2]);
+    box.points.add(res[0], res2[1], res[2]);
+    box.points.add(res2[0], res2[1], res2[2]);
+    box.points.add(res2[0], res[1], res2[2]);
+    box.points.add(res[0], res2[1], res2[2]);
+    box.points.add(res[0], res[1], res2[2]);
+    box.points.add(res[0], res2[1], res[2]);
+    box.points.add(res[0], res[1], res[2]);
+    box.points.add(res2[0], res2[1], res[2]);
+    box.points.add(res2[0], res[1], res[2]);
+    for ( var i = 0; i < 24; ++i) {
+      box.normals.add(0, 0, 0);
+    }
+    box.color=[1,0,0];
+    r.add(box);
+ 
+    var center = [v.bbox[0] + (v.bbox[1]-v.bbox[0]),
+              v.bbox[2] + (v.bbox[3]-v.bbox[2]),
+              v.bbox[4] + (v.bbox[5]-v.bbox[4])
+              ]
 
-function volumeslicingSag(event, ui) {
-  if (!vol) { return; }
-  vol.indexX = Math.floor(jQuery('#Sag_slider').slider("option", "value"));
-}
+   window.console.log("center is at.."+center[0]+" "+center[1]+" "+center[2]);
 
-function volumeslicingAx(event, ui) {
-  if (!vol) { return; }
-  vol.indexZ = Math.floor(jQuery('#Ax_slider').slider("option", "value"));
-}
-
-function volumeslicingCor(event, ui) {
-  if (!vol) { return; }
-  vol.indexY = Math.floor(jQuery('#Cor_slider').slider("option", "value"));
-}
-
-function setupSliders() {
-
-  jQuery('#opacity-volume').slider({ slide: opacityVolume });
-  jQuery('#opacity-volume').width(100);
-
-  jQuery('#threshold-volume').dragslider({
-    range: true,
-    rangeDrag: true,
-    values: [0, 100],
-    slide: thresholdVolume
-  });
-  jQuery('#threshold-volume').width(100);
-
-  // create the 2d sliders
-  jQuery("#Ax_slider").slider({
-    slide: volumeslicingAx
-  });
-  jQuery("#Ax_slider .ui-slider-handle").unbind('keydown');
-
-  jQuery("#Sag_slider").slider({
-    slide: volumeslicingSag
-  });
-  jQuery("#Sag_slider .ui-slider-handle").unbind('keydown');
-
-  jQuery("#Cor_slider").slider({
-    slide: volumeslicingCor
-  });
-  jQuery("#Cor_slider .ui-slider-handle").unbind('keydown');
-}
-
-function initSliders() {
-  if(!vol) { return; }
-
-  jQuery('#opacity-volume').slider("option", "value", 80);
-  vol.opacity = 0.8; // re-propagate
-  vol.modified();
-
-  jQuery('#threshold-volume').dragslider("option", "max", vol.max);
-  jQuery('#threshold-volume').dragslider("option", "min", vol.min);
-  jQuery('#threshold-volume').dragslider("option", "values",
-        [vol.min, vol.max]);
-
-    // update 2d slice sliders
-    var dim = vol.range;
-
-    // ax
-    jQuery("#Ax_slider").slider("option", "disabled", false);
-    jQuery("#Ax_slider").slider("option", "min", 0);
-    jQuery("#Ax_slider").slider("option", "max", dim[2] - 1);
-    jQuery("#Ax_slider").slider("option", "value", vol.indexZ);
-
-    // sag
-    jQuery("#Sag_slider").slider("option", "disabled", false);
-    jQuery("#Sag_slider").slider("option", "min", 0);
-    jQuery("#Sag_slider").slider("option", "max", dim[0] - 1);
-    jQuery("#Sag_slider").slider("option", "value", vol.indexX);
-
-    // cor
-    jQuery("#Cor_slider").slider("option", "disabled", false);
-    jQuery("#Cor_slider").slider("option", "min", 0);
-    jQuery("#Cor_slider").slider("option", "max", dim[1] - 1);
-    jQuery("#Cor_slider").slider("option", "value", vol.indexY);
-
-}
-
-  // LINK THE RENDERERS
-  //
-  // link the 2d renderers to the 3d one by setting the onScroll
-  // method. this means, once you scroll in 2d, it upates 3d as well
-function updateSag() {
-  jQuery('#Sag_slider').slider("option", "value",vol.indexX);
-};
-function updateAx() {
-  jQuery('#Ax_slider').slider("option", "value",vol.indexZ);
-};
-function updateCor() {
-  jQuery('#Cor_slider').slider("option", "value",vol.indexY);
 };
 
-function updateWLSlider() {
-  jQuery('#windowlevel-volume').dragslider("option", "values", [vol.windowLow, vol.windowHigh]);
-}
 
-function onSliceNavigation() {
-  jQuery('#Sag_slider').slider("option", "value",volume.indexX);
-  jQuery('#Ax_slider').slider("option", "value",volume.indexY);
-  jQuery('#Cor_slider').slider("option", "value",volume.indexZ);
-};
