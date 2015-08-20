@@ -781,19 +781,15 @@ addSphereByIdx(mesh,i, [1,0.5,0], 0.04);
 function clip3d(near) {
   var _width = jQuery(mainView).width();
   var _height = jQuery(mainView).height();
-  if(near < 0) { // reset 
+  if(near <= 0) { // reset 
     ren3d.camera.clip(_width,_height,1);
     return;
   }
   var _range= (vol.bbox[3] - vol.bbox[2] + 1)/2;
   var _start=Math.abs(ren3d.camera.view[14]);
-  var _near= Math.round((near * _range) + _start);
+  var _near= (near * _range) + _start;
 //window.console.log("clip3d, start "+_start+" and to "+_range+ " on target "+_near);
-  if(_start == _near) {
-    ren3d.camera.clip(_width,_height,1);
-    } else {
-      ren3d.camera.clip(_width,_height,_near);
-  }
+  ren3d.camera.clip(_width,_height,_near);
 }
 
 function makeBBox(r,v) {
