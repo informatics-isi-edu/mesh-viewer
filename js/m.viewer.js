@@ -87,7 +87,7 @@ window.onload = function() {
 
           showLabel(_j['type'],_j['data'],_j['link']);
           } else { 
-window.console.log("  this object "+_id+ " does not have caption..");
+//window.console.log("  this object "+_id+ " does not have caption..");
         }
         } else {
 // grab the object and turn it white, only if it has caption,
@@ -120,10 +120,8 @@ window.console.log("  this object "+_id+ " does not have caption..");
     saved_id=null;
   }
 
-  ren3d.render();
-
   ren3d.onShowtime = function(){
-//window.console.log("XXX calling onShowtime");
+//window.console.log("calling onShowtime");
     var loadingDiv = document.getElementById('loading');
     loadingDiv.style.display = 'none';
 
@@ -147,8 +145,13 @@ window.console.log("  this object "+_id+ " does not have caption..");
       if (vol) { // use bounding box if vol exists
         var _y=(vol.bbox[3] - vol.bbox[2] + 1)*2;
         ren3d.camera.position = [ 0, _y, 0];
+//window.console.log("using vol, y max "+vol.bbox[3]+" y min "+ vol.bbox[2]);
+//window.console.log("and now "+_y);
         } else {
-          ren3d.camera.position = [ 0, 10, 0];
+          var _y=(ren3d.bbox[3] - ren3d.bbox[2] + 1)*2;
+          ren3d.camera.position = [ 0, _y, 0];
+//window.console.log("using renderer3d, y max "+ren3d.bbox[3]+" y min "+ ren3d.bbox[2]);
+//window.console.log("and now "+_y);
       }
       saveView();
     }
@@ -170,6 +173,8 @@ window.console.log("  this object "+_id+ " does not have caption..");
       ren3d.camera.rotate([1, 0]);
     }
   };
+
+  ren3d.render();
 }
 
 //http://stackoverflow.com/questions/11871077/proper-way-to-detect-webgl-support
@@ -788,7 +793,7 @@ function clip3d(near) {
   var _range= (vol.bbox[3] - vol.bbox[2] + 1)/2;
   var _start=Math.abs(ren3d.camera.view[14]);
   var _near= (near * _range) + _start;
-//window.console.log("clip3d, start "+_start+" and to "+_range+ " on target "+_near);
+window.console.log("clip3d, start "+_start+" and to "+_range+ " on target "+_near);
   ren3d.camera.clip(_width,_height,_near);
 }
 
