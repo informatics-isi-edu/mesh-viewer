@@ -143,12 +143,12 @@ window.onload = function() {
     if( first_time ) {
       first_time=false;
       if (vol) { // use bounding box if vol exists
-        var _y=(vol.bbox[3] - vol.bbox[2] + 1)*2;
+        var _y=(vol.bbox[3] - vol.bbox[2] + 1)*1.3;
         ren3d.camera.position = [ 0, _y, 0];
 //window.console.log("using vol, y max "+vol.bbox[3]+" y min "+ vol.bbox[2]);
 //window.console.log("and now "+_y);
         } else {
-          var _y=(ren3d.bbox[3] - ren3d.bbox[2] + 1)*2;
+          var _y=(ren3d.bbox[3] - ren3d.bbox[2] + 1)*1.3;
           ren3d.camera.position = [ 0, _y, 0];
 //window.console.log("using renderer3d, y max "+ren3d.bbox[3]+" y min "+ ren3d.bbox[2]);
 //window.console.log("and now "+_y);
