@@ -164,6 +164,8 @@ window.onload = function() {
       setup2dSliders();
       init2dSliders();
       makeBBox(ren3d,vol);
+      } else {
+        makeBBox(ren3d,null);
     }
   };
 
@@ -799,8 +801,13 @@ window.console.log("clip3d, start "+_start+" and to "+_range+ " on target "+_nea
 
 function makeBBox(r,v) {
 // CREATE Bounding Box
-    var res = [v.bbox[0],v.bbox[2],v.bbox[4]];
-    var res2 = [v.bbox[1],v.bbox[3],v.bbox[5]];
+    var _r=r;
+    var _v=v;
+    if(v == null) {
+      _v=r; 
+    }
+    var res = [_v.bbox[0],_v.bbox[2],_v.bbox[4]];
+    var res2 = [_v.bbox[1],_v.bbox[3],_v.bbox[5]];
 
     box = new X.object();
     box.points = new X.triplets(72);
@@ -833,12 +840,16 @@ function makeBBox(r,v) {
     for ( var i = 0; i < 24; ++i) {
       box.normals.add(0, 0, 0);
     }
-    box.color=[1,0,0];
-    r.add(box);
+    if(v==null) {
+      box.color=[0,1,1];
+      } else {
+        box.color=[1,1,1];
+    }
+    _r.add(box);
  
-    var center = [v.bbox[0] + (v.bbox[1]-v.bbox[0]),
-              v.bbox[2] + (v.bbox[3]-v.bbox[2]),
-              v.bbox[4] + (v.bbox[5]-v.bbox[4])
+    var center = [_v.bbox[0] + (_v.bbox[1]-_v.bbox[0]),
+              _v.bbox[2] + (_v.bbox[3]-_v.bbox[2]),
+              _v.bbox[4] + (_v.bbox[5]-_v.bbox[4])
               ]
 
    window.console.log("center is at.."+center[0]+" "+center[1]+" "+center[2]);
