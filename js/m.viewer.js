@@ -20,6 +20,9 @@ var landmarks=[];  // sphere objects
 var first_time=true;
 var first_time_vol=true;
 
+var add_landmark=false;
+
+
 //==== Mesh ====
 var initial_mesh_list;
 var mesh_list;
@@ -74,13 +77,16 @@ window.onload = function() {
     }
     // grab the current mouse position
     var _pos = ren3d.interactor.mousePosition;
-
-//window.console.log("  current mouse position is.."+_pos);
+    var _c = ren3d.camera.unproject_(_pos[0], _pos[1], 0);
+window.console.log("  current mouse position is.."+_pos);
+//window.console.log("  and c is "+_c[0]+" "+_c[1]+" "+_c[2]);
 
     // pick the current object
     var _id = ren3d.pick(_pos[0], _pos[1]);
 
     if (_id != 0) {
+      var _obj=ren3d.get(_id);
+      var _target=ren3d.pick3d(_pos[0],_pos[1], null, null, _obj);
       if(show_caption) {
         if(ren3d.get(_id).caption) {
           var _j=ren3d.get(_id).caption;
@@ -89,18 +95,35 @@ window.onload = function() {
           } else { 
 //window.console.log("  this object "+_id+ " does not have caption..");
         }
-        } else {
-// grab the object and turn it white, only if it has caption,
-          if(ren3d.get(_id).caption) {
+        } else { // grab the object and turn it white, only if it has caption,
+          if(ren3d.get(_id).caption && !add_landmark) {
 //window.console.log("  picking obj .."+_id);
-          saved_color=ren3d.get(_id).color;
-          var obj=ren3d.get(_id);
-          saved_id=_id;
-          ren3d.get(_id).color = [1, 1, 1];
-//      ren3d.get(saved_id).transform.translateY(1);
-            } else {
+              saved_color=ren3d.get(_id).color;
+              var obj=ren3d.get(_id);
+              saved_id=_id;
+              ren3d.get(_id).color = [1, 1, 1];
+//ren3d.get(saved_id).transform.translateY(1);
+              } else {
 //window.console.log(" picking "+_id+ " no change since no stored caption");
           }
+      }
+      if(add_landmark && _target) {
+         if( _obj == null ) {
+           return;
+         }
+         var _g=_obj.file.split('/').pop().toLowerCase().split('.').shift();
+         var _cap= { "type":"Landmark","data":"user added landmark" };
+         var _s=addSphere(_target, [0,0,1], 0.08,_cap);
+window.console.log("adding a new landmark for "+_g);
+
+         if( landmarks[_g] == null ) {
+           landmarks[_g]=[];
+           landmarks[_g].push(_s);
+           } else {
+             landmarks[_g].push(_s);
+         }
+         var _label=askForLabel(_g);
+         addLandmarkListEntry(_g,landmarks[_g].length,_obj.color,_label);
       }
     } else {
 //window.console.log("  did not pick anything");
@@ -204,6 +227,11 @@ function webgl_detect()
   return false;
 }
 
+function askForLabel(g)
+{
+  return "new landmark for "+g;
+}
+
 function stringIt(msg, v) {
   var str="{";
   for(var i=0; i<v.length; i++) {
@@ -281,11 +309,21 @@ function addMeshListEntry(fname,i,color)
 //window.console.log(_nn);
 }
 
+function toggleAddLandmark() 
+{
+  add_landmark = ! add_landmark;
+  if(add_landmark) {
+    jQuery('#toggleAddLandmarkbtn').prop('value','noAdd');
+    } else {
+      jQuery('#toggleAddLandmarkbtn').prop('value','addMore');
+  }
+}
+
 function addLandmarkListEntry(name,i,color,label)
 {
   var _nn='<button class="btn" disabled=true style="background-color:'+RGBTohex(color)+';"/><input type="checkbox" class="mychkbox" id="'+name+'_'+i+'d" onClick="toggleDistance(\''+name+'\','+i+');"/><label for="'+name+'_'+i+'d" style="display:none" name="distance"></label><input id='+name+'_'+i+' type=checkbox checked="" onClick="toggleLandmark(\''+name+'\','+i+');" value='+i+' name="landmark">'+label+'</input><br>';
   jQuery('#landmarklist').append(_nn);
-window.console.log(_nn);
+//window.console.log(_nn);
 }
 
 function selectLandmark()
@@ -629,6 +667,14 @@ function lookupMesh(n) {
   }
   return null;
 }
+function lookupMeshByID(id) {  
+  for(var i=0; i< meshs.length; i++) {
+    var _id=meshs[i].id;
+    if( _id == id )
+      return meshs[i];
+  }
+  return null;
+}
 
 function addLandmark(p) {
   var _g=p['group'].toLowerCase();
@@ -792,8 +838,8 @@ function clip3d(near) {
     ren3d.camera.clip(_width,_height,1);
     return;
   }
-  var _range= (vol.bbox[3] - vol.bbox[2] + 1)/2;
-  var _start=Math.abs(ren3d.camera.view[14]);
+  var _range= (vol.bbox[3] - vol.bbox[2] + 1);
+  var _start=Math.abs(ren3d.camera.view[14])-(_range/2);
   var _near= (near * _range) + _start;
 window.console.log("clip3d, start "+_start+" and to "+_range+ " on target "+_near);
   ren3d.camera.clip(_width,_height,_near);
