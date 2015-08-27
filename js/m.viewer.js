@@ -77,7 +77,7 @@ window.onload = function() {
     }
     // grab the current mouse position
     var _pos = ren3d.interactor.mousePosition;
-    var _c = ren3d.camera.unproject_(_pos[0], _pos[1], 0);
+//    var _c = ren3d.camera.unproject_(_pos[0], _pos[1], 0);
 window.console.log("  current mouse position is.."+_pos);
 //window.console.log("  and c is "+_c[0]+" "+_c[1]+" "+_c[2]);
 
@@ -86,7 +86,7 @@ window.console.log("  current mouse position is.."+_pos);
 
     if (_id != 0) {
       var _obj=ren3d.get(_id);
-      var _target=ren3d.pick3d(_pos[0],_pos[1], null, null, _obj);
+      var _target=ren3d.pick3d(_pos[0],_pos[1], 4, 0.5, _obj);
       if(show_caption) {
         if(ren3d.get(_id).caption) {
           var _j=ren3d.get(_id).caption;
@@ -142,6 +142,80 @@ window.console.log("adding a new landmark for "+_g);
     saved_color=null;
     saved_id=null;
   }
+
+  ren3d.interactor.onTouchHover = function() {
+window.console.log("touch hover..")
+    if(saved_color != null) {
+      ren3d.get(saved_id).color = saved_color;
+//      ren3d.get(saved_id).transform.translateY(-1);
+      saved_color=null;
+    }
+    // grab the current touch position
+    var _pos = ren3d.interactor.touchPosition;
+window.console.log("  current touch position is.."+_pos);
+
+    // pick the current object
+    var _id = ren3d.pick(_pos[0], _pos[1]);
+
+    if (_id != 0) {
+      var _obj=ren3d.get(_id);
+      var _target=ren3d.pick3d(_pos[0],_pos[1], 4, 0.5, _obj);
+      if(show_caption) {
+        if(ren3d.get(_id).caption) {
+          var _j=ren3d.get(_id).caption;
+
+          showLabel(_j['type'],_j['data'],_j['link']);
+          } else { 
+//window.console.log("  this object "+_id+ " does not have caption..");
+        }
+        } else { // grab the object and turn it white, only if it has caption,
+          if(ren3d.get(_id).caption && !add_landmark) {
+//window.console.log("  picking obj .."+_id);
+              saved_color=ren3d.get(_id).color;
+              var obj=ren3d.get(_id);
+              saved_id=_id;
+              ren3d.get(_id).color = [1, 1, 1];
+//ren3d.get(saved_id).transform.translateY(1);
+              } else {
+//window.console.log(" picking "+_id+ " no change since no stored caption");
+          }
+      }
+      if(add_landmark && _target) {
+         if( _obj == null ) {
+           return;
+         }
+         var _g=_obj.file.split('/').pop().toLowerCase().split('.').shift();
+         var _cap= { "type":"Landmark","data":"user added landmark" };
+         var _s=addSphere(_target, [0,0,1], 0.08,_cap);
+window.console.log("adding a new landmark for "+_g);
+
+         if( landmarks[_g] == null ) {
+           landmarks[_g]=[];
+           landmarks[_g].push(_s);
+           } else {
+             landmarks[_g].push(_s);
+         }
+         var _label=askForLabel(_g);
+         addLandmarkListEntry(_g,landmarks[_g].length,_obj.color,_label);
+      }
+    } else {
+//window.console.log("  did not pick anything");
+    }
+  }
+
+  ren3d.interactor.onTouchEnd = function() {
+window.console.log("touch up..");
+    if(saved_color == null) {
+      return;
+    }
+    // grab the object and turn it red
+    ren3d.get(saved_id).color = saved_color;
+//window.console.log("  reset "+saved_id + " with "+saved_color);
+//    ren3d.get(saved_id).transform.translateY(-1);
+    saved_color=null;
+    saved_id=null;
+  }
+
 
   ren3d.onShowtime = function(){
 //window.console.log("calling onShowtime");
