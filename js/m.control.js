@@ -101,12 +101,10 @@ window.console.log("in here..");
 
 /* slide from 1 to 100 */
 function clipPlane(event, ui) {
-  if (!vol) { return; }
   clip3d(ui.value/100);
 }
 
 function reset_clipPlane() {
-  if (!vol) { return; }
   clip3d(-1);
   jQuery('#clip-plane').slider("option", "value", 0);
 }
@@ -129,7 +127,9 @@ function setup3dSliders() {
     slide: thresholdVolume
   });
   jQuery('#threshold-volume').width(100);
+}
 
+function setupClipSlider() {
   jQuery('#clip-plane').slider({ slide: clipPlane });
   jQuery('#clip-plane').width(100);
 }
@@ -145,6 +145,8 @@ function init3dSliders() {
   jQuery('#threshold-volume').dragslider("option", "min", vol.min);
   jQuery('#threshold-volume').dragslider("option", "values",
         [vol.min, vol.max]);
+}
 
+function initClipSlider() {
   jQuery('#clip-plane').slider("option", "value", 0);
 }

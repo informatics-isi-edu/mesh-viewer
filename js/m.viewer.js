@@ -143,80 +143,6 @@ window.console.log("adding a new landmark for "+_g);
     saved_id=null;
   }
 
-  ren3d.interactor.onTouchHover = function() {
-window.console.log("touch hover..")
-    if(saved_color != null) {
-      ren3d.get(saved_id).color = saved_color;
-//      ren3d.get(saved_id).transform.translateY(-1);
-      saved_color=null;
-    }
-    // grab the current touch position
-    var _pos = ren3d.interactor.touchPosition;
-window.console.log("  current touch position is.."+_pos);
-
-    // pick the current object
-    var _id = ren3d.pick(_pos[0], _pos[1]);
-
-    if (_id != 0) {
-      var _obj=ren3d.get(_id);
-      var _target=ren3d.pick3d(_pos[0],_pos[1], 4, 0.5, _obj);
-      if(show_caption) {
-        if(ren3d.get(_id).caption) {
-          var _j=ren3d.get(_id).caption;
-
-          showLabel(_j['type'],_j['data'],_j['link']);
-          } else { 
-//window.console.log("  this object "+_id+ " does not have caption..");
-        }
-        } else { // grab the object and turn it white, only if it has caption,
-          if(ren3d.get(_id).caption && !add_landmark) {
-//window.console.log("  picking obj .."+_id);
-              saved_color=ren3d.get(_id).color;
-              var obj=ren3d.get(_id);
-              saved_id=_id;
-              ren3d.get(_id).color = [1, 1, 1];
-//ren3d.get(saved_id).transform.translateY(1);
-              } else {
-//window.console.log(" picking "+_id+ " no change since no stored caption");
-          }
-      }
-      if(add_landmark && _target) {
-         if( _obj == null ) {
-           return;
-         }
-         var _g=_obj.file.split('/').pop().toLowerCase().split('.').shift();
-         var _cap= { "type":"Landmark","data":"user added landmark" };
-         var _s=addSphere(_target, [0,0,1], 0.08,_cap);
-window.console.log("adding a new landmark for "+_g);
-
-         if( landmarks[_g] == null ) {
-           landmarks[_g]=[];
-           landmarks[_g].push(_s);
-           } else {
-             landmarks[_g].push(_s);
-         }
-         var _label=askForLabel(_g);
-         addLandmarkListEntry(_g,landmarks[_g].length,_obj.color,_label);
-      }
-    } else {
-//window.console.log("  did not pick anything");
-    }
-  }
-
-  ren3d.interactor.onTouchEnd = function() {
-window.console.log("touch up..");
-    if(saved_color == null) {
-      return;
-    }
-    // grab the object and turn it red
-    ren3d.get(saved_id).color = saved_color;
-//window.console.log("  reset "+saved_id + " with "+saved_color);
-//    ren3d.get(saved_id).transform.translateY(-1);
-    saved_color=null;
-    saved_id=null;
-  }
-
-
   ren3d.onShowtime = function(){
 //window.console.log("calling onShowtime");
     var loadingDiv = document.getElementById('loading');
@@ -239,6 +165,8 @@ window.console.log("touch up..");
     var _camera=ren3d.camera.position;
     if( first_time ) {
       first_time=false;
+      setupClipSlider();
+      initClipSlider();
       if (vol) { // use bounding box if vol exists
         var _y=(vol.bbox[3] - vol.bbox[2] + 1)*1.3;
         ren3d.camera.position = [ 0, _y, 0];
@@ -912,7 +840,7 @@ function clip3d(near) {
     ren3d.camera.clip(_width,_height,1);
     return;
   }
-  var _range= (vol.bbox[3] - vol.bbox[2] + 1);
+  var _range= (ren3d.bbox[3] - ren3d.bbox[2] + 1);
   var _start=Math.abs(ren3d.camera.view[14])-(_range/2);
   var _near= (near * _range) + _start;
 window.console.log("clip3d, start "+_start+" and to "+_range+ " on target "+_near);

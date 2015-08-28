@@ -21,13 +21,13 @@
 <script type='text/javascript' src='js/jquery.ui.slider.js'></script>
 <script type='text/javascript' src='js/alertify.min.js'></script>
 
-<!-- for debug -->
+<!-- for debug 
 <script type="text/javascript" src="X/lib/google-closure-library/closure/goog/base.js"></script>
 <script type="text/javascript" src="X/xtk-deps.js"></script>
 <script type="text/javascript" src="js/default.js"></script>
-<!-- for regular  
-<script type="text/javascript" src="js/xtk.js"></script>
 -->
+<!-- for regular -->  
+<script type="text/javascript" src="js/xtk.js"></script>
 
 <script type="text/javascript" src="js/m.viewer.js"></script>
 <script type="text/javascript" src="js/m.control.js"></script>
@@ -51,6 +51,12 @@
     <input id="labelbtn" type="button" value="showLabel" onclick="toggleLabel();"/>
     <input id="spinbtn" type="button" value="spin" onclick="spinView();"/>
   </div>
+  <div>
+    <p>Clip Plane
+      <input id="clipbtn" type="button" value="reset"  style="margin-top:4px;" onclick="reset_clipPlane();"/>
+    </p>
+    <div id='clip-plane' style='margin-left: 660px; background:yellow;'> </div>
+  </div>
   <div id='forTop' style='margin-top:10px;' >
     <input id="volbtn" type="button" value="addVol" onclick="loadVol();"/>
     <input id="lastbtn" type="button" value="addMoreMesh"  onclick="loadMesh();"/>
@@ -64,10 +70,6 @@
       <div id='opacity-volume' style='margin-left: 10px; background:blue;'></div>
       <p>Volume Thresholds</p>
       <div id='threshold-volume' style='margin-left: 10px;'></div>
-      <p>Clip Plane
-      <input id="clipbtn" type="button" value="reset"  style="margin-top:4px;" onclick="reset_clipPlane();"/>
-</p>
-      <div id='clip-plane' style='margin-left: 10px; background:yellow;'> </div>
     </div>
   </div>
   <div id='forMesh' style='margin-top:10px;'>
