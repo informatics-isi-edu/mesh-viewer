@@ -13,6 +13,8 @@ var ren3d=null; // 3d renderer
 
 var meshs=[];   // mesh objects
 var vol=null;   // volume objects
+var gbbox=null; // global bounding box
+
 var sliceAx=null;
 var sliceSag=null;
 var sliceCor=null;
@@ -22,6 +24,8 @@ var first_time_vol=true;
 
 var add_landmark=false;
 
+//=== bounding box ===
+var show_box = true;
 
 //==== Mesh ====
 var initial_mesh_list;
@@ -86,7 +90,9 @@ window.console.log("  current mouse position is.."+_pos);
 
     if (_id != 0) {
       var _obj=ren3d.get(_id);
-      var _target=ren3d.pick3d(_pos[0],_pos[1], 4, 0.5, _obj);
+// this is particular to the mousehead mesh, need to figure out
+// how to calc on the fly or store landmark params somewhere.
+
       if(show_caption) {
         if(ren3d.get(_id).caption) {
           var _j=ren3d.get(_id).caption;
@@ -95,35 +101,47 @@ window.console.log("  current mouse position is.."+_pos);
           } else { 
 //window.console.log("  this object "+_id+ " does not have caption..");
         }
-        } else { // grab the object and turn it white, only if it has caption,
-          if(ren3d.get(_id).caption && !add_landmark) {
-//window.console.log("  picking obj .."+_id);
-              saved_color=ren3d.get(_id).color;
-              var obj=ren3d.get(_id);
-              saved_id=_id;
-              ren3d.get(_id).color = [1, 1, 1];
-//ren3d.get(saved_id).transform.translateY(1);
-              } else {
-//window.console.log(" picking "+_id+ " no change since no stored caption");
-          }
+        return; // show_caption
       }
-      if(add_landmark && _target) {
-         if( _obj == null ) {
-           return;
-         }
-         var _g=_obj.file.split('/').pop().toLowerCase().split('.').shift();
-         var _cap= { "type":"Landmark","data":"user added landmark" };
-         var _s=addSphere(_target, [0,0,1], 0.08,_cap);
-window.console.log("adding a new landmark for "+_g);
+      
+      // hightlight the object
+      if(ren3d.get(_id).caption && !add_landmark) {
+//window.console.log("  picking obj .."+_id);
+        saved_color=ren3d.get(_id).color;
+        var obj=ren3d.get(_id);
+        saved_id=_id;
+        ren3d.get(_id).color = [1, 1, 1];
+//ren3d.get(saved_id).transform.translateY(1);
+        return;
+      }
 
-         if( landmarks[_g] == null ) {
-           landmarks[_g]=[];
-           landmarks[_g].push(_s);
-           } else {
-             landmarks[_g].push(_s);
-         }
-         var _label=askForLabel(_g);
-         addLandmarkListEntry(_g,landmarks[_g].length,_obj.color,_label);
+      if( add_landmark ) {
+        var _targetlist=ren3d.pick3d(_pos[0],_pos[1], 0.4, 0.08, _obj);
+        var m=[];
+        var plist=[];
+// [[march_point,[roi_points]],...[march_point,[roi_points]]
+// stop at the first set roi_points that has length > 0 
+//window.console.log(" picking "+_id+ " no c=0;
+        for(var i=0; i<_targetlist.length; i++) {
+          if(_targetlist[i][1].length !=0) {
+            m=_targetlist[i][0];
+            plist=_targetlist[i][1];
+            break;
+          }
+        }
+            
+        if(plist.length ==0)
+          return;
+
+        for(var i=0; i< plist.length; i++) {
+          if(i == 0) {
+            s=addSphere(plist[i],[0.25,1,0.4],0.04, i);
+            insertLandmark(s,_obj);
+            } else {
+              s=addSphere(plist[i],[0.25,1,0.6],0.04, i);
+              insertLandmark(s,_obj);
+          }
+        }
       }
     } else {
 //window.console.log("  did not pick anything");
@@ -227,6 +245,21 @@ function webgl_detect()
 
   // WebGL not supported
   return false;
+}
+
+function insertLandmark(_s,_obj) {
+   var _g=_obj.file.split('/').pop().toLowerCase().split('.').shift();
+   var _cap= { "type":"Landmark","data":"user added landmark" };
+window.console.log("adding a new landmark for "+_g);
+
+   if( landmarks[_g] == null ) {
+     landmarks[_g]=[];
+     landmarks[_g].push(_s);
+     } else {
+       landmarks[_g].push(_s);
+   }
+   var _label=askForLabel(_g);
+   addLandmarkListEntry(_g,landmarks[_g].length,_obj.color,_label);
 }
 
 function askForLabel(g)
@@ -847,53 +880,64 @@ window.console.log("clip3d, start "+_start+" and to "+_range+ " on target "+_nea
   ren3d.camera.clip(_width,_height,_near);
 }
 
+function toggleBox() {
+  show_box = !show_box;
+  if(show_box) {
+    jQuery('#boxbtn').prop('value','noBox');
+    gbbox.visible=true;
+    } else {
+      jQuery('#boxbtn').prop('value','showBox');
+      gbbox.visible=false;
+  }
+}
+
 function makeBBox(r,v) {
 // CREATE Bounding Box
     var _r=r;
-    var _v=v;
+    var _v=v; // could be volume or renderer3D
     if(v == null) {
       _v=r; 
     }
     var res = [_v.bbox[0],_v.bbox[2],_v.bbox[4]];
     var res2 = [_v.bbox[1],_v.bbox[3],_v.bbox[5]];
 
-    box = new X.object();
-    box.points = new X.triplets(72);
-    box.normals = new X.triplets(72);
-    box.type = 'LINES';
-    box.points.add(res2[0], res[1], res2[2]);
-    box.points.add(res[0], res[1], res2[2]);
-    box.points.add(res2[0], res2[1], res2[2]);
-    box.points.add(res[0], res2[1], res2[2]);
-    box.points.add(res2[0], res[1], res[2]);
-    box.points.add(res[0], res[1], res[2]);
-    box.points.add(res2[0], res2[1], res[2]);
-    box.points.add(res[0], res2[1], res[2]);
-    box.points.add(res2[0], res[1], res2[2]);
-    box.points.add(res2[0], res[1], res[2]);
-    box.points.add(res[0], res[1], res2[2]);
-    box.points.add(res[0], res[1], res[2]);
-    box.points.add(res2[0], res2[1], res2[2]);
-    box.points.add(res2[0], res2[1], res[2]);
-    box.points.add(res[0], res2[1], res2[2]);
-    box.points.add(res[0], res2[1], res[2]);
-    box.points.add(res2[0], res2[1], res2[2]);
-    box.points.add(res2[0], res[1], res2[2]);
-    box.points.add(res[0], res2[1], res2[2]);
-    box.points.add(res[0], res[1], res2[2]);
-    box.points.add(res[0], res2[1], res[2]);
-    box.points.add(res[0], res[1], res[2]);
-    box.points.add(res2[0], res2[1], res[2]);
-    box.points.add(res2[0], res[1], res[2]);
+    gbbox = new X.object();
+    gbbox.points = new X.triplets(72);
+    gbbox.normals = new X.triplets(72);
+    gbbox.type = 'LINES';
+    gbbox.points.add(res2[0], res[1], res2[2]);
+    gbbox.points.add(res[0], res[1], res2[2]);
+    gbbox.points.add(res2[0], res2[1], res2[2]);
+    gbbox.points.add(res[0], res2[1], res2[2]);
+    gbbox.points.add(res2[0], res[1], res[2]);
+    gbbox.points.add(res[0], res[1], res[2]);
+    gbbox.points.add(res2[0], res2[1], res[2]);
+    gbbox.points.add(res[0], res2[1], res[2]);
+    gbbox.points.add(res2[0], res[1], res2[2]);
+    gbbox.points.add(res2[0], res[1], res[2]);
+    gbbox.points.add(res[0], res[1], res2[2]);
+    gbbox.points.add(res[0], res[1], res[2]);
+    gbbox.points.add(res2[0], res2[1], res2[2]);
+    gbbox.points.add(res2[0], res2[1], res[2]);
+    gbbox.points.add(res[0], res2[1], res2[2]);
+    gbbox.points.add(res[0], res2[1], res[2]);
+    gbbox.points.add(res2[0], res2[1], res2[2]);
+    gbbox.points.add(res2[0], res[1], res2[2]);
+    gbbox.points.add(res[0], res2[1], res2[2]);
+    gbbox.points.add(res[0], res[1], res2[2]);
+    gbbox.points.add(res[0], res2[1], res[2]);
+    gbbox.points.add(res[0], res[1], res[2]);
+    gbbox.points.add(res2[0], res2[1], res[2]);
+    gbbox.points.add(res2[0], res[1], res[2]);
     for ( var i = 0; i < 24; ++i) {
-      box.normals.add(0, 0, 0);
+      gbbox.normals.add(0, 0, 0);
     }
     if(v==null) {
-      box.color=[0,1,1];
+      gbbox.color=[0,1,1];
       } else {
-        box.color=[1,1,1];
+        gbbox.color=[1,1,1];
     }
-    _r.add(box);
+    _r.add(gbbox);
  
     var center = [_v.bbox[0] + (_v.bbox[1]-_v.bbox[0]),
               _v.bbox[2] + (_v.bbox[3]-_v.bbox[2]),
