@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+<title >test Touch</title>
+<link href='css/bootstrap.css' rel='stylesheet' />
+<link href='css/jquery-ui.min.css' rel='stylesheet' />
+<link href='css/jquery-ui.theme.min.css' rel='stylesheet' />
+<link href='css/alertify.default.css' rel='stylesheet' />
+<link href='css/alertify.core.css' rel='stylesheet' />
+<link href='css/m.viewer.css' rel='stylesheet' />
+<style>
+.myDialogClass .ui-dialog-titlebar {
+  background:#1C94C4;
+  border:#1C94C4;
+}
+</style>
+
+<script type='text/javascript' src='js/jquery.js'></script>
+<script type='text/javascript' src='js/jquery-ui.min.js'></script>
+<script type='text/javascript' src='js/jquery.ui.slider.js'></script>
+<script type='text/javascript' src='js/alertify.min.js'></script>
+
+<!-- for debug -->
+<script type="text/javascript" src="X/lib/google-closure-library/closure/goog/base.js"></script>
+<script type="text/javascript" src="X/xtk-deps.js"></script>
+<script type="text/javascript" src="js/default.js"></script>
+<!-- for regular  
+<script type="text/javascript" src="js/xtk.js"></script>
+-->
+<script type="text/javascript" src="js/m.setup.js"></script>
+<script type="text/javascript" src="js/touch.js"></script>
+</head>
+<body>
+<div id='mainView' style='background-color:black; border:solid 2px grey;  float: left; width:630px; height:500px; margin:10px;' ></div>
+<input id="addbtn" type="button" value="addMore"  style="margin-top:4px;" onclick="toggleAdd();"/>
+<div id='clipSlider'>
+  <p>Clip Plane
+    <input id="clipbtn" type="button" value="reset"  style="margin-top:4px;" onclick="reset_clipPlane();"/>
+  </p>
+  <div id='clip-plane' style='background:yellow; margin-left:650px;'> </div>
+</div>
+</body>
+</html>
+
