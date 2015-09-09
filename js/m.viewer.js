@@ -122,11 +122,13 @@ window.console.log("  current mouse position is.."+_pos);
 // [[march_point,[roi_points]],...[march_point,[roi_points]]
 // stop at the first set roi_points that has length > 0 
 //window.console.log(" picking "+_id+ " no c=0;
-        for(var i=0; i<_targetlist.length; i++) {
-          if(_targetlist[i][1].length !=0) {
-            m=_targetlist[i][0];
-            plist=_targetlist[i][1];
-            break;
+        if(_targetlist != null) {
+          for(var i=0; i<_targetlist.length; i++) {
+            if(_targetlist[i][1].length !=0) {
+              m=_targetlist[i][0];
+              plist=_targetlist[i][1];
+              break;
+            }
           }
         }
             
@@ -134,12 +136,15 @@ window.console.log("  current mouse position is.."+_pos);
           return;
 
         for(var i=0; i< plist.length; i++) {
+          var _p=plist[i];
           if(i == 0) {
-            s=addSphere(plist[i],[0.25,1,0.4],0.04, i);
-            insertLandmark(s,_obj);
+            var _c={ "type":"POINT","data": i };
+            var _s=addSphere(_p,[0.25,1,0.4],0.04, _c);
+            insertLandmark(_s,_obj);
             } else {
-              s=addSphere(plist[i],[0.25,1,0.6],0.04, i);
-              insertLandmark(s,_obj);
+              var _c={ "type":"POINT","data": i };
+              var _s=addSphere(_p,[0.25,1,0.6],0.04, _c);
+              insertLandmark(_s,_obj);
           }
         }
       }
@@ -787,13 +792,14 @@ function addSphereByIdx(mesh, pt, color, radius) {
   return addSphere(_l, color, radius, caption);
 }
 
+var newSphere;
 function addSphere(loc, color, radius, caption) {
-  var newSphere = new X.sphere();
+  newSphere = new X.sphere();
   newSphere.center = loc;
   caption['data']=caption['data']+'<br>x: '+String(loc[0])+'<br>y: '+String(loc[1])+'<br>z: '+String(loc[2]);
   newSphere.color = color;
-  newSphere.radius = radius;
-  newSphere.caption = caption;
+  newSphere.radius = radius; 
+  newSphere.caption = JSON.stringify(caption);
   ren3d.add(newSphere);
   return newSphere;
 }
