@@ -432,10 +432,13 @@ function toggleVolume() {
     jQuery('#2dViews').show();
     jQuery('#visbtn').prop('value','noVol');
     jQuery('#3dbtn').prop('disabled',false);
+    jQuery('#sliders').show();
     } else {
       jQuery('#2dViews').hide();
       jQuery('#visbtn').prop('value','vizVol');
       jQuery('#3dbtn').prop('disabled',true);
+// remove the sliders XXX
+      jQuery('#sliders').hide();
   }
 }
 
