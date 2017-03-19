@@ -28,8 +28,8 @@ var add_landmark=false;
 var show_box = true;
 
 //==== Mesh ====
-var initial_mesh_list;
-var mesh_list;
+var initial_mesh_list={};
+var mesh_list={};
 var show_mesh = true;
 
 //==== Landmark ====
@@ -46,7 +46,9 @@ var show_caption=false;
 var save_view_matrix = new Float32Array(16);
 var spin_view=false;
 
-window.onload = function() {
+
+// MAIN
+jQuery(document).ready(function() {
 
   if (webgl_detect() == false) {
     alertify.confirm("There is no webgl!!");
@@ -54,13 +56,23 @@ window.onload = function() {
     return;
   }
 
+  // viewer?meshurl="http:...&landmarkurl="http:.."
+  var args=document.location.href.split('?');
+  if (args.length >= 2) { // there are some url to pick up
+    processArgs(args);
+    } else {
+      setupWithDefaults();
+  }
+
   var _m=mesh_load();
   initial_mesh_list=_m[0], mesh_list=_m[1];
 
   initRenderer();
 
-  for (var i=0;i<initial_mesh_list['mesh'].length;i++) {
-     addMesh(initial_mesh_list['mesh'][i]);
+  if(initial_mesh_list) {
+    for (var i=0;i<initial_mesh_list['mesh'].length;i++) {
+       addMesh(initial_mesh_list['mesh'][i]);
+    }
   }
 
 // stackoverflow.com/question/17462936/xtk-flickering-in-overlay-mesh
@@ -225,7 +237,7 @@ window.console.log("  current mouse position is.."+_pos);
   };
 
   ren3d.render();
-}
+})
 
 //http://stackoverflow.com/questions/11871077/proper-way-to-detect-webgl-support
 function webgl_detect()
@@ -304,8 +316,10 @@ function resetView() {
 
 function loadView() {
   var _v = view_load();
-  for(var i=0; i< _v.length; i++) 
-    ren3d.camera.view[i]=_v[i];
+  if(_v) {
+    for(var i=0; i< _v.length; i++) 
+      ren3d.camera.view[i]=_v[i];
+  }
   ren3d.render();
 }
 
@@ -684,8 +698,10 @@ function addMesh(t) { // color, url, caption
 
 // adding a new mesh after rendering
 function loadMesh() {
-  for (var i=0;i<mesh_list['mesh'].length;i++) {
-     addMesh(mesh_list['mesh'][i]);
+  if(mesh_list) {
+    for (var i=0;i<mesh_list['mesh'].length;i++) {
+       addMesh(mesh_list['mesh'][i]);
+    }
   }
   document.getElementById('lastbtn').style.display = 'none';
   document.getElementById('landmarkbtn').style.display = '';
@@ -694,11 +710,13 @@ function loadMesh() {
 // adding volume after initial rendering
 function loadVol() {
   var _v=vol_load();
-  addVolume(_v['volume'][0]); // one and only one
-  document.getElementById('volbtn').style.display = 'none';
-  var loadingDiv = document.getElementById('loading');
-  loadingDiv.style.display = '';
-  jQuery('#forVolume').show();
+  if(_v) {
+    addVolume(_v['volume'][0]); // one and only one
+    document.getElementById('volbtn').style.display = 'none';
+    var loadingDiv = document.getElementById('loading');
+    loadingDiv.style.display = '';
+    jQuery('#forVolume').show();
+  }
 }
 
 // given a mesh name, find the mesh that matches it
@@ -745,8 +763,10 @@ function addLandmark(p) {
 // adding landmarks after initial rendering
 function loadLandmark() {
   var _l=landmark_load();
-  for(var i=0; i< _l['landmark'].length;i++) {
-    addLandmark(_l['landmark'][i]);
+  if(_l) {
+    for(var i=0; i< _l['landmark'].length;i++) {
+      addLandmark(_l['landmark'][i]);
+    }
   }
   document.getElementById('landmarkbtn').style.display = 'none';
   jQuery('#forLandmark').show();
