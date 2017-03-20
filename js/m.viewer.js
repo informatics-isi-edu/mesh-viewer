@@ -53,6 +53,8 @@ var spin_view=false;
 // MAIN
 jQuery(document).ready(function() {
 
+  $('[data-toggle="tooltip"]').tooltip();   
+
   if (webgl_detect() == false) {
     alertify.confirm("There is no webgl!!");
     throw new Error("WebGL is not enabled!");
@@ -329,11 +331,11 @@ function loadView() {
 function spinView() {
   spin_view = !spin_view;
   if(spin_view) {
-    jQuery('#spinbtn').css('border-color','red');
-    jQuery('#spinbtn').prop('value','stop');
+    jQuery('#spinbtn').prop('value','stop spinning');
+    $('#spinbtn').addClass('pick');
     } else {
-      jQuery('#spinbtn').css('border-color','');
       jQuery('#spinbtn').prop('value','spin');
+      $('#spinbtn').removeClass('pick');
   }
 }
 
@@ -633,10 +635,8 @@ function toggleLandmark(g,i) {
 function toggleLabel() {
   show_caption=!show_caption;
   if(show_caption) {
-    jQuery('#labelbtn').css('border-color','red');
     jQuery('#labelbtn').prop('value','offLabel');
     } else {
-      jQuery('#labelbtn').css('border-color','');
       jQuery('#labelbtn').prop('value','showLabel');
   }
 }
@@ -915,11 +915,11 @@ window.console.log("clip3d, start "+_start+" and to "+_range+ " on target "+_nea
 function toggleBox() {
   show_box = !show_box;
   if(show_box) {
-    jQuery('#boxbtn').prop('value','noBox');
     gbbox.visible=true;
+    $('#boxbtn').removeClass('pick');
     } else {
-      jQuery('#boxbtn').prop('value','showBox');
       gbbox.visible=false;
+      $('#boxbtn').addClass('pick');
   }
 }
 

@@ -1,5 +1,5 @@
 //**************************************************************
-//   m.setup-url.js
+//   m.setup.js
 //**************************************************************
 var hostname=window.location.hostname;
 var initial_mesh_json=null;
