@@ -17,7 +17,7 @@ var initial_mesh_json='\
   },\
   {\
     "url": "https://'+hostname+'/data/mesh/19dpf/Other_Structures.obj",\
-    "color": [0.37, 0.37, 0.27],\
+    "color": [0.8, 0.8, 0.8],\
     "caption": { "type": "Other structures",\
                  "data":"a others mesh",\
                  "link": { "label":"gene expression",\

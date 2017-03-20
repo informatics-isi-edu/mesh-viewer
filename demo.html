@@ -3,7 +3,7 @@
 
 <head>
 <title >3D mesh Viewer</title>
-<link href='css/bootstrap.css' rel='stylesheet' />
+<link href='css/bootstrap.min.css' rel='stylesheet' />
 <link href='css/jquery-ui.min.css' rel='stylesheet' />
 <link href='css/jquery-ui.theme.min.css' rel='stylesheet' />
 <link href='css/alertify.default.css' rel='stylesheet' />
@@ -60,10 +60,10 @@
 <div class="container-fluid">
   <div id='control-block' class="row col-md-12 col-xs-12" style="margin:10px" >
     <div class="btn-group btn-group-sm pull-left" role="group">
-      <button id="boxbtn" class="btn btn-success" data-toggle="tooltip" data-placement="bottom" title="turn on/off the Bounding box" onclick="toggleBox();">
+      <button id="boxbtn" class="btn btn-success" title="turn on/off the Bounding box" onclick="toggleBox();">
            <span class="glyphicon glyphicon-picture"></span> 
               Bounding box</button>
-      <button id="spinbtn" class="btn btn-success" title="animate the display" data-toggle="tooltip" data-placement="bottom" onclick="spinView();">
+      <button id="spinbtn" class="btn btn-success" title="animate the display" onclick="spinView();">
            <span class="glyphicon glyphicon-refresh"></span> 
               Animate</button>
       <button class="btn btn-success" title="reset the display" data-toggle="tooltip" data-placement="bottom" onclick="resetView();">
