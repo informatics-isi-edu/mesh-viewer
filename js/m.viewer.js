@@ -1,5 +1,8 @@
 //**************************************************************
 //   m.viewer.js
+//
+//   viewer.html  (using default localhost data)
+//   viewer.html?meshurl="http:..."&landmarkurl="http:.."
 //**************************************************************
 
 /*

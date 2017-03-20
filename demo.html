@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+<title >3D mesh Viewer</title>
+<link href='css/bootstrap.css' rel='stylesheet' />
+<link href='css/jquery-ui.min.css' rel='stylesheet' />
+<link href='css/jquery-ui.theme.min.css' rel='stylesheet' />
+<link href='css/alertify.default.css' rel='stylesheet' />
+<link href='css/alertify.core.css' rel='stylesheet' />
+<link href='css/m.viewer.css' rel='stylesheet' />
+<style>
+.myDialogClass .ui-dialog-titlebar {
+  background:#1C94C4;
+  border:#1C94C4;
+}
+html, body {
+    height: 100%;
+}
+.container-fluid {
+    height: 100%;
+}
+#mainView {
+    min-height: 90%;
+    overflow-y: hidden; /* don't show content that exceeds my height */
+    overflow-x: hidden; /* don't show content that exceeds my width */
+}
+#loading {
+    position: fixed;
+    top: 40%;
+    left: 40%;
+    color: white;
+}
+</style>
+
+<script type='text/javascript' src='js/jquery.js'></script>
+<script type='text/javascript' src='js/jquery-ui.min.js'></script>
+<script type='text/javascript' src='js/jquery.ui.slider.js'></script>
+<script type='text/javascript' src='js/alertify.min.js'></script>
+
+<!-- for debug 
+<script type="text/javascript" src="X/lib/google-closure-library/closure/goog/base.js"></script>
+<script type="text/javascript" src="X/xtk-deps.js"></script>
+<script type="text/javascript" src="js/default.js"></script>
+-->
+
+<!-- for regular -->  
+<script type="text/javascript" src="js/xtk.js"></script>
+
+<script type="text/javascript" src="js/m.viewer.js"></script>
+<script type="text/javascript" src="js/m.control.js"></script>
+<script type="text/javascript" src="js/m.setup.js"></script>
+</head>
+<body>
+<div id="dialog-label" style="display: none;">
+   <p id="dtext">PPP</p>
+   <br>
+   <div style="background:#d9d9d9">
+     <a id="dlink" href="">Gene expression</a>
+   </div>
+</div>
+
+<div class="container-fluid" style='background-color:grey; border:solid 2px red'>
+  <div id='control-block' class="row col-md-12 col-xs-12" style="margin:10px" >
+    <a class="btn btn-primary" onclick="toggleBox();"><strong> noBox </strong></a>
+    <a class="btn btn-primary" onclick="spinView();"><strong> spin </strong></a>
+    <a class="btn btn-primary" onclick="resetView();"><strong> reset </strong></a>
+  </div>
+
+  <div id='mainView' class="row col-md-10 col-xs-10" style='background-color: black; border:solid 2px green'>
+  </div>
+  
+  <div id='forMesh' class="row col-md-2 col-xs-2" style='background-color:white; border: solid 2px blue'>
+    <div id='meshlist'></div>
+  </div>
+
+  <div id='loading' class="row col-md-12 col-xs-12">
+    <h3 class='onair'>Loading data ...</h3>
+  </div>
+
+</div>
+</body>
+</html>
+
