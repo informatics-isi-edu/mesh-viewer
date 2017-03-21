@@ -9,6 +9,8 @@
 <link href='css/alertify.default.css' rel='stylesheet' />
 <link href='css/alertify.core.css' rel='stylesheet' />
 <link href='css/m.viewer.css' rel='stylesheet' />
+<link href='css/m.sidebar.css' rel='stylesheet' />
+<link href='css/m.panel.css' rel='stylesheet' />
 
 <style>
 
@@ -22,10 +24,11 @@
     overflow-y: hidden; /* don't show content that exceeds my height */
     overflow-x: hidden; /* don't show content that exceeds my width */
 }
+
 #loading {
     position: fixed;
     top: 40%;
-    left: 35%;
+    left: 40%;
     color: white;
 }
 </style>
@@ -47,6 +50,7 @@
 <script type="text/javascript" src="js/m.viewer.js"></script>
 <script type="text/javascript" src="js/m.control.js"></script>
 <script type="text/javascript" src="js/m.setup.js"></script>
+<script type="text/javascript" src="js/m.sidebar.js"></script>
 </head>
 <body>
 <div id="dialog-label" style="display: none;">
@@ -60,29 +64,64 @@
 <div class="container-fluid">
   <div id='control-block' class="row col-md-12 col-xs-12" style="margin:10px" >
     <div class="btn-group btn-group-sm pull-left" role="group">
+      <button id="meshesbtn" class="btn btn-success" title="mesh list" onclick="meshesClick();">
+           <span class="glyphicon glyphicon-th"></span> 
+              Meshes</button>
+      <button id="clipbtn" class="btn btn-success" title="clipping plane" onclick="clipClick();">
+           <span class="glyphicon glyphicon-scissors"></span> 
+              Clip plane</button>
       <button id="boxbtn" class="btn btn-success" title="turn on/off the Bounding box" onclick="toggleBox();">
            <span class="glyphicon glyphicon-picture"></span> 
               Bounding box</button>
       <button id="spinbtn" class="btn btn-success" title="animate the display" onclick="spinView();">
            <span class="glyphicon glyphicon-refresh"></span> 
-              Animate</button>
+              Rotate</button>
       <button class="btn btn-success" title="reset the display" onclick="resetView();">
            <span class="glyphicon glyphicon-home"></span>
-               Reset </button>
+               Reset</button>
     </div>
   </div>
 
-  <div id='mainView' class="row col-md-10 col-xs-10" style='background-color: black; border:solid 2px green'>
+<div id='viewport' class="row col-md-12 col-xs-12" style='background-color: white; border:solid 2px blue'>
+  <div id='mainView' class="row col-md-12 col-xs-12" style='background-color: black; border:solid 2px green'>
   </div>
   
-  <div id='forMesh' class="row col-md-2 col-xs-2" style='background-color:white; border: solid 2px blue'>
-    <div id='meshlist'></div>
-  </div>
+<div id="slideOut" class="row col-md-3 col-xs-3 control-block" style="opacity:0.95;position:absolute;top:0;left:0;" >
+<ul id="sidebar" class="navigation" style="display:none">
+<!-- for meshes control -->
+  <li id='meshes' class='navigationLi row col-md-12 col-xs-12' style="background-color:#f9f9f9; display:none">
+    <div id='meshesMenu' class='menu'>
+      <div id='meshesLabel' class='menuLabel' style="margin-left:20px;font-size:14px;font-weight:bold">MESH(es)<button class="pull-right" title="dismiss" onclick="dismissMeshes()" style="border:none;background-color:transparent"><span class="glyphicon glyphicon-remove"></span>
+</button>
+      </div>
+<!-- meshes items are added to here.. -->
+      <div id='meshlist' class='panel-group' style="background-color:transparent"> </div>
+    </div>
+  </li>
+<!-- for clip control -->
+  <li id='clip' class='navigationLi row col-md-12 col-xs-12' style="background-color:#f9f9f9; display:none">
+    <div id='clipMenu' class='menu'>
+      <div id='clipLabel' class='menuLabel' style="margin-left:20px;font-size:14px;font-weight:bold">CLIPPING<button class="pull-right" title="dismiss" onclick="dismissClip()" style="border:none;background-color:transparent"><span class="glyphicon glyphicon-remove"></span>
+</button>
+       </div>
+<!-- clip items are added to here.. -->
+       <div class="row col-md-12 col-xs-12">
+           <div class="row col-md-12 col-xs-12" style="margin-left:10px; margin-top:10px">
+             <div id='clip-plane' style='background:rgb(51, 122, 183);'> </div>
+           </div>
+           <div class="row col-md-8 col-xs-8 pull-right">
+             <button id="clipbtn" class="btn btn-xs btn-success" style="margin:10px" title="Reset clipping plane" onclick="reset_clipPlane();">Reset</button>
+           </div>
+       </div>
+    </div>
+  </li>
+</ul>
+</div>
+</div> <!-- viewport -->
 
   <div id='loading' class="row col-md-12 col-xs-12">
     <h3 class='onair'>Loading data ...</h3>
   </div>
-
 </div>
 </body>
 </html>

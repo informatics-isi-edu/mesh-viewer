@@ -86,11 +86,12 @@ jQuery(document).ready(function() {
   ren3d.config.ORDERING_ENABLED=false;
 
 // disable default tooltip-caption 
+// XXX ???
   ren3d.interactor.config.HOVERING_ENABLED = false;
   show_caption=false;
 
   ren3d.interactor.onMouseDown = function() {
-//window.console.log("mouse down..")
+window.console.log("mouse down..")
     if(saved_color != null) {
       ren3d.get(saved_id).color = saved_color;
 //      ren3d.get(saved_id).transform.translateY(-1);
@@ -98,7 +99,8 @@ jQuery(document).ready(function() {
     }
     // grab the current mouse position
     var _pos = ren3d.interactor.mousePosition;
-//    var _c = ren3d.camera.unproject_(_pos[0], _pos[1], 0);
+//
+//???    var _c = ren3d.camera.unproject_(_pos[0], _pos[1], 0);
 window.console.log("  current mouse position is.."+_pos);
 //window.console.log("  and c is "+_c[0]+" "+_c[1]+" "+_c[2]);
 
@@ -111,12 +113,15 @@ window.console.log("  current mouse position is.."+_pos);
 // how to calc on the fly or store landmark params somewhere.
 
       if(show_caption) {
+window.console.log("show_caption..");
         if(ren3d.get(_id).caption) {
           var _j=ren3d.get(_id).caption;
 
           showLabel(_j['type'],_j['data'],_j['link']);
+window.console.log("trying to show Label..");
+window.console.log(_j['type'],_j['data'],_j['link']);
           } else { 
-//window.console.log("  this object "+_id+ " does not have caption..");
+window.console.log("  this object "+_id+ " does not have caption..");
         }
         return; // show_caption
       }
@@ -359,13 +364,30 @@ function RGBTohex(rgb) {
    return _hex;
 }
 
-function addMeshListEntry(fname,i,color)
+//var name=fname.split('/').pop().toLowerCase().split('.').shift();
+function addMeshListEntry(name,i,color)
 {
-  var _idx=i-1;
-  var _n=fname.split('/').pop().toLowerCase().split('.').shift();
-  var _nn='<button class="btn" disabled=true style="background-color:'+RGBTohex(color)+';"/><input id='+_n+' type=checkbox checked="" onClick=toggleMesh('+_idx+') value='+_idx+' name="mesh">'+_n+'</input><br>';
+window.console.log("add..", name, " ", i, " ", color);
+  var _collapse_name=i+'_collapse';
+  var _visible_name=i+'_visible';
+  var _reset_name=name+'_reset';
+  var _reset_btn=name+'_reset_btn';
+
+  var _nn='';
+
+_nn+='<div class="panel panel-default col-md-12 col-xs-12">';
+_nn+='<div class="panel-heading"><div class="row panel-title" style="background-color:transparent;">'
+
+_nn+='<button id="'+_visible_name+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white"  onClick="toggleMesh('+i+',\'eye_'+name+'\')" title="hide or show mesh"><span id="eye_'+name+'" class="glyphicon glyphicon-eye-open" style="color:'+RGBTohex(color)+';"></span> </button>';
+_nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand" >'+name+'</a> </div></div>';
+_nn+=' <div id="'+_collapse_name+'" class="panel-collapse collapse"> <div class="panel-body">';
+
+_nn+= ' <div id="'+name+ '" class="row" style="background-color:white;opacity:1;"> <button id="'+_reset_btn+ '" title="restore settings" type="button" class="btn btn-xs btn-primary pull-right" onclick="toggleResetMesh('+ i+ ','+ '\''+ name+ '\');" style="font-size:12px;margin-top:2px; margin-right:20px" >Reset</button>';
+// last bits
+_nn+= '</div> </div> </div> <!-- panel-body --> </div> </div> <!-- panel -->';
+
   jQuery('#meshlist').append(_nn);
-//window.console.log(_nn);
+window.console.log(_nn);
 }
 
 function toggleAddLandmark() 
@@ -461,9 +483,15 @@ function toggleVolume() {
   }
 }
 
-function toggleMesh(i) {
+function toggleMesh(i,eye_name) {
   var _mesh=meshs[i];
+  var eye='#'+eye_name;
   _mesh.visible = !_mesh.visible;
+  if(_mesh.visible) {
+    $(eye).removeClass('glyphicon-eye-close').addClass('glyphicon-eye-open');
+    } else {
+      $(eye).removeClass('glyphicon-eye-open').addClass('glyphicon-eye-close');
+  }
 }
 
 // check with points
@@ -696,7 +724,8 @@ function addMesh(t) { // color, url, caption
   ren3d.add(_mesh);
 
   var _cnt=meshs.push(_mesh);
-  addMeshListEntry(t['url'],_cnt,t['color']);
+  var _caption=t['caption'];
+  addMeshListEntry(_caption['type'],_cnt-1,t['color']);
 }
 
 // adding a new mesh after rendering

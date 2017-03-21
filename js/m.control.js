@@ -131,7 +131,7 @@ function setup3dSliders() {
 
 function setupClipSlider() {
   jQuery('#clip-plane').slider({ slide: clipPlane });
-  jQuery('#clip-plane').width(100);
+  jQuery('#clip-plane').width(100+'%');
 }
 
 function init3dSliders() {
