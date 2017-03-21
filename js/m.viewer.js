@@ -376,7 +376,7 @@ window.console.log("add..", name, " ", i, " ", color);
   var _nn='';
 
 _nn+='<div class="panel panel-default col-md-12 col-xs-12">';
-_nn+='<div class="panel-heading"><div class="row panel-title" style="background-color:transparent;">'
+_nn+='<div class="panel-heading"><div class="row panel-title" style="background-color:transparent; border:solid 2px green">'
 
 _nn+='<button id="'+_visible_name+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white"  onClick="toggleMesh('+i+',\'eye_'+name+'\')" title="hide or show mesh"><span id="eye_'+name+'" class="glyphicon glyphicon-eye-open" style="color:'+RGBTohex(color)+';"></span> </button>';
 _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand" >'+name+'</a> </div></div>';
