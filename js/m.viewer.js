@@ -376,15 +376,20 @@ window.console.log("add..", name, " ", i, " ", color);
   var _nn='';
 
 _nn+='<div class="panel panel-default col-md-12 col-xs-12">';
-_nn+='<div class="panel-heading"><div class="row panel-title" style="background-color:transparent; border:solid 2px green">'
+_nn+='<div class="panel-heading">';
+_nn+='<div class="panel-title row" style="background-color:transparent; border:solid 2px green">'
 
 _nn+='<button id="'+_visible_name+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white"  onClick="toggleMesh('+i+',\'eye_'+name+'\')" title="hide or show mesh"><span id="eye_'+name+'" class="glyphicon glyphicon-eye-open" style="color:'+RGBTohex(color)+';"></span> </button>';
-_nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand" >'+name+'</a> </div></div>';
+
+_nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand" >'+name+'</a>';
+_nn+='</div></div> <!-- panel-heading -->';
+
 _nn+=' <div id="'+_collapse_name+'" class="panel-collapse collapse"> <div class="panel-body">';
 
-_nn+= ' <div id="'+name+ '" class="row" style="background-color:white;opacity:1;"> <button id="'+_reset_btn+ '" title="restore settings" type="button" class="btn btn-xs btn-primary pull-right" onclick="toggleResetMesh('+ i+ ','+ '\''+ name+ '\');" style="font-size:12px;margin-top:2px; margin-right:20px" >Reset</button>';
+_nn+= ' <div id="'+name+ '" class="row" style="background-color:white;opacity:1;"> ';
+_nn+= ' <button id="'+_reset_btn+ '" title="restore settings" type="button" class="btn btn-xs btn-primary pull-right" onclick="toggleResetMesh('+ i+ ','+ '\''+ name+ '\');" style="font-size:12px;margin-top:2px; margin-right:20px" >Reset</button>';
 // last bits
-_nn+= '</div> </div> </div> <!-- panel-body --> </div> </div> <!-- panel -->';
+_nn+= '</div> </div> <!-- panel-body --> </div> </div> <!-- panel -->';
 
   jQuery('#meshlist').append(_nn);
 window.console.log(_nn);
