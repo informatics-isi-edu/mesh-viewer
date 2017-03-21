@@ -1,0 +1,37 @@
+.panel {
+  margin: 15px 5px;
+  border: none;
+}
+
+.panel-body {
+   background-color: white;
+   overflow: hidden;
+}
+
+.panel-title {
+/*
+  font-weight:bold;
+*/
+  color: #000;
+  font-size: 14px;
+}
+
+.panel > .panel-heading {
+    background-image: none;
+    background-color: white;
+    color: white;
+    border: 1px solid #f9f9f9;
+    border-radius: 3px;
+}
+
+.panel-heading .accordion-toggle:after {
+    font-size: 14px;
+    font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
+    content: "\e137";
+    float: left;
+    margin-right:10px;
+    color: #337ab7;
+}
+
+
+
