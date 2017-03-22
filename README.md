@@ -36,7 +36,7 @@ The JSON payload must be a serialized object that describes the model:
 - `id`: the identifier of the model
 - `label`: a short text field for the name or title of the model
 - `caption`: a caption for the entire model, which may be longer text content
-- `boundingBox`: the default state of the bounding box feature. Set to `True` or `False` to show or hide the bounding box on load. Default: `True`.
+- `boundingBox`: the default state of the bounding box feature. Set to `True` or `False` to show or hide the bounding box on load. Default: `False`.
 - `rotate`: the default state of the rotating animation of the model. Set to `True` or `False` to enable or disable animation on load. Default: `False`.
 - `mesh`: an array of `mesh` objects described next
 - `volume`: a `volume` object described below
