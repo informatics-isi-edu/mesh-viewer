@@ -372,14 +372,14 @@ function RGBTohex(rgb) {
 //var name=fname.split('/').pop().toLowerCase().split('.').shift();
 function addMeshListEntry(name,i,color)
 {
-window.console.log("add..", name, " ", i, " ", color);
+  var _name = name.replace(/ +/g, "");
   var _collapse_name=i+'_collapse';
   var _visible_name=i+'_visible';
-  var _reset_name=name+'_reset';
-  var _reset_btn=name+'_reset_btn';
+  var _reset_name=_name+'_reset';
+  var _reset_btn=_name+'_reset_btn';
 
 // landmark's name is always lowercased
-  var gname=name.toLowerCase();
+  var gname=_name.toLowerCase();
   var _landmark_name=gname+'_landmark_list';
 
   var _nn='';
@@ -388,7 +388,7 @@ _nn+='<div class="panel panel-default col-md-12 col-xs-12">';
 _nn+='<div class="panel-heading">';
 _nn+='<div class="panel-title row" style="background-color:transparent">'
 
-_nn+='<button id="'+_visible_name+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white"  onClick="toggleMesh('+i+',\'eye_'+name+'\')" title="hide or show mesh"><span id="eye_'+name+'" class="glyphicon glyphicon-eye-open" style="color:'+RGBTohex(color)+';"></span> </button>';
+_nn+='<button id="'+_visible_name+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white"  onClick="toggleMesh('+i+',\'eye_'+_name+'\')" title="hide or show mesh"><span id="eye_'+_name+'" class="glyphicon glyphicon-eye-open" style="color:'+RGBTohex(color)+';"></span> </button>';
 
 if(hasLandmarks) {
   _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand" >'+name+'</a>';
@@ -399,7 +399,7 @@ _nn+='</div></div> <!-- panel-heading -->';
 
 _nn+=' <div id="'+_collapse_name+'" class="panel-collapse collapse"> <div class="panel-body" >';
 
-_nn+= ' <div id="'+name+ '" class="row" style="background-color:white;opacity:1;"> ';
+_nn+= ' <div id="'+_name+ '" class="row" style="background-color:white;opacity:1;"> ';
 /****
 _nn+= ' <button id="'+_reset_btn+ '" title="restore settings" type="button" class="btn btn-xs btn-primary pull-right" onclick="toggleResetMesh('+ i+ ','+ '\''+ name+ '\');" style="font-size:12px;margin-top:2px; margin-right:20px" >Reset</button>';
 ****/
@@ -417,8 +417,9 @@ window.console.log(_nn);
 // TEST MEI
 function addTESTMeshListEntry(name,i,color)
 {
-    var _nn='<button class="btn btn-sq-sm" disabled=true style="background-color:'+RGBTohex(color)+';"/><input id='+name+' type=checkbox checked="" onClick=toggleMesh('+i+') value='+i+' name="mesh">'+name+'</input><br>';
-    jQuery('#TESTmeshlist').append(_nn);
+  var _name = name.replace(/ +/g, "");
+  var _nn='<button class="btn btn-sq-sm" disabled=true style="background-color:'+RGBTohex(color)+';"/><input id='+_name+' type=checkbox checked="" onClick=toggleMesh('+i+') value='+i+' name="mesh">'+name+'</input><br>';
+  jQuery('#TESTmeshlist').append(_nn);
 //window.console.log(_nn);
 }
 
@@ -435,15 +436,17 @@ function toggleAddLandmark()
 
 function addLandmarkListEntry(name,i,color,label)
 {
-  var _landmark_name='#'+name+'_landmark_list';
-  var _nn='<div class="row col-md-12 col-xs-12"><input id='+name+'_'+i+' type=checkbox checked="" onClick="toggleLandmark(\''+name+'\','+i+');" value='+i+' name="landmark">'+label+'</input></div>';
+  var _name = name.replace(/ +/g, "");
+  var _landmark_name='#'+_name+'_landmark_list';
+  var _nn='<div class="row col-md-12 col-xs-12"><input id='+_name+'_'+i+' type=checkbox checked="" onClick="toggleLandmark(\''+_name+'\','+i+');" value='+i+' name="landmark">'+label+'</input></div>';
     jQuery(_landmark_name).append(_nn);
 window.console.log("XXX",_nn);
 }
 
 function addTESTLandmarkListEntry(name,i,color,label)
 {
-    var _nn='<button class="btn" disabled=true style="background-color:'+RGBTohex(color)+';"/><input type="checkbox" class="mychkbox" id="'+name+'_'+i+'d" onClick="toggleDistance(\''+name+'\','+i+');"/><label for="'+name+'_'+i+'d" style="display:none" name="distance"></label><input id='+name+'_'+i+' type=checkbox checked="" onClick="toggleLandmark(\''+name+'\','+i+');" value='+i+' name="landmark">'+label+'</input><br>';
+  var _name = name.replace(/ +/g, "");
+  var _nn='<button class="btn" disabled=true style="background-color:'+RGBTohex(color)+';"/><input type="checkbox" class="mychkbox" id="'+_name+'_'+i+'d" onClick="toggleDistance(\''+_name+'\','+i+');"/><label for="'+_name+'_'+i+'d" style="display:none" name="distance"></label><input id='+_name+'_'+i+' type=checkbox checked="" onClick="toggleLandmark(\''+_name+'\','+i+');" value='+i+' name="landmark">'+label+'</input><br>';
     jQuery('#TESTlandmarklist').append(_nn);
 //window.console.log(_nn);
 }
