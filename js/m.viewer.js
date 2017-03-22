@@ -488,12 +488,14 @@ function toggleAllLandmark()
 {
   if(!load_landmark) {
     loadLandmark();
+    $('#landmarkbtn').addClass('pick');
     return;
   }
 
   show_landmark = !show_landmark;
   var _list=document.getElementsByName("landmark");
   if(show_landmark) {
+    $('#landmarkbtn').addClass('pick');
     for (var i=0; i<_list.length;i++) {
       _list[i].checked=false;
       var _g=(_list[i].id).split('_').shift();
@@ -502,6 +504,7 @@ function toggleAllLandmark()
       landmarks[_g][_i].visible=true;
     }
     } else {
+      $('#landmarkbtn').removeClass('pick');
       for (var i=0; i<_list.length;i++) {
         _list[i].checked=true;
         var _g=(_list[i].id).split('_').shift();
