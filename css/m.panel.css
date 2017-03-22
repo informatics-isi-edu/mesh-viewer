@@ -1,9 +1,16 @@
+.landmarkcontrol {
+     padding: 0px;
+     width: 100%;
+}
+
 .panel {
-  margin: 2px 1px;
+  margin: 0;
   border: none;
 }
 
 .panel-body {
+   padding: 10px;
+   margin-left:10px;
    background-color: white;
    overflow: hidden;
 }
@@ -12,6 +19,8 @@
 /*
   font-weight:bold;
 */
+  padding:5px;
+  margin-left: 5px;
   color: #000;
   font-size: 14px;
 }
@@ -20,14 +29,15 @@
     background-image: none;
     background-color: white;
     color: white;
-    border: 1px solid #f9f9f9;
-    border-radius: 3px;
+    padding: 2px 2px;
+    border: 2px;
+    border-radius: 2px;
 }
 
 .panel-heading .accordion-toggle:after {
     font-size: 14px;
     font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
-    content: "\e137";
+    content: "\e199"; /* glyphicon-tree-conifer */
     float: left;
     margin-right:10px;
     color: #337ab7;

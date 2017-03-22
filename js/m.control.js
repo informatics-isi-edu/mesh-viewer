@@ -131,7 +131,12 @@ function setup3dSliders() {
 
 function setupClipSlider() {
   jQuery('#clip-plane').slider({ slide: clipPlane });
-  jQuery('#clip-plane').width(100+'%');
+  var tmp = document.getElementById('TESTING');
+  if(tmp) {
+    jQuery('#clip-plane').width(10+'%');
+    } else {
+      jQuery('#clip-plane').width(100+'%');
+  }
 }
 
 function init3dSliders() {

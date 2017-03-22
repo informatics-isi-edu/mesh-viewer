@@ -11,6 +11,7 @@
  [1.00, 0.46, 0.19]  light orange 
 */
 
+var TESTMODE=false;
 // global scoped data
 var ren3d=null; // 3d renderer
 
@@ -53,7 +54,6 @@ var spin_view=false;
 // MAIN
 jQuery(document).ready(function() {
 
-  $('[data-toggle="tooltip"]').tooltip();   
 
   if (webgl_detect() == false) {
     alertify.confirm("There is no webgl!!");
@@ -61,6 +61,11 @@ jQuery(document).ready(function() {
     return;
   }
 
+  var tmp = document.getElementById('TESTING');
+  if(tmp) {
+    TESTMODE=true;
+  }
+  
   // viewer?meshurl="http:...&landmarkurl="http:.."
   var args=document.location.href.split('?');
   if (args.length >= 2) { // there are some url to pick up
@@ -277,7 +282,7 @@ function webgl_detect()
 function insertLandmark(_s,_obj) {
    var _g=_obj.file.split('/').pop().toLowerCase().split('.').shift();
    var _cap= { "type":"Landmark","data":"user added landmark" };
-window.console.log("adding a new landmark for "+_g);
+//window.console.log("adding a new landmark for "+_g);
 
    if( landmarks[_g] == null ) {
      landmarks[_g]=[];
@@ -373,27 +378,50 @@ window.console.log("add..", name, " ", i, " ", color);
   var _reset_name=name+'_reset';
   var _reset_btn=name+'_reset_btn';
 
+// landmark's name is always lowercased
+  var gname=name.toLowerCase();
+  var _landmark_name=gname+'_landmark_list';
+
   var _nn='';
 
 _nn+='<div class="panel panel-default col-md-12 col-xs-12">';
 _nn+='<div class="panel-heading">';
-_nn+='<div class="panel-title row" style="background-color:transparent; border:solid 2px green">'
+_nn+='<div class="panel-title row" style="background-color:transparent">'
 
 _nn+='<button id="'+_visible_name+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white"  onClick="toggleMesh('+i+',\'eye_'+name+'\')" title="hide or show mesh"><span id="eye_'+name+'" class="glyphicon glyphicon-eye-open" style="color:'+RGBTohex(color)+';"></span> </button>';
 
-_nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand" >'+name+'</a>';
+if(hasLandmarks) {
+  _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand" >'+name+'</a>';
+  } else {
+    _nn+='<a >'+name+'</a>';
+}
 _nn+='</div></div> <!-- panel-heading -->';
 
-_nn+=' <div id="'+_collapse_name+'" class="panel-collapse collapse"> <div class="panel-body">';
+_nn+=' <div id="'+_collapse_name+'" class="panel-collapse collapse"> <div class="panel-body" >';
 
 _nn+= ' <div id="'+name+ '" class="row" style="background-color:white;opacity:1;"> ';
+/****
 _nn+= ' <button id="'+_reset_btn+ '" title="restore settings" type="button" class="btn btn-xs btn-primary pull-right" onclick="toggleResetMesh('+ i+ ','+ '\''+ name+ '\');" style="font-size:12px;margin-top:2px; margin-right:20px" >Reset</button>';
+****/
+_nn+= '<div id="'+_landmark_name+'" class="landmarkcontrol row pull-right">';
+_nn+= '</div>';
+_nn+= '</div>';
+
 // last bits
-_nn+= '</div> </div> <!-- panel-body --> </div> </div> <!-- panel -->';
+_nn+= '</div> <!-- panel-body --> </div> </div> <!-- panel -->';
 
   jQuery('#meshlist').append(_nn);
 window.console.log(_nn);
 }
+
+// TEST MEI
+function addTESTMeshListEntry(name,i,color)
+{
+    var _nn='<button class="btn btn-sq-sm" disabled=true style="background-color:'+RGBTohex(color)+';"/><input id='+name+' type=checkbox checked="" onClick=toggleMesh('+i+') value='+i+' name="mesh">'+name+'</input><br>';
+    jQuery('#TESTmeshlist').append(_nn);
+//window.console.log(_nn);
+}
+
 
 function toggleAddLandmark() 
 {
@@ -407,8 +435,16 @@ function toggleAddLandmark()
 
 function addLandmarkListEntry(name,i,color,label)
 {
-  var _nn='<button class="btn" disabled=true style="background-color:'+RGBTohex(color)+';"/><input type="checkbox" class="mychkbox" id="'+name+'_'+i+'d" onClick="toggleDistance(\''+name+'\','+i+');"/><label for="'+name+'_'+i+'d" style="display:none" name="distance"></label><input id='+name+'_'+i+' type=checkbox checked="" onClick="toggleLandmark(\''+name+'\','+i+');" value='+i+' name="landmark">'+label+'</input><br>';
-  jQuery('#landmarklist').append(_nn);
+  var _landmark_name='#'+name+'_landmark_list';
+  var _nn='<div class="row col-md-12 col-xs-12"><input id='+name+'_'+i+' type=checkbox checked="" onClick="toggleLandmark(\''+name+'\','+i+');" value='+i+' name="landmark">'+label+'</input></div>';
+    jQuery(_landmark_name).append(_nn);
+window.console.log("XXX",_nn);
+}
+
+function addTESTLandmarkListEntry(name,i,color,label)
+{
+    var _nn='<button class="btn" disabled=true style="background-color:'+RGBTohex(color)+';"/><input type="checkbox" class="mychkbox" id="'+name+'_'+i+'d" onClick="toggleDistance(\''+name+'\','+i+');"/><label for="'+name+'_'+i+'d" style="display:none" name="distance"></label><input id='+name+'_'+i+' type=checkbox checked="" onClick="toggleLandmark(\''+name+'\','+i+');" value='+i+' name="landmark">'+label+'</input><br>';
+    jQuery('#TESTlandmarklist').append(_nn);
 //window.console.log(_nn);
 }
 
@@ -730,7 +766,11 @@ function addMesh(t) { // color, url, caption
 
   var _cnt=meshs.push(_mesh);
   var _caption=t['caption'];
-  addMeshListEntry(_caption['type'],_cnt-1,t['color']);
+  if(TESTMODE) {
+    addTESTMeshListEntry(_caption['type'],_cnt-1,t['color']);
+    } else {
+      addMeshListEntry(_caption['type'],_cnt-1,t['color']);
+  }
 }
 
 // adding a new mesh after rendering
@@ -794,7 +834,12 @@ function addLandmark(p) {
     } else {
       landmarks[_g].push(_s);
   }
-  addLandmarkListEntry(_g,landmarks[_g].length,_mesh.color,_label);
+
+  if(TESTMODE) {
+    addTESTLandmarkListEntry(_g,landmarks[_g].length,_mesh.color,_label);
+    } else {
+      addLandmarkListEntry(_g,landmarks[_g].length,_mesh.color,_label);
+  }
 }
 
 // adding landmarks after initial rendering

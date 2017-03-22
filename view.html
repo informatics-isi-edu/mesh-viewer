@@ -33,8 +33,10 @@
 <script type="text/javascript" src="js/m.viewer.js"></script>
 <script type="text/javascript" src="js/m.control.js"></script>
 <script type="text/javascript" src="js/m.setup.js"></script>
+
 </head>
 <body>
+<div id='TESTING'></div>
 <div id="dialog-label" style="display: none;">
    <p id="dtext">PPP</p>
    <br>
@@ -76,12 +78,12 @@
   </div>
   <div id='forMesh' style='margin-top:10px;'>
     <input id="selectmeshbtn" type="button" value="excludeMesh"  onclick="selectMesh();"/>
-    <div id='meshlist'></div>
+    <div id='TESTmeshlist'></div>
   </div>
   <div id='forLandmark' style="margin-top:10px;display:none;">
     <input id="selectlandmarkbtn" type="button" value="excludeLandmark"  onclick="selectLandmark();"/>
     <input id="toggleAddLandmarkbtn" type="button" value="addMore"  onclick="toggleAddLandmark();"/>
-    <div id='landmarklist'></div>
+    <div id='TESTlandmarklist'></div>
   </div>
   <div id='forDistance' style='margin-top:10px;display:none;'>
     <input id="calcbtn" type="button" value="Distance" style="border-radius: 4px; border:2px solid grey;" onclick="toggleCalcDistance();"/>

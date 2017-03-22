@@ -8,6 +8,7 @@ var landmark_json=null;
 var vol_json=null;
 var view_json=null;
 var anno_json=null;
+var hasLandmarks=false;
 
 // should be a very small file and used for testing and so can ignore
 // >>Synchronous XMLHttpRequest on the main thread is deprecated
@@ -80,6 +81,12 @@ window.console.log(args[1]);
             var t=kvp[1].trim();
             var tmp=ckExist(t);
             landmark_json=trimQ(tmp);
+            // only when there are landmark that we enable the btn
+            if(!TESTMODE) {
+              var p = document.getElementById('landmarkbtn');
+              p.style.display = '';
+              hasLandmarks=true;
+            }
             break;
             }
           default:

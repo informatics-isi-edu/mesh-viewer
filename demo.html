@@ -31,12 +31,14 @@
     left: 40%;
     color: white;
 }
+
 </style>
 
 <script type='text/javascript' src='js/jquery.js'></script>
 <script type='text/javascript' src='js/jquery-ui.min.js'></script>
 <script type='text/javascript' src='js/jquery.ui.slider.js'></script>
 <script type='text/javascript' src='js/alertify.min.js'></script>
+<script type='text/javascript' src='js/bootstrap.js'></script>
 
 <!-- for debug 
 <script type="text/javascript" src="X/lib/google-closure-library/closure/goog/base.js"></script>
@@ -67,6 +69,9 @@
       <button id="meshesbtn" class="btn btn-success" title="mesh list" onclick="meshesClick();">
            <span class="glyphicon glyphicon-th"></span> 
               Meshes</button>
+      <button id="landmarkbtn" class="btn btn-success" title="load landmarks" onclick="loadLandmark();" style="display:none">
+           <span class="glyphicon glyphicon-tree-conifer"></span> 
+              Load landmarks</button>
       <button id="clipbtn" class="btn btn-success" title="clipping plane" onclick="clipClick();">
            <span class="glyphicon glyphicon-scissors"></span> 
               Clip plane</button>
@@ -95,7 +100,7 @@
 </button>
       </div>
 <!-- meshes items are added to here.. -->
-      <div id='meshlist' class='panel-group' style="background-color:transparent"> </div>
+      <div id='meshlist' class='panel-group row' style="background-color:transparent"> </div>
     </div>
   </li>
 <!-- for clip control -->
