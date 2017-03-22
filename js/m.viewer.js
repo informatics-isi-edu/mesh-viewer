@@ -11,7 +11,8 @@
  [1.00, 0.46, 0.19]  light orange 
 */
 
-var TESTMODE=false;
+var TESTMODE=false; // to track demo.html and view.html requirements
+
 // global scoped data
 var ren3d=null; // 3d renderer
 
@@ -27,6 +28,7 @@ var first_time=true;
 var first_time_vol=true;
 
 var add_landmark=false;
+var load_landmark=false;
 
 //=== bounding box ===
 var show_box = true;
@@ -131,7 +133,7 @@ window.console.log("  this object "+_id+ " does not have caption..");
         return; // show_caption
       }
       
-      // hightlight the object
+      // highlight the object
       if(ren3d.get(_id).caption && !add_landmark) {
 //window.console.log("  picking obj .."+_id);
         saved_color=ren3d.get(_id).color;
@@ -480,6 +482,36 @@ function selectLandmark()
       }
   }
 }
+
+// similar to selectLandmark but for demo.html
+function toggleAllLandmark()
+{
+  if(!load_landmark) {
+    loadLandmark();
+    return;
+  }
+
+  show_landmark = !show_landmark;
+  var _list=document.getElementsByName("landmark");
+  if(show_landmark) {
+    for (var i=0; i<_list.length;i++) {
+      _list[i].checked=false;
+      var _g=(_list[i].id).split('_').shift();
+      var _i=_list[i].value-1;
+      _list[i].checked=true;
+      landmarks[_g][_i].visible=true;
+    }
+    } else {
+      for (var i=0; i<_list.length;i++) {
+        _list[i].checked=true;
+        var _g=(_list[i].id).split('_').shift();
+        var _i=_list[i].value-1;
+        _list[i].checked=false;
+        landmarks[_g][_i].visible=false;
+      }
+  }
+}
+
 
 function selectMesh()
 {
@@ -847,15 +879,22 @@ function addLandmark(p) {
 
 // adding landmarks after initial rendering
 function loadLandmark() {
+  if(load_landmark) { // already loaded
+    return;
+  }
+  load_landmark=true;
   var _l=landmark_load();
   if(_l) {
     for(var i=0; i< _l['landmark'].length;i++) {
       addLandmark(_l['landmark'][i]);
     }
   }
-  document.getElementById('landmarkbtn').style.display = 'none';
-  jQuery('#forLandmark').show();
-  jQuery('#forDistance').show();
+  // this is for view.html
+  if(TESTMODE) {
+    document.getElementById('landmarkbtn').style.display = 'none';
+    jQuery('#forLandmark').show();
+    jQuery('#forDistance').show();
+  }
 }
 
 function autoLandmark(){
