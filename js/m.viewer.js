@@ -2,7 +2,8 @@
 //   m.viewer.js
 //
 //   viewer.html  (using default localhost data)
-//   viewer.html?meshurl="http:..."&landmarkurl="http:.."
+//   viewer.html?model="http:..."
+//   viewer.html?mesh="http:..."&landmark="http:..."
 //**************************************************************
 
 /*
@@ -68,7 +69,6 @@ jQuery(document).ready(function() {
     TESTMODE=true;
   }
   
-  // viewer?meshurl="http:...&landmarkurl="http:.."
   var args=document.location.href.split('?');
   if (args.length >= 2) { // there are some url to pick up
     processArgs(args);
@@ -372,7 +372,7 @@ function RGBTohex(rgb) {
 }
 
 //var name=fname.split('/').pop().toLowerCase().split('.').shift();
-function addMeshListEntry(name,i,color)
+function addMeshListEntry(label,name,i,color)
 {
   var _name = name.replace(/ +/g, "");
   var _collapse_name=i+'_collapse';
@@ -393,9 +393,9 @@ _nn+='<div class="panel-title row" style="background-color:transparent">'
 _nn+='<button id="'+_visible_name+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white"  onClick="toggleMesh('+i+',\'eye_'+_name+'\')" title="hide or show mesh"><span id="eye_'+_name+'" class="glyphicon glyphicon-eye-open" style="color:'+RGBTohex(color)+';"></span> </button>';
 
 if(hasLandmarks) {
-  _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand" >'+name+'</a>';
+  _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand" >'+label+'</a>';
   } else {
-    _nn+='<a >'+name+'</a>';
+    _nn+='<a >'+label+'</a>';
 }
 _nn+='</div></div> <!-- panel-heading -->';
 
@@ -417,10 +417,10 @@ window.console.log(_nn);
 }
 
 // TEST MEI
-function addTESTMeshListEntry(name,i,color)
+function addTESTMeshListEntry(label,name,i,color)
 {
   var _name = name.replace(/ +/g, "");
-  var _nn='<button class="btn btn-sq-sm" disabled=true style="background-color:'+RGBTohex(color)+';"/><input id='+_name+' type=checkbox checked="" onClick=toggleMesh('+i+') value='+i+' name="mesh">'+name+'</input><br>';
+  var _nn='<button class="btn btn-sq-sm" disabled=true style="background-color:'+RGBTohex(color)+';"/><input id='+_name+' type=checkbox checked="" onClick=toggleMesh('+i+') value='+i+' name="mesh">'+label+'</input><br>';
   jQuery('#TESTmeshlist').append(_nn);
 //window.console.log(_nn);
 }
@@ -810,10 +810,11 @@ function addMesh(t) { // color, url, caption
 // meshs[0] is the _mesh, meshs[1] is the original object
   var _cnt=meshs.push([_mesh,t]);
   var _name=t['id'];
+  var _label=t['label'];
   if(TESTMODE) {
-    addTESTMeshListEntry(_name,_cnt-1,t['color']);
+    addTESTMeshListEntry(_label,_name,_cnt-1,t['color']);
     } else {
-      addMeshListEntry(_name,_cnt-1,t['color']);
+      addMeshListEntry(_label, _name,_cnt-1,t['color']);
   }
 }
 
