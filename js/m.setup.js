@@ -10,6 +10,10 @@ var view_json=null;
 var anno_json=null;
 var hasLandmarks=false;
 
+var model_label=null;
+var model_id=null;
+var model_caption=null;
+
 // should be a very small file and used for testing and so can ignore
 // >>Synchronous XMLHttpRequest on the main thread is deprecated
 // >>because of its detrimental effects to the end user's experience.
@@ -45,10 +49,10 @@ function trimQ(s) {
 
 function setupWithDefaults()
 {
-  initial_mesh_json=foo_initial_mesh_json;
-  mesh_json=foo_mesh_json;
-  landmark_json=foo_landmark_json;
-  vol_json=foo_vol_json;
+  initial_mesh_json=$.parseJSON(foo_initial_mesh_json);
+  mesh_json=$.parseJSON(foo_mesh_json);
+  landmark_json=$.parseJSON(foo_landmark_json);
+  vol_json=$.parseJSON(foo_vol_json);
   view_json=foo_view_json;
   anno_json=foo_anno_json;
 }
@@ -61,26 +65,44 @@ window.console.log(args[1]);
     if (param.indexOf('=') == -1) {
       // only one -- expect it to be meshurl
       var url=param.replace(new RegExp('/$'),'').trim();
-      initial_mesh_json=ckExist(url);
+      var tmp=ckExist(url);
+      var tt=trimQ(tmp);
+      initial_mesh_json=JSON.parse(tt);
       } else {
         var kvp = param.split('=');
-        switch (kvp[0].trim()) {
-          case 'meshurl': // 
+
+var myProcessArg=function(kvp0, kvp1) {
+        switch (kvp0.trim()) {
+          case 'mesh': // 
             {
-            var t=kvp[1].trim();
-            var tmp=ckExist(t);
+            var tmp;
+            if( typeof kvp1 === 'object') { // already in parsed
+              tmp=kvp1;
+              } else { // this is an url
+                var t=kvp1.trim();
+                var tt=ckExist(t);
+                tt=trimQ(tt);
+                tmp= JSON.parse(tt);
+            }
             if(initial_mesh_json == null) {
-              initial_mesh_json=trimQ(tmp);
+              initial_mesh_json=tmp;
               } else {
-                 mesh_json=trimQ(tmp);
+                 mesh_json=tmp;
             }
             break;
             }
-          case 'landmarkurl':
+          case 'landmark':
             {
-            var t=kvp[1].trim();
-            var tmp=ckExist(t);
-            landmark_json=trimQ(tmp);
+            var tmp;
+            if( typeof kvp1 === 'object') { // already in parsed
+              tmp=kvp1;
+              } else { // this is an url
+                var t=kvp1.trim();
+                var tt=ckExist(t);
+                tt=trimQ(tt);
+                tmp= JSON.parse(tt);
+            }
+            landmark_json=tmp;
             // only when there are landmark that we enable the btn
             if(!TESTMODE) {
               var p = document.getElementById('landmarkbtn');
@@ -89,62 +111,93 @@ window.console.log(args[1]);
             }
             break;
             }
+          case 'volume':
+            {
+window.consow.log("NOT handling volume yet..");
+            break;
+            }
+          case 'model':
+            {
+            var t=kvp1.trim();
+            var tt=ckExist(t);
+            tt=trimQ(tt);
+            var tmp= JSON.parse(tt);
+            var klist=Object.keys(tmp);
+            var mi=klist.find(function(m) { return m=='mesh' });
+            var li=klist.find(function(m) { return m=='landmark'});
+            if(mi != undefined) {
+              myProcessArg('mesh',{ "mesh": tmp['mesh']}); 
+            }
+            if(li != undefined) {
+              myProcessArg('landmark',{"landmark": tmp['landmark']});
+            }
+            model_label=tmp['label'];
+            model_id=tmp['id'];
+            model_caption=tmp['caption'];
+            break;
+            }
           default:
             {
-            window.console.log("HUM.. skip this arg ", kvp[0]);
+            window.console.log("HUM.. skip this arg ", kvp0);
             break;
             }
         }
+} // end of myProcessArg
+       myProcessArg(kvp[0],kvp[1]);
     }
   }
-  return 
+  return; 
 }
 
 
 var foo_initial_mesh_json='\
-{ "mesh" : [\
-  {\
-    "url": "http://'+hostname+'/data/3mesh/JI296CCMB.obj",\
-    "color": [1.00, 0.80, 0.40],\
-    "caption": { "type": "JI296CCMB",\
-                 "data":"a skull mesh",\
-                 "link": { "label":"gene expression",\
-                           "url":"http://'+hostname+'/meshviewer/gene.html"}\
-                }\
-  },\
-  {\
-    "url": "http://'+hostname+'/data/3mesh/Mandible.obj",\
-    "color": [0.53, 0.90, 0.90],\
-    "caption": { "type": "Mandible",\
-                 "data":"a Mandible mesh",\
-                 "link": { "label":"gene expression",\
-                           "url":"http://'+hostname+'/meshviewer/gene.html"}\
-                }\
-  }\
- ]\
+{ "mesh" : [ { \
+      "id": "JI296CCMB",\
+      "label": "Back Skull",\
+      "url": "http://localhost/data/3mesh/JI296CCMB.obj",\
+      "color": [1.00, 0.80, 0.40],\
+      "caption": {\
+                   "description":"a skull mesh at the back of head",\
+                   "link": { "label":"gene expression",\
+                             "url":"http://localhost/meshviewer/gene.html"}\
+                  }\
+               },\
+               {\
+      "id": "Maxilla",\
+      "label": "Maxilla",\
+      "url": "http://localhost/data/3mesh/Maxilla.obj",\
+      "color": [1.00, 0.46, 0.19],\
+      "caption": {\
+                   "description":"a Mandible Maxilla",\
+                   "link": { "label":"gene expression",\
+                             "url":"http://localhost/meshviewer/gene.html"}\
+                  }\
+               }\
+  ]\
 }';
 
 var foo_mesh_json='\
-{ "mesh" : [\
-  {\
-    "url": "http://'+hostname+'/data/3mesh/Maxilla.obj",\
-    "color": [1.00, 0.46, 0.19],\
-    "caption": { "type": "Maxilla",\
-                 "data":"a Mandible Maxilla",\
-                 "link": { "label":"gene expression",\
-                           "url":"http://'+hostname+'/meshviewer/gene.html"}\
-                }\
-  }\
- ]\
+{ "mesh" : \
+  [{\
+      "id": "Mandible",\
+      "label": "Mandible",\
+      "url": "http://localhost/data/3mesh/Mandible.obj",\
+      "color": [0.53, 0.90, 0.90],\
+      "caption": {\
+                   "description":"a Mandible Mandible",\
+                   "link": { "label":"gene expression",\
+                             "url":"http://localhost/meshviewer/gene.html"}\
+                  }\
+   }]\
 }';
 
 function mesh_load() {
    var _m=null;
    var _mm=null;
    if(initial_mesh_json)
-     _m=$.parseJSON(initial_mesh_json);
+     _m=initial_mesh_json;
    if(mesh_json)
-     _mm=$.parseJSON(mesh_json);
+     _mm=mesh_json;
    return [_m, _mm];
 }
 
@@ -155,82 +208,99 @@ var foo_vol_json='\
     "color": [0.00, 0.00, 0.00],\
     "caption": { "type": "Volume",\
                  "data":"nifti vol file for JI296CCMB" }\
-  }\
- ]\
+  }]\
 }';
 
 function vol_load() {
    if(vol_json)
-     return $.parseJSON(vol_json);
+     return vol_json;
    return(null);
 }
 
 var foo_landmark_json='\
-{ "landmark" : [\
-  {\
-    "group": "JI296CCMB", \
-    "color": [1, 0, 0],\
-    "label": "Posterior point of something",\
-    "radius": 0.1, \
-    "point": [8.502269744873047, 6.578330039978027, 69.94249725341797],\
-    "caption": { "type":"Landmark",\
-                 "data":"Tail end of Skull"\
-               }\
-  },\
-  {\
-    "group": "JI296CCMB", \
-    "color": [1, 0, 0],\
-    "label": "Most anterior superior point of premaxilla",\
-    "radius": 0.1, \
-    "point": [15.606300354003906, 9.819620132446289,71.14600372314453],\
-    "caption": { "type":"Landmark",\
-                 "data":"Front tip of Skull",\
-                 "link": { "label":"point expression",\
-                           "url":"http://'+hostname+'/meshviewer/gene.html"}\
-               }\
-  },\
-  {\
-    "group": "JI296CCMB",\
-    "color": [1, 0, 0],\
-    "label": "Anterior point of something",\
-    "radius": 0.1, \
-    "point": [7.819620132446289,10.14050006866455,67.17459869384766],\
-    "caption": { "type":"Landmark",\
-                 "data":"Lowermost tip of Skull",\
-                 "link": { "label":"point expression",\
-                           "url":"http://'+hostname+'/meshviewer/gene.html"}\
-               }\
-  },\
-  {\
-    "group": "Maxilla", \
-    "color": [1, 0, 0],\
-    "label": "Anterior-medial point to zygomatic process",\
-    "radius": 0.1, \
-    "point": [13.516400337219238,11.584600448608398,70.9854965209961],\
-    "caption": { "type": "Landmark", "data":"Lower most of Maxilla" }\
-  },\
-  {\
-    "group": "Mandible", \
-    "color": [1, 0, 0],\
-    "label": "Superior tip of coronary process",\
-    "radius": 0.1, \
-    "point": [11.42609977722168,12.432299613952637,70.46399688720703],\
-    "caption": { "type": "Landmark", "data":"Top tip of Mandible" }\
-  },\
-  {\
-    "group": "Mandible", \
-    "color": [1, 0, 0],\
-    "label": "Most anterior point of mandible",\
-    "radius": 0.1, \
-    "point": [15.551799774169922,9.578940391540527,69.4209976196289],\
-    "caption": { "type": "Landmark", "data":"Front tip of Mandible" }\
-  }\
- ]\
+{  "landmark" : [ {\
+         "id": "LND5678",\
+         "label": "Posterior pt of JI296CCMB",\
+         "group": "JI296CCMB", \
+         "color": [1, 0, 0],\
+         "radius": 0.1, \
+         "point": [8.502269744873047, 6.578330039978027, 69.94249725341797],\
+         "caption": { \
+                 "description":"Tail end of Skull, JI296CCMB",\
+                 "link": { "label": "point",\
+                           "url":"https://www.example.com/path/to/info/about/LND5678" }\
+                    }\
+                 },\
+                 {\
+         "id": "LND5679",\
+         "label": "Most anterior superior pt of premaxilla",\
+         "group": "JI296CCMB", \
+         "color": [1, 0, 0],\
+         "radius": 0.1, \
+         "point": [15.606300354003906, 9.819620132446289,71.14600372314453],\
+         "caption": { \
+                 "description":"Front tip of Skull",\
+                 "link": { "label":"point",\
+                           "url":"https://www.example.com/path/to/info/about/LND5679" }\
+                    }\
+                  },\
+                  {\
+         "id": "LND5680",\
+         "label": "Anterior point of something",\
+         "group": "JI296CCMB",\
+         "color": [1, 0, 0],\
+         "radius": 0.1, \
+         "point": [7.819620132446289,10.14050006866455,67.17459869384766],\
+         "caption": { \
+                 "description":"Lowermost tip of Skull",\
+                 "link": { "label":"point",\
+                           "url":"https://www.example.com/path/to/info/about/LND5680" }\
+                    }\
+                  },\
+                  {\
+         "id": "LND5681",\
+         "label": "Anterior-medial point to zygomatic process",\
+         "group": "Maxilla", \
+         "color": [1, 0, 0],\
+         "radius": 0.1, \
+         "point": [13.516400337219238,11.584600448608398,70.9854965209961],\
+         "caption": { \
+                 "description":"Lowermost tip of Maxilla",\
+                 "link": { "label":"point",\
+                           "url":"https://www.example.com/path/to/info/about/LND5681" }\
+                    }\
+                  },\
+                  {\
+         "id": "LND5682",\
+         "label": "Superior tip of coronary process",\
+         "group": "Mandible", \
+         "color": [1, 0, 0],\
+         "radius": 0.1, \
+         "point": [11.42609977722168,12.432299613952637,70.46399688720703],\
+         "caption": { \
+                 "description":"Superior tip",\
+                 "link": { "label":"point",\
+                           "url":"https://www.example.com/path/to/info/about/LND5682" }\
+                    }\
+                   },\
+                   {\
+         "id": "LND5683",\
+         "label": "Most anterior pt of mandible",\
+         "group": "Mandible", \
+         "color": [1, 0, 0],\
+         "radius": 0.1, \
+         "point": [15.551799774169922,9.578940391540527,69.4209976196289],\
+         "caption": { \
+                 "description":"Anterior tip",\
+                 "link": { "label":"point",\
+                           "url":"https://www.example.com/path/to/info/about/LND5683" }\
+                     }\
+             } ]\
 }';
 
 function landmark_load() {
-   if(landmark_json)
-     return $.parseJSON(landmark_json);
+   if(landmark_json )
+     return landmark_json;
    return (null);
 }
 

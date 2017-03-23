@@ -16,7 +16,7 @@ var TESTMODE=false; // to track demo.html and view.html requirements
 // global scoped data
 var ren3d=null; // 3d renderer
 
-var meshs=[];   // mesh objects
+var meshs=[];   // mesh objects -- [_mesh, _meshjson]
 var vol=null;   // volume objects
 var gbbox=null; // global bounding box
 
@@ -524,13 +524,15 @@ function selectMesh()
     jQuery('#selectmeshbtn').prop('value','excludeMesh');
     for (var i=0; i<_list.length;i++) {
        _list[i].checked=true;
-       meshs[_list[i].value].visible=true;
+       var _m=meshs[_list[i].value];
+       _m[0].visible=true;
     }
     } else {
       jQuery('#selectmeshbtn').prop('value','selectMesh');
       for (var i=0; i<_list.length;i++) {
         _list[i].checked=false;
-        meshs[_list[i].value].visible=false;
+        var _m=meshs[_list[i].value];
+        _m[0].visible=false;
       }
   }
 }
@@ -563,7 +565,7 @@ function toggleVolume() {
 }
 
 function toggleMesh(i,eye_name) {
-  var _mesh=meshs[i];
+  var _mesh=meshs[i][0];
   var eye='#'+eye_name;
   _mesh.visible = !_mesh.visible;
   if(_mesh.visible) {
@@ -797,17 +799,21 @@ function addMesh(t) { // color, url, caption
   var _mesh = new X.mesh();
   _mesh.color = t['color'];
   _mesh.file = encodeURI(t['url']);
-  _mesh.caption = t['caption'];
+  _mesh.caption = t['label']
+//  _mesh.caption = t['caption'];
+//  _mesh.label = t['label'];
+//  _mesh.id= t['id'];
   var loadingDiv = document.getElementById('loading');
   loadingDiv.style.display ='';
   ren3d.add(_mesh);
 
-  var _cnt=meshs.push(_mesh);
-  var _caption=t['caption'];
+// meshs[0] is the _mesh, meshs[1] is the original object
+  var _cnt=meshs.push([_mesh,t]);
+  var _name=t['id'];
   if(TESTMODE) {
-    addTESTMeshListEntry(_caption['type'],_cnt-1,t['color']);
+    addTESTMeshListEntry(_name,_cnt-1,t['color']);
     } else {
-      addMeshListEntry(_caption['type'],_cnt-1,t['color']);
+      addMeshListEntry(_name,_cnt-1,t['color']);
   }
 }
 
@@ -834,27 +840,20 @@ function loadVol() {
   }
 }
 
-// given a mesh name, find the mesh that matches it
-function lookupMesh(n) {  
-  for(var i=0; i< meshs.length; i++) {
-    var _n=meshs[i].file.split('/').pop().toLowerCase().split('.').shift();
-    if( _n == n )
-      return meshs[i];
-  }
-  return null;
-}
+// meshs[1],
 function lookupMeshByID(id) {  
   for(var i=0; i< meshs.length; i++) {
-    var _id=meshs[i].id;
+    var _m=meshs[i][1];
+    var _id=_m['id'].toLowerCase();
     if( _id == id )
-      return meshs[i];
+      return meshs[i][0]; // return the X.mesh
   }
   return null;
 }
 
 function addLandmark(p) {
   var _g=p['group'].toLowerCase();
-  var _mesh=lookupMesh(_g);
+  var _mesh=lookupMeshByID(_g);
   if( _mesh == null ) {
     window.console.log("BAD BAD.. can not find mesh for "+_g);
     return;
@@ -903,7 +902,7 @@ function loadLandmark() {
 function autoLandmark(){
 // bring in the random points
   for(var i=0; i<meshs.length; i++) {
-      hlite(meshs[i]);
+      hlite(meshs[i][0]);
   }
   document.getElementById('autoLandmarkbtn').style.display = 'none';
 }
@@ -1037,18 +1036,22 @@ window.console.log("clip3d, start "+_start+" and to "+_range+ " on target "+_nea
 }
 
 function toggleBox() {
+window.console.log(" calling toggleBox..");
   show_box = !show_box;
   if(show_box) {
     gbbox.visible=true;
-    $('#boxbtn').removeClass('pick');
+    if(! TESTMODE)
+      $('#boxbtn').removeClass('pick');
     } else {
       gbbox.visible=false;
-      $('#boxbtn').addClass('pick');
+      if(! TESTMODE)
+        $('#boxbtn').addClass('pick');
   }
 }
 
 function makeBBox(r,v) {
 // CREATE Bounding Box
+//window.console.log("making bounding box..");
     var _r=r;
     var _v=v; // could be volume or renderer3D
     if(v == null) {
@@ -1057,6 +1060,10 @@ function makeBBox(r,v) {
     var res = [_v.bbox[0],_v.bbox[2],_v.bbox[4]];
     var res2 = [_v.bbox[1],_v.bbox[3],_v.bbox[5]];
 
+    if(gbbox != null) {
+      gbbox.visible=false;
+      gbbox=null;
+    }
     gbbox = new X.object();
     gbbox.points = new X.triplets(72);
     gbbox.normals = new X.triplets(72);
