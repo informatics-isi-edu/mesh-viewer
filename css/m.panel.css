@@ -1,5 +1,5 @@
 .landmarkcontrol {
-     padding: 0px;
+     padding: 5px;
      width: 100%;
 }
 
@@ -37,7 +37,7 @@
 .panel-heading .accordion-toggle:after {
     font-size: 14px;
     font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
-    content: "\e199"; /* glyphicon-tree-conifer */
+    content: "\e062"; /* glyphicon-tree-conifer */
     float: left;
     margin-right:10px;
     color: #337ab7;

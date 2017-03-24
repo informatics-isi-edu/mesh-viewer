@@ -1,5 +1,10 @@
 //**************************************************************
 //   m.setup.js
+//
+// model.json attributes
+//    label is used for legend 
+//    id, group are used for internal keys
+//
 //**************************************************************
 var hostname=window.location.hostname;
 var initial_mesh_json=null;
@@ -204,10 +209,13 @@ function mesh_load() {
 var foo_vol_json='\
 { "volume" : [\
   {\
+    "id": "VOL5600", \
+    "label": "volume of JI296CCMB", \
     "url": "http://'+hostname+'/data/3mesh/JI296CCMB_Control_P0_Hard_Tissue.transformed.nii",\
     "color": [0.00, 0.00, 0.00],\
-    "caption": { "type": "Volume",\
-                 "data":"nifti vol file for JI296CCMB" }\
+    "caption": { "description":"nifti vol file for JI296CCMB",\
+                 "link": { "label":"gene expression",\
+                           "url":"http://localhost/meshviewer/gene.html"}\
   }]\
 }';
 

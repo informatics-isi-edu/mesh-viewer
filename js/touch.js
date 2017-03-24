@@ -1,4 +1,4 @@
-*************************************************************
+///*************************************************************
 //   touch.js
 //**************************************************************
 
@@ -21,11 +21,25 @@ var first_time=true;
 var first_time_vol=true;
 
 //==== Mesh ====
-var initial_mesh_list;
-var mesh_list;
+var initial_mesh_list=null;
+var mesh_list=null;
 var show_mesh = true;
 
 window.onload = function() {
+
+  if (webgl_detect() == false) {
+    alertify.confirm("There is no webgl!!");
+    throw new Error("WebGL is not enabled!");
+    return;
+  }
+
+  
+  var args=document.location.href.split('?');
+  if (args.length >= 2) { // there are some url to pick up
+    processArgs(args);
+    } else {
+      setupWithDefaults();
+  }
 
   var _m=mesh_load();
   initial_mesh_list=_m[0], mesh_list=_m[1];
@@ -89,10 +103,11 @@ printDebug("  current touch position is.."+_pos);
       var _obj=ren3d.get(_id);
       var _target=ren3d.pick3d(_pos[0],_pos[1], 0.5, 0.05, _obj);
       if(show_caption) {
+window.console.log("  AAA -- found a caption forthis obj");
         if(ren3d.get(_id).caption) {
           var _j=ren3d.get(_id).caption;
 
-          showLabel(_j['type'],_j['data'],_j['link']);
+          showLabel(_j['description'],_j['link']);
           } else { 
 //printDebug("  this object "+_id+ " does not have caption..");
         }
@@ -364,3 +379,53 @@ printDebug("addSphere at. "+loc);
 }
 
 
+//http://stackoverflow.com/questions/11871077/proper-way-to-detect-webgl-support
+function webgl_detect()
+{
+  if (!!window.WebGLRenderingContext) {
+    var canvas = document.createElement("canvas"),
+         names = ["webgl", "experimental-webgl", "moz-webgl", "webkit-3d"],
+       context = false;
+
+    for(var i=0;i<4;i++) {
+      try {
+        context = canvas.getContext(names[i]);
+        if (context && typeof context.getParameter == "function") {
+          // WebGL is enabled
+          return true;
+        }
+      } catch(e) {}
+    }
+    // WebGL is supported, but disabled
+    return false;
+  }
+
+  // WebGL not supported
+  return false;
+}
+
+//
+function showLabel(jval,lval) {
+  if ($("#dialog-label").dialog("instance") &&
+                       $("#dialog-label").dialog("isOpen")) {
+    $("#dialog-label").dialog("close");
+  }
+  $("#dialog-label").dialog({
+    modal: false,
+    width: 300,
+    height: 200,
+    dialogClass: 'myDialogClass',
+    open: function() {
+     var _p=jQuery('#dtext');
+     var _nn='<p id="dtext">'+jval+'</p>';
+     _p.replaceWith(_nn);
+      _p=jQuery('#dlink');
+     if (typeof lval != "undefined") {
+       _nn='<a id="dlink" href="'+encodeURI(lval['url'])+'">'+lval['label']+'</a>'
+       } else {
+       _nn='<a id="dlink" href=""></a>'
+     }
+     _p.replaceWith(_nn);
+    }
+  });//dialog
+}

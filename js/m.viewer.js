@@ -124,9 +124,9 @@ window.console.log("show_caption..");
         if(ren3d.get(_id).caption) {
           var _j=ren3d.get(_id).caption;
 
-          showLabel(_j['type'],_j['data'],_j['link']);
+          showLabel(_j['description'],_j['link']);
 window.console.log("trying to show Label..");
-window.console.log(_j['type'],_j['data'],_j['link']);
+window.console.log(_j['description'],_j['link']);
           } else { 
 window.console.log("  this object "+_id+ " does not have caption..");
         }
@@ -167,18 +167,17 @@ window.console.log("  this object "+_id+ " does not have caption..");
         for(var i=0; i< plist.length; i++) {
           var _p=plist[i];
           if(i == 0) {
-            var _c={ "type":"POINT","data": i };
             var _s=addSphere(_p,[0.25,1,0.4],0.04, _c);
             insertLandmark(_s,_obj);
             } else {
-              var _c={ "type":"POINT","data": i };
+              var _c={ "description":"fake landmark" };
               var _s=addSphere(_p,[0.25,1,0.6],0.04, _c);
               insertLandmark(_s,_obj);
           }
         }
       }
     } else {
-//window.console.log("  did not pick anything");
+window.console.log("  DID not pick anything");
     }
   }
 
@@ -241,8 +240,12 @@ window.console.log("  this object "+_id+ " does not have caption..");
       setup2dSliders();
       init2dSliders();
       makeBBox(ren3d,vol);
+      gbbox.visible=false;
+      show_box = false;
       } else {
         makeBBox(ren3d,null);
+        gbbox.visible=false;
+        show_box = false;
     }
   };
 
@@ -282,9 +285,10 @@ function webgl_detect()
 }
 
 function insertLandmark(_s,_obj) {
+window.console.log("PANIC, insertLandmark, should double check here..");
    var _g=_obj.file.split('/').pop().toLowerCase().split('.').shift();
-   var _cap= { "type":"Landmark","data":"user added landmark" };
-//window.console.log("adding a new landmark for "+_g);
+   var _cap= { "description":"user added landmark" };
+window.console.log("==> insertLandmark, adding a new landmark for "+_g);
 
    if( landmarks[_g] == null ) {
      landmarks[_g]=[];
@@ -293,7 +297,7 @@ function insertLandmark(_s,_obj) {
        landmarks[_g].push(_s);
    }
    var _label=askForLabel(_g);
-   addLandmarkListEntry(_g,landmarks[_g].length,_obj.color,_label);
+   addLandmarkListEntry(_g,landmarks[_g].length,_obj.color,_label,null);
 }
 
 function askForLabel(g)
@@ -372,7 +376,7 @@ function RGBTohex(rgb) {
 }
 
 //var name=fname.split('/').pop().toLowerCase().split('.').shift();
-function addMeshListEntry(label,name,i,color)
+function addMeshListEntry(label,name,i,color,href)
 {
   var _name = name.replace(/ +/g, "");
   var _collapse_name=i+'_collapse';
@@ -393,9 +397,13 @@ _nn+='<div class="panel-title row" style="background-color:transparent">'
 _nn+='<button id="'+_visible_name+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white"  onClick="toggleMesh('+i+',\'eye_'+_name+'\')" title="hide or show mesh"><span id="eye_'+_name+'" class="glyphicon glyphicon-eye-open" style="color:'+RGBTohex(color)+';"></span> </button>';
 
 if(hasLandmarks) {
-  _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand" >'+label+'</a>';
+   if(href) {
+      _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand landmarks"></a><a href="'+href+'">'+label+'</a>';
+      } else {
+      _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand landmarks">'+label+'</a>';
+   }
   } else {
-    _nn+='<a >'+label+'</a>';
+    _nn+='<a>'+label+'</a>';
 }
 _nn+='</div></div> <!-- panel-heading -->';
 
@@ -436,13 +444,17 @@ function toggleAddLandmark()
   }
 }
 
-function addLandmarkListEntry(name,i,color,label)
+function addLandmarkListEntry(name,i,color,label,href)
 {
   var _name = name.replace(/ +/g, "");
   var _landmark_name='#'+_name+'_landmark_list';
-  var _nn='<div class="row col-md-12 col-xs-12"><input id='+_name+'_'+i+' type=checkbox checked="" onClick="toggleLandmark(\''+_name+'\','+i+');" value='+i+' name="landmark">'+label+'</input></div>';
-    jQuery(_landmark_name).append(_nn);
-window.console.log("XXX",_nn);
+  var _nn='';
+  if(href) {
+    _nn+='<div class="row col-md-12 col-xs-12"><input id='+_name+'_'+i+' type=checkbox checked="" onClick="toggleLandmark(\''+_name+'\','+i+');" value='+i+' name="landmark"></input><a href="'+href+'">'+label+'</a></div>';
+    } else {
+      _nn+='<div class="row col-md-12 col-xs-12"><input id='+_name+'_'+i+' type=checkbox checked="" onClick="toggleLandmark(\''+_name+'\','+i+');" value='+i+' name="landmark">'+label+'</input></div>';
+  }
+  jQuery(_landmark_name).append(_nn);
 }
 
 function addTESTLandmarkListEntry(name,i,color,label)
@@ -782,6 +794,17 @@ sliceSag.onScroll = updateSag;
 sliceCor.onScroll = updateCor;
 }
 
+function getHref(t) {
+  var _cap=t['caption'];
+  if(_cap && _cap['link']) {
+     var href= _cap['link']['url'];
+     window.console.log(">>",href,"<<");
+     return href;
+  }
+  return(null);
+}
+
+
 function addVolume(t) { // color, url, caption, <id/new>
   vol = new X.volume();
   vol.file = encodeURI(t['url']);
@@ -811,10 +834,12 @@ function addMesh(t) { // color, url, caption
   var _cnt=meshs.push([_mesh,t]);
   var _name=t['id'];
   var _label=t['label'];
+ 
+  var _href=getHref(t);
   if(TESTMODE) {
     addTESTMeshListEntry(_label,_name,_cnt-1,t['color']);
     } else {
-      addMeshListEntry(_label, _name,_cnt-1,t['color']);
+      addMeshListEntry(_label,_name,_cnt-1,t['color'],_href);
   }
 }
 
@@ -873,10 +898,11 @@ function addLandmark(p) {
       landmarks[_g].push(_s);
   }
 
+  var _href=getHref(p);
   if(TESTMODE) {
     addTESTLandmarkListEntry(_g,landmarks[_g].length,_mesh.color,_label);
     } else {
-      addLandmarkListEntry(_g,landmarks[_g].length,_mesh.color,_label);
+      addLandmarkListEntry(_g,landmarks[_g].length,_mesh.color,_label,_href);
   }
 }
 
@@ -909,14 +935,13 @@ function autoLandmark(){
 }
 
 //
-function showLabel(tval,jval,lval) {
+function showLabel(jval,lval) {
   if ($("#dialog-label").dialog("instance") &&
                        $("#dialog-label").dialog("isOpen")) {
     $("#dialog-label").dialog("close");
   }
   $("#dialog-label").dialog({
     modal: false,
-    title: tval,
     width: 300,
     height: 200,
     dialogClass: 'myDialogClass',
@@ -1042,11 +1067,11 @@ window.console.log(" calling toggleBox..");
   if(show_box) {
     gbbox.visible=true;
     if(! TESTMODE)
-      $('#boxbtn').removeClass('pick');
+      $('#boxbtn').addClass('pick');
     } else {
       gbbox.visible=false;
       if(! TESTMODE)
-        $('#boxbtn').addClass('pick');
+        $('#boxbtn').removeClass('pick');
   }
 }
 

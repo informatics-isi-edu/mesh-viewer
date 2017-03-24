@@ -40,19 +40,23 @@
 <script type='text/javascript' src='js/alertify.min.js'></script>
 <script type='text/javascript' src='js/bootstrap.js'></script>
 
-<!-- for debug 
+<!-- for debug --> 
 <script type="text/javascript" src="X/lib/google-closure-library/closure/goog/base.js"></script>
 <script type="text/javascript" src="X/xtk-deps.js"></script>
 <script type="text/javascript" src="js/default.js"></script>
--->
 
-<!-- for regular -->  
+<!-- for regular  
 <script type="text/javascript" src="js/xtk.js"></script>
+-->
 
 <script type="text/javascript" src="js/m.viewer.js"></script>
 <script type="text/javascript" src="js/m.control.js"></script>
 <script type="text/javascript" src="js/m.setup.js"></script>
 <script type="text/javascript" src="js/m.sidebar.js"></script>
+<!--
+<script type="text/javascript" src="js/html2canvas.js"></script>
+<script type="text/javascript" src="js/m.util.js"></script>
+-->
 </head>
 <body>
 <div id="dialog-label" style="display: none;">
@@ -70,7 +74,7 @@
            <span class="glyphicon glyphicon-th"></span> 
               Meshes</button>
       <button id="landmarkbtn" class="btn btn-success" title="turn on/off landmarks" onclick="toggleAllLandmark();" style="display:none">
-           <span class="glyphicon glyphicon-tree-conifer"></span> 
+           <span class="glyphicon glyphicon-map-marker"></span> 
               Landmarks</button>
       <button id="clipbtn" class="btn btn-success" title="clipping plane" onclick="clipClick();">
            <span class="glyphicon glyphicon-scissors"></span> 
@@ -84,6 +88,11 @@
       <button class="btn btn-success" title="reset the display" onclick="resetView();">
            <span class="glyphicon glyphicon-home"></span>
                Reset</button>
+<!--
+      <button class="btn btn-success" title="download jpeg" onclick="jpgDownload(null);">
+           <span class="glyphicon glyphicon-camera"></span>
+               Download</button>
+-->
     </div>
   </div>
 

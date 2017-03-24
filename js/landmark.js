@@ -207,3 +207,29 @@ window.console.log("add sphere.. from "+idx+" "+loc);
 }
 
 
+//
+function showLabel(jval,lval) {
+  if ($("#dialog-label").dialog("instance") &&
+                       $("#dialog-label").dialog("isOpen")) {
+    $("#dialog-label").dialog("close");
+  }
+  $("#dialog-label").dialog({
+    modal: false,
+    width: 300,
+    height: 200,
+    dialogClass: 'myDialogClass',
+    open: function() {
+     var _p=jQuery('#dtext');
+     var _nn='<p id="dtext">'+jval+'</p>';
+     _p.replaceWith(_nn);
+      _p=jQuery('#dlink');
+     if (typeof lval != "undefined") {
+       _nn='<a id="dlink" href="'+encodeURI(lval['url'])+'">'+lval['label']+'</a>'
+       } else {
+       _nn='<a id="dlink" href=""></a>'
+     }
+     _p.replaceWith(_nn);
+    }
+  });//dialog
+}
+
