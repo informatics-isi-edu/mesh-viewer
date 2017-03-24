@@ -403,7 +403,11 @@ if(hasLandmarks) {
       _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand landmarks">'+label+'</a>';
    }
   } else {
-    _nn+='<a>'+label+'</a>';
+    if(href) {
+      _nn+='<a href="'+href+'">'+label+'</a>';
+      } else {
+        _nn+='<a>'+label+'</a>';
+    }
 }
 _nn+='</div></div> <!-- panel-heading -->';
 
