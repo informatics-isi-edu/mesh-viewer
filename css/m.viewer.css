@@ -1,15 +1,19 @@
 html, body {
     background-color: #f9f9f9;
     height: 100%;
+    overflow:hidden;
 }
 
 .container-fluid {
     height: 100%;
+    overflow:hidden;
 }
 
 #viewport {
-    height: 100%;
+    height: 90%;
+    overflow:hidden;
 }
+ 
 
 .btn-success {
     background-color: #407CCA;

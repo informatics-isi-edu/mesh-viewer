@@ -20,7 +20,7 @@
 }
 
 #mainView {
-    min-height: 90%;
+    height: 100%;
     overflow-y: hidden; /* don't show content that exceeds my height */
     overflow-x: hidden; /* don't show content that exceeds my width */
 }
@@ -94,11 +94,12 @@
                Download</button>
 -->
     </div>
-  </div>
+  </div> <!-- control-block -->
 
-<div id='viewport' class="row col-md-12 col-xs-12" style='background-color: transparent; margin:0;'>
-  <div id='mainView' class="row col-md-12 col-xs-12" style='background-color: black;'>
-  </div>
+<div id='viewport' class="col-md-12 col-xs-12" style='background-color:transparent'>
+
+<div id='mainView' class="col-md-12 col-xs-12" style='background-color: black;'>
+</div>
   
 <div id="slideOut" class="row col-md-3 col-xs-3 control-block" style="opacity:0.95;position:absolute;top:0;left:0;" >
 <ul id="sidebar" class="navigation" style="display:none">
