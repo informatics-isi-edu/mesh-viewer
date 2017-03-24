@@ -216,7 +216,7 @@ var foo_vol_json='\
     "caption": { "description":"nifti vol file for JI296CCMB",\
                  "link": { "label":"gene expression",\
                            "url":"http://localhost/meshviewer/gene.html"}\
-  }]\
+  }}]\
 }';
 
 function vol_load() {
