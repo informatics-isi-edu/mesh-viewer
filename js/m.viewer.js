@@ -64,6 +64,13 @@ jQuery(document).ready(function() {
     return;
   }
 
+  var h=window.innerHeight;
+  var m= document.getElementById('meshes');
+  var h= Math.floor(h*0.80);
+  var hh=h+"px";
+  m.style.maxHeight=hh;
+//  window.console.log("height is..",hh);
+
   var tmp = document.getElementById('TESTING');
   if(tmp) {
     TESTMODE=true;
