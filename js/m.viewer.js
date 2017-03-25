@@ -398,13 +398,13 @@ _nn+='<button id="'+_visible_name+'" class="pull-left"  style="display:inline-bl
 
 if(hasLandmarks) {
    if(href) {
-      _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand landmarks"></a><a href="'+href+'">'+label+'</a>';
+      _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand landmarks"></a><a href="'+href+'">'+label+'<span class="glyphicon glyphicon-link" style="font-size:12px;color:grey"></span></a>';
       } else {
       _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand landmarks">'+label+'</a>';
    }
   } else {
     if(href) {
-      _nn+='<a href="'+href+'">'+label+'</a>';
+      _nn+='<a href="'+href+'">'+label+'<span id="eye_'+_name+'" class="glyphicon glyphicon-link" style="font-size:12px;color:grey"></span></a>';
       } else {
         _nn+='<a>'+label+'</a>';
     }
@@ -454,9 +454,9 @@ function addLandmarkListEntry(name,i,color,label,href)
   var _landmark_name='#'+_name+'_landmark_list';
   var _nn='';
   if(href) {
-    _nn+='<div class="row col-md-12 col-xs-12"><input id='+_name+'_'+i+' type=checkbox checked="" onClick="toggleLandmark(\''+_name+'\','+i+');" value='+i+' name="landmark"></input><a href="'+href+'">'+label+'</a></div>';
+    _nn+='<div class="row col-md-12 col-xs-12"><input id='+_name+'_'+i+' type=checkbox checked="" onClick="toggleLandmark(\''+_name+'\','+i+');" value='+i+' name="landmark"></input><a href="'+href+'" style="color:inherit">'+" "+label+'</a><span class="glyphicon glyphicon-link" style="font-size:12px;color:grey"></span></div>';
     } else {
-      _nn+='<div class="row col-md-12 col-xs-12"><input id='+_name+'_'+i+' type=checkbox checked="" onClick="toggleLandmark(\''+_name+'\','+i+');" value='+i+' name="landmark">'+label+'</input></div>';
+      _nn+='<div class="row col-md-12 col-xs-12"><input id='+_name+'_'+i+' type=checkbox checked="" onClick="toggleLandmark(\''+_name+'\','+i+');" value='+i+' name="landmark" style="color:inherit">'+" "+label+'</input></div>';
   }
   jQuery(_landmark_name).append(_nn);
 }

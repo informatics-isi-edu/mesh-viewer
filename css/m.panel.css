@@ -6,13 +6,16 @@
 .panel {
   margin: 0;
   border: none;
+  overflow: hidden;
+}
+
+.panel-group {
 }
 
 .panel-body {
    padding: 10px;
    margin-left:10px;
    background-color: white;
-   overflow: hidden;
 }
 
 .panel-title {
