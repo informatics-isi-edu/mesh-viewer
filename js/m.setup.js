@@ -113,6 +113,8 @@ var myProcessArg=function(kvp0, kvp1) {
               var p = document.getElementById('landmarkbtn');
               p.style.display = '';
               hasLandmarks=true;
+              var d = document.getElementById('dummybtn');
+              d.style.display = '';
             }
             break;
             }
