@@ -44,6 +44,7 @@ html, body {
     left: 45%;
     color: white;
 }
+
 </style>
 
 <script type='text/javascript' src='js/jquery.js'></script>
@@ -83,24 +84,22 @@ html, body {
 <div class="container-fluid" style="height:inherit;">
   <div id='control-block' class="row col-md-12 col-xs-12" style="margin:10px" >
     <div class="btn-group btn-group-sm pull-left" role="group">
-      <button id="meshesbtn" class="btn btn-success" title="show mesh list" onclick="meshesClick();">
+      <button id="meshesbtn" class="btn btn-success" title="open the mesh and landmark controls panel" onclick="meshesClick();">
            <span class="glyphicon glyphicon-th"></span> 
               Meshes</button>
-      <button id="dummybtn" class="dummyC btn btn-success" style="padding:5px 0px 5px 10px;border-right:0; display:none;" onmouseover="landmarkOver()" onmouseout="landmarkOut()" onclick="toggleAllLandmark()">
+      <button id="landmarkbtn" class="btn btn-success" title="show or hide landmarks on the model"  onclick="toggleAllLandmark()" style="display:none;">
            <span class="glyphicon glyphicon-map-marker"></span>
-      </button>
-      <button id="landmarkbtn" class="btn btn-success" title="turn on/off landmarks"  onclick="toggleAllLandmark()" onmouseover="dummyOver()" onmouseout="dummyOut()" style="padding:5px 10px 5px 0px;display:none;border-left:0;">
-              Landmarks on</button>
-      <button id="clipbtn" class="btn btn-success" title="clip plane" onclick="clipClick();">
+              Show landmarks</button>
+      <button id="clipbtn" class="btn btn-success" title="open the clipping plane control panel" onclick="clipClick();">
            <span class="glyphicon glyphicon-scissors"></span> 
               Clip plane</button>
-      <button id="boxbtn" class="btn btn-success" title="turn on/off Bounding box" onclick="toggleBox();">
+      <button id="boxbtn" class="btn btn-success" title="show or hide model bounding box" onclick="toggleBox();">
            <span class="glyphicon glyphicon-picture"></span> 
-              Bounding box</button>
-      <button id="spinbtn" class="btn btn-success" title="animate model" onclick="spinView();">
+              Show bounding box</button>
+      <button id="spinbtn" class="btn btn-success" title="turn on or off animated rotation of the model" onclick="spinView()">
            <span class="glyphicon glyphicon-refresh"></span> 
               Rotate</button>
-      <button class="btn btn-success" title="reset model view" onclick="resetView();">
+      <button id="resetbtn" class="btn btn-success" title="reset orientation of  the model" onclick="resetView()" onmousedown="resetDown()">
            <span class="glyphicon glyphicon-home"></span>
                Reset</button>
 <!--
@@ -121,7 +120,7 @@ html, body {
 <!-- for meshes control -->
   <li id='meshes' class='navigationLi col-md-12 col-xs-12' style="background-color:#f9f9f9; display:none">
     <div id='meshesMenu' class='menu'>
-      <div id='meshesLabel' class='menuLabel' style="margin-left:20px;font-size:14px;font-weight:bold">MESH(es)<button class="pull-right" title="dismiss" onclick="dismissMeshes()" style="border:none;background-color:transparent"><span class="glyphicon glyphicon-remove"></span>
+      <div id='meshesLabel' class='menuLabel' style="margin-left:20px;font-size:14px;font-weight:bold">Meshes<button class="pull-right" title="dismiss" onclick="dismissMeshes()" style="border:none;background-color:transparent"><span class="glyphicon glyphicon-remove"></span>
 </button>
       </div>
 <!-- meshes items are added to here.. -->
@@ -131,13 +130,13 @@ html, body {
 <!-- for clip control -->
   <li id='clip' class='navigationLi col-md-12 col-xs-12' style="background-color:#f9f9f9; display:none">
     <div id='clipMenu' class='menu'>
-      <div id='clipLabel' class='menuLabel' style="margin-left:20px;font-size:14px;font-weight:bold">CLIPPING<button class="pull-right" title="dismiss" onclick="dismissClip()" style="border:none;background-color:transparent"><span class="glyphicon glyphicon-remove"></span>
+      <div id='clipLabel' class='menuLabel' style="margin-left:20px;font-size:14px;font-weight:bold">Clip Plane<button class="pull-right" title="dismiss" onclick="dismissClip()" style="border:none;background-color:transparent"><span class="glyphicon glyphicon-remove"></span>
 </button>
        </div>
 <!-- clip items are added to here.. -->
        <div class="row col-md-12 col-xs-12">
            <div class="row col-md-12 col-xs-12" style="margin-left:20px; margin-top:30px">
-             <div id='clip-plane' style='background:rgb(51, 122, 183);'> </div>
+             <div id='clip-plane' title='adjust clipping plane' style='background:rgb(51, 122, 183);'> </div>
            </div>
            <div class="row col-md-8 col-xs-8 pull-right">
              <button id="clipbtn" class="btn btn-xs btn-success" style="margin:10px" title="Reset clipping plane" onclick="reset_clipPlane();">Reset</button>

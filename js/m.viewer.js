@@ -339,6 +339,8 @@ function goView() {
 }
 
 function resetView() {
+window.console.log("in resetview");
+  resetUp();
   ren3d.resetViewAndRender();
 }
 
@@ -506,54 +508,19 @@ function selectLandmark()
   }
 }
 
-function landmarkOver()
-{
-var c=$('#dummybtn').css('background-color');
-$('#landmarkbtn').css('background-color', c);
-}
-
-function landmarkOut()
-{
-$('#landmarkbtn').css('background-color', "");
-}
-
-function dummyOver()
-{
-var c=$('#landmarkbtn').css('background-color');
-$('#dummybtn').css('background-color', c);
-}
-
-function dummyOut()
-{
-$('#dummybtn').css('background-color', "");
-}
-
-function toggleDummy() 
-{
-  if(show_landmark) {
-    $('#dummybtn').addClass('pick');
-    } else {
-      $('#dummybtn').removeClass('pick');
-  }
-}
-
 // similar to selectLandmark but for demo.html
 function toggleAllLandmark()
 {
   if(!load_landmark) {
     loadLandmark();
     $('#landmarkbtn').addClass('pick');
-    $('#landmarkbtn').text("Landmarks off");
-    $('#dummybtn').addClass('pick');
     return;
   }
 
   show_landmark = !show_landmark;
-  toggleDummy(); 
   var _list=document.getElementsByName("landmark");
   if(show_landmark) {
     $('#landmarkbtn').addClass('pick');
-    $('#landmarkbtn').text('Landmarks off');
     for (var i=0; i<_list.length;i++) {
       _list[i].checked=false;
       var _g=(_list[i].id).split('_').shift();
@@ -563,7 +530,6 @@ function toggleAllLandmark()
     }
     } else {
       $('#landmarkbtn').removeClass('pick');
-      $('#landmarkbtn').text('Landmarks on');
       for (var i=0; i<_list.length;i++) {
         _list[i].checked=true;
         var _g=(_list[i].id).split('_').shift();
@@ -899,7 +865,6 @@ function loadMesh() {
   }
   document.getElementById('lastbtn').style.display = 'none';
   document.getElementById('landmarkbtn').style.display = '';
-  document.getElementById('dummybtn').style.display = '';
 }
 
 // adding volume after initial rendering
