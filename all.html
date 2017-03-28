@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<head>
+<title >3D mesh test Viewer</title>
+<link href='css/bootstrap.css' rel='stylesheet' />
+<link href='css/jquery-ui.min.css' rel='stylesheet' />
+<link href='css/jquery-ui.theme.min.css' rel='stylesheet' />
+<link href='css/alertify.default.css' rel='stylesheet' />
+<link href='css/alertify.core.css' rel='stylesheet' />
+<link href='css/m.viewer.css' rel='stylesheet' />
+<style>
+.myDialogClass .ui-dialog-titlebar {
+  background:#1C94C4;
+  border:#1C94C4;
+}
+</style>
+
+<script type='text/javascript' src='js/jquery.js'></script>
+<script type='text/javascript' src='js/jquery-ui.min.js'></script>
+<script type='text/javascript' src='js/jquery.ui.slider.js'></script>
+<script type='text/javascript' src='js/alertify.min.js'></script>
+
+<!-- for debug 
+<script type="text/javascript" src="X/lib/google-closure-library/closure/goog/base.js"></script>
+<script type="text/javascript" src="X/xtk-deps.js"></script>
+<script type="text/javascript" src="js/default.js"></script>
+-->
+
+<!-- for regular -->  
+<script type="text/javascript" src="js/xtk.js"></script>
+
+<script type="text/javascript" src="js/m.viewer.js"></script>
+<script type="text/javascript" src="js/m.control.js"></script>
+<script type="text/javascript" src="js/m.setup.js"></script>
+
+</head>
+<body>
+<div id='TESTING'></div>
+<div id="dialog-label" style="display: none;">
+   <p id="dtext">PPP</p>
+   <br>
+   <div style="background:#d9d9d9">
+     <a id="dlink" href="">Gene expression</a>
+   </div>
+</div>
+<div id='mainView' style='background-color:black; border:solid 2px grey;  float: left; width:630px; height:500px; margin:10px;' ></div>
+<div id='loading'>
+  <h3 class='onair' 
+     style="position:absolute; height:400px; width:430px; text-align:right; color:white; margin-top:150px;">Loading data...</h3>
+</div>
+<div id='control' style='margin-top:20px;'>
+  <id id='forLabel'>
+    <input id="labelbtn" type="button" value="showLabel" onclick="toggleLabel();"/>
+    <input id="boxbtn" type="button" value="Bounding box" onclick="toggleBox();"/>
+    <input id="spinbtn" type="button" value="spin" onclick="spinView();"/>
+  </div>
+  <div>
+    <p>Clip Plane
+      <input id="clipbtn" type="button" value="reset"  style="margin-top:4px;" onclick="reset_clipPlane();"/>
+    </p>
+    <div id='clip-plane' style='margin-left: 660px; background:yellow;'> </div>
+  </div>
+  <div id='forTop' style='margin-top:10px;' >
+    <input id="volbtn" type="button" value="addVol" onclick="loadVol();"/>
+    <input id="lastbtn" type="button" value="addMoreMesh"  onclick="loadMesh();"/>
+    <input id="landmarkbtn" type="button" value="addLandmark" style="display:none"  onclick="loadLandmark();"/>
+  </div>
+  <div id='forVolume' style="margin-top:10px;display:none;">
+    <input id="3dbtn" type="button" value="3dVol" onclick="toggle3D();"/>
+    <input id="visbtn" type="button" value="noVol"  onclick="toggleVolume();"/>
+    <div id='sliders' style='width:300; margin-left:650px;'>
+      <p>Volume Opacity</p>
+      <div id='opacity-volume' style='margin-left: 10px; background:blue;'></div>
+      <p>Volume Thresholds</p>
+      <div id='threshold-volume' style='margin-left: 10px;'></div>
+    </div>
+  </div>
+  <div id='forMesh' style='margin-top:10px;'>
+    <input id="selectmeshbtn" type="button" value="excludeMesh"  onclick="selectMesh();"/>
+    <div id='TESTmeshlist'></div>
+  </div>
+  <div id='forLandmark' style="margin-top:10px;display:none;">
+    <input id="selectlandmarkbtn" type="button" value="excludeLandmark"  onclick="selectLandmark();"/>
+    <input id="toggleAddLandmarkbtn" type="button" value="addMore"  onclick="toggleAddLandmark();"/>
+    <div id='TESTlandmarklist'></div>
+  </div>
+  <div id='forDistance' style='margin-top:10px;display:none;'>
+    <input id="calcbtn" type="button" value="Distance" style="border-radius: 4px; border:2px solid grey;" onclick="toggleCalcDistance();"/>
+    <p id='result'></p>
+  </div>
+  <div id='forView' style='margin-top:10px' >
+    <input id="savebtn" type="button" value="saveView" onclick="saveView();"/>
+    <input id="gobtn" type="button" value="goView" onclick="goView();"/>
+    <input id="resetbtn" type="button" value="resetView" onclick="resetView();"/>
+    <input id="loadbtn" type="button" value="loadView" onclick="loadView();"/>
+  </div>
+<div id='2dViews' style="width:700px; display:none;">
+    <div id='sliceSag' style='background-color:black; border:solid 2px grey;  float: left; width:200px; height:200px; margin:10px;' >
+      <div id='Sag_slider' style="background:red;"></div>
+    </div>
+    <div id='sliceAx' style='background-color:black; border:solid 2px grey;  float: left; width:200px; height:200px; margin:10px;' >
+      <div id='Ax_slider' style="background:blue;"></div>
+    </div>
+    <div id='sliceCor' style='background-color:black; border:solid 2px grey;  float: left; width:200px; height:200px; margin:10px;' >
+      <div id='Cor_slider' style="background:green;"></div>
+    </div>
+</div>
+</body>
+</html>
+
