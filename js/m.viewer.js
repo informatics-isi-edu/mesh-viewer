@@ -339,8 +339,6 @@ function goView() {
 }
 
 function resetView() {
-window.console.log("in resetview");
-  resetUp();
   ren3d.resetViewAndRender();
 }
 
