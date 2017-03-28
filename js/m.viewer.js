@@ -68,7 +68,8 @@ jQuery(document).ready(function() {
   var m= document.getElementById('meshes');
   var h= Math.floor(h*0.80);
   var hh=h+"px";
-  m.style.maxHeight=hh;
+  if(m)
+    m.style.maxHeight=hh;
 //  window.console.log("height is..",hh);
 
   var tmp = document.getElementById('TESTING');
