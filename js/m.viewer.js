@@ -314,7 +314,7 @@ function cameraZoomingIn(inward,fast)
 //window.console.log("calling camera zooming..",fast);
 // var zoomStep = 20;
   var zoomStep = 2;
-  if (goog.isDefAndNotNull(fast) && fast) {
+  if (fast) {
     zoomStep = 1;
   }
   if(inward) {
