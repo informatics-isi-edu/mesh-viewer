@@ -122,16 +122,6 @@ jQuery(document).ready(function() {
 
   show_caption=false;
 
-// does not really work
-// replace the default interactor -- the element on DOM
-//  var _interactor = new X.interactor3D(ren3d._canvas);
-// suppress zoom in and out via mousewheel
-//  _interactor.config.MOUSEWHEEL_ENABLED = false;
-// disable default tooltip-caption 
-//  _interactor.config.HOVERING_ENABLED = false;
-//  _interactor.init();
-//  ren3d.interator=_interactor;
-
   ren3d.interactor.onMouseDown = function(event) {
     if(saved_color != null) {
       ren3d.get(saved_id).color = saved_color;
@@ -446,8 +436,11 @@ function initRenderer() {
 //  ren3d.interactor.config.HOVERING_ENABLED = false;
 
 // suppress zoom in and out via mousewheel
-  ren3d.interactor.config.MOUSEWHEEL_ENABLED = false;
-  ren3d.interactor.init();
+
+  if(!TESTMODE) {
+    ren3d.interactor.config.MOUSEWHEEL_ENABLED = false;
+    ren3d.interactor.init();
+  }
 }
 
 function RGBTohex(rgb) {
