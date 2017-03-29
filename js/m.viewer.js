@@ -28,8 +28,6 @@
  [0.53, 0.90, 0.90]  light aqua 
  [1.00, 0.46, 0.19]  light orange 
 */
-var nozoom=false;
-
 var TESTMODE=false; // to track demo.html and view.html requirements
 
 // global scoped data
@@ -134,12 +132,6 @@ jQuery(document).ready(function() {
 //  _interactor.init();
 //  ren3d.interator=_interactor;
 
-  ren3d.interactor.onMouseWheel = function(event) {
-  nozoom=false;
-  return;
-
-  };
-
   ren3d.interactor.onMouseDown = function(event) {
     if(saved_color != null) {
       ren3d.get(saved_id).color = saved_color;
@@ -149,14 +141,14 @@ jQuery(document).ready(function() {
     // grab the current mouse position
     var _pos = ren3d.interactor.mousePosition;
 //
-//???    var _c = ren3d.camera.unproject_(_pos[0], _pos[1], 0);
 window.console.log("  current mouse position is.."+_pos);
+//var _c = ren3d.camera.unproject_(_pos[0], _pos[1], 0);
 //window.console.log("  and c is "+_c[0]+" "+_c[1]+" "+_c[2]);
 
     // pick the current object
     var _id = ren3d.pick(_pos[0], _pos[1]);
 
-window.console.log("picking the current object..",_id);
+//window.console.log("picking the current object..",_id);
 
     if (_id != 0) {
       var _obj=ren3d.get(_id);
@@ -164,7 +156,7 @@ window.console.log("picking the current object..",_id);
 // how to calc on the fly or store landmark params somewhere.
 
       if(show_caption) {
-window.console.log("show_caption..");
+//window.console.log("show_caption..");
         if(ren3d.get(_id).caption) {
           var _j=ren3d.get(_id).caption;
 
@@ -179,7 +171,7 @@ window.console.log("  this object "+_id+ " does not have caption..");
       
       // highlight the object
       if(ren3d.get(_id).caption && !add_landmark) {
-window.console.log("  picking obj .."+_id);
+//window.console.log("  picking obj .."+_id);
         saved_color=ren3d.get(_id).color;
         var obj=ren3d.get(_id);
         saved_id=_id;
@@ -194,7 +186,7 @@ window.console.log("  picking obj .."+_id);
         var plist=[];
 // [[march_point,[roi_points]],...[march_point,[roi_points]]
 // stop at the first set roi_points that has length > 0 
-//window.console.log(" picking "+_id+ " no c=0;
+//window.console.log(" picking "+_id+ " no c=0");
         if(_targetlist != null) {
           for(var i=0; i<_targetlist.length; i++) {
             if(_targetlist[i][1].length !=0) {
@@ -238,30 +230,22 @@ window.console.log("  DID not pick anything");
     saved_id=null;
   }
 
+// zoom in alittle
+// replace default X camera's zoom,
+  ren3d.camera.zoomIn = function() {
+    
+    cameraZoomingIn(true,false);
+  };
+
+  ren3d.camera.zoomOut = function() {
+    cameraZoomingIn(false,false);
+  };
+
   ren3d.onShowtime = function(){
 //window.console.log("calling onShowtime");
     var loadingDiv = document.getElementById('loading');
     loadingDiv.style.display = 'none';
 
-// zoom in alittle
-// replace default X camera's zoom,
-    ren3d.camera.zoomIn = function(fast) {
-      if(nozoom) { 
-         nozoom = !nozoom;
-         return;
-      }
-      cameraZoomingIn(true,fast);
-    };
-
-    ren3d.camera.zoomOut = function(fast) {
-      if(nozoom) { 
-        nozoom = !nozoom;
-        return;
-      }
-      cameraZoomingIn(false,fast);
-    };
-
-    var _camera=ren3d.camera.position;
     if( first_time ) {
       first_time=false;
       setupClipSlider();
@@ -309,14 +293,25 @@ window.console.log("  DID not pick anything");
 
 // inward = true for zoomIn
 // inward = false for zoomOut
+// logic from xtk's source
 function cameraZoomingIn(inward,fast)
 {
-//window.console.log("calling camera zooming..",fast);
-// var zoomStep = 20;
-  var zoomStep = 2;
-  if (fast) {
+  var zoomStep = 20;
+  var tmp=ren3d.camera.view[14];
+  var s=Math.abs(tmp);
+
+  var slow=false;
+  if (fast!=undefined && !fast) {
+    slow=true;
+  }
+
+  if (s < 100 || slow) {
     zoomStep = 1;
   }
+window.console.log("zoomStep is..",zoomStep);
+
+// mouse->10, 19mesh -> 1000 range
+// 
   if(inward) {
     ren3d.camera.view[14] += zoomStep;
     } else {
@@ -367,7 +362,7 @@ function insertLandmark(_s,_obj) {
 window.console.log("PANIC, insertLandmark, should double check here..");
    var _g=_obj.file.split('/').pop().toLowerCase().split('.').shift();
    var _cap= { "description":"user added landmark" };
-window.console.log("==> insertLandmark, adding a new landmark for "+_g);
+//window.console.log("==> insertLandmark, adding a new landmark for "+_g);
 
    if( landmarks[_g] == null ) {
      landmarks[_g]=[];
@@ -440,18 +435,19 @@ function initRenderer() {
       return;
   }
   ren3d = new X.renderer3D();
-
   ren3d.container='mainView';
 
+  ren3d.init();
 
-  var r=ren3d;
+//http://stackoverflow.com/questions/10380269/change-the-config-attribute
+//-of-an-interactor-for-disabling-some-user-events?rq=1
 
-// suppress zoom in and out via mousewheel
-//  ren3d.interactor.config.MOUSEWHEEL_ENABLED = false;
 // disable default tooltip-caption 
 //  ren3d.interactor.config.HOVERING_ENABLED = false;
 
-  ren3d.init();
+// suppress zoom in and out via mousewheel
+  ren3d.interactor.config.MOUSEWHEEL_ENABLED = false;
+  ren3d.interactor.init();
 }
 
 function RGBTohex(rgb) {
@@ -513,7 +509,7 @@ _nn+= '</div>';
 _nn+= '</div> <!-- panel-body --> </div> </div> <!-- panel -->';
 
   jQuery('#meshlist').append(_nn);
-window.console.log(_nn);
+//window.console.log(_nn);
 }
 
 // TEST MEI
