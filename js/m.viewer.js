@@ -138,7 +138,7 @@ window.console.log("  current mouse position is.."+_pos);
     // pick the current object
     var _id = ren3d.pick(_pos[0], _pos[1]);
 
-//window.console.log("picking the current object..",_id);
+window.console.log("picking the current object..",_id);
 
     if (_id != 0) {
       var _obj=ren3d.get(_id);
@@ -298,7 +298,7 @@ function cameraZoomingIn(inward,fast)
   if (s < 100 || slow) {
     zoomStep = 1;
   }
-window.console.log("zoomStep is..",zoomStep);
+//window.console.log("zoomStep is..",zoomStep);
 
 // mouse->10, 19mesh -> 1000 range
 // 
@@ -1141,12 +1141,12 @@ function clip3d(near) {
   var _range= (ren3d.bbox[3] - ren3d.bbox[2] + 1);
   var _start=Math.abs(ren3d.camera.view[14])-(_range/2);
   var _near= (near * _range) + _start;
-window.console.log("clip3d, start "+_start+" and to "+_range+ " on target "+_near);
+//window.console.log("clip3d, start "+_start+" and to "+_range+ " on target "+_near);
   ren3d.camera.clip(_width,_height,_near);
 }
 
 function toggleBox() {
-window.console.log(" calling toggleBox..");
+//window.console.log(" calling toggleBox..");
   show_box = !show_box;
   if(show_box) {
     gbbox.visible=true;
@@ -1217,7 +1217,7 @@ function makeBBox(r,v) {
               _v.bbox[4] + (_v.bbox[5]-_v.bbox[4])
               ]
 
-   window.console.log("center is at.."+center[0]+" "+center[1]+" "+center[2]);
+//   window.console.log("center is at.."+center[0]+" "+center[1]+" "+center[2]);
 
 };
 
