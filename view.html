@@ -53,14 +53,14 @@ html, body {
 <script type='text/javascript' src='js/alertify.min.js'></script>
 <script type='text/javascript' src='js/bootstrap.js'></script>
 
-<!-- for debug  
+<!-- for debug -->  
 <script type="text/javascript" src="X/lib/google-closure-library/closure/goog/base.js"></script>
 <script type="text/javascript" src="X/xtk-deps.js"></script>
 <script type="text/javascript" src="js/default.js"></script>
--->
 
-<!-- for regular -->  
+<!-- for regular  
 <script type="text/javascript" src="js/xtk.js"></script>
+-->
 
 <script type="text/javascript" src="js/m.viewer.js"></script>
 <script type="text/javascript" src="js/m.control.js"></script>
@@ -96,6 +96,12 @@ html, body {
       <button id="clipbtn" class="btn btn-success" title="open the clipping plane control panel" onclick="clipClick();">
            <span class="glyphicon glyphicon-scissors"></span> 
               Clip plane</button>
+      <button class="btn btn-success" title="zoom in" onclick="zoomIn();">
+           <span class="glyphicon glyphicon-plus"></span>
+               Zoom in</button>
+      <button class="btn btn-success" title="zoom Out" onclick="zoomOut();">
+           <span class="glyphicon glyphicon-minus"></span>
+               Zoom out</button>
       <button id="spinbtn" class="btn btn-success" title="turn on or off animated rotation of the model" onclick="spinView()">
            <span class="glyphicon glyphicon-refresh"></span> 
               Rotate</button>

@@ -4,6 +4,23 @@
 //   viewer.html  (using default localhost data)
 //   viewer.html?model="http:..."
 //   viewer.html?mesh="http:..."&landmark="http:..."
+//
+// from view.html
+//    meshesClick()
+//    toggleAllLandmark()
+//    toggleBox()
+//    clipClick()
+//    spinView()
+//    resetView()
+//    zoomIn()
+//    zoomOut()
+//    jpgDownload(null) ** not enabled
+//    dismissMeshes()
+//    dismissClip()
+//    reset_clipPlane()
+//
+//   meshes, label is used to display on the legends
+//           id is used to link between mesh and its landmarks points
 //**************************************************************
 
 /*
@@ -11,6 +28,7 @@
  [0.53, 0.90, 0.90]  light aqua 
  [1.00, 0.46, 0.19]  light orange 
 */
+var nozoom=false;
 
 var TESTMODE=false; // to track demo.html and view.html requirements
 
@@ -57,7 +75,6 @@ var spin_view=false;
 // MAIN
 jQuery(document).ready(function() {
 
-
   if (webgl_detect() == false) {
     alertify.confirm("There is no webgl!!");
     throw new Error("WebGL is not enabled!");
@@ -95,18 +112,35 @@ jQuery(document).ready(function() {
     }
   }
 
+// load the landmarks
+  toggleAllLandmark();
+// suppress the showing of the landmarks
+  toggleAllLandmark();
+
 // stackoverflow.com/question/17462936/xtk-flickering-in-overlay-mesh
 // resolve multiple mesh transparent object being rendered causing flickering
 // effect
   ren3d.config.ORDERING_ENABLED=false;
 
-// disable default tooltip-caption 
-// XXX ???
-  ren3d.interactor.config.HOVERING_ENABLED = false;
   show_caption=false;
 
-  ren3d.interactor.onMouseDown = function() {
-window.console.log("mouse down..")
+// does not really work
+// replace the default interactor -- the element on DOM
+//  var _interactor = new X.interactor3D(ren3d._canvas);
+// suppress zoom in and out via mousewheel
+//  _interactor.config.MOUSEWHEEL_ENABLED = false;
+// disable default tooltip-caption 
+//  _interactor.config.HOVERING_ENABLED = false;
+//  _interactor.init();
+//  ren3d.interator=_interactor;
+
+  ren3d.interactor.onMouseWheel = function(event) {
+  nozoom=false;
+  return;
+
+  };
+
+  ren3d.interactor.onMouseDown = function(event) {
     if(saved_color != null) {
       ren3d.get(saved_id).color = saved_color;
 //      ren3d.get(saved_id).transform.translateY(-1);
@@ -121,6 +155,8 @@ window.console.log("  current mouse position is.."+_pos);
 
     // pick the current object
     var _id = ren3d.pick(_pos[0], _pos[1]);
+
+window.console.log("picking the current object..",_id);
 
     if (_id != 0) {
       var _obj=ren3d.get(_id);
@@ -143,7 +179,7 @@ window.console.log("  this object "+_id+ " does not have caption..");
       
       // highlight the object
       if(ren3d.get(_id).caption && !add_landmark) {
-//window.console.log("  picking obj .."+_id);
+window.console.log("  picking obj .."+_id);
         saved_color=ren3d.get(_id).color;
         var obj=ren3d.get(_id);
         saved_id=_id;
@@ -189,8 +225,8 @@ window.console.log("  DID not pick anything");
     }
   }
 
-  ren3d.interactor.onMouseUp = function() {
-//window.console.log("mouse up..");
+  ren3d.interactor.onMouseUp = function(event) {
+//window.console.log("on interator mouse up..");
     if(saved_color == null) {
       return;
     }
@@ -210,15 +246,19 @@ window.console.log("  DID not pick anything");
 // zoom in alittle
 // replace default X camera's zoom,
     ren3d.camera.zoomIn = function(fast) {
-      var zoomStep = 20;
-      if (goog.isDefAndNotNull(fast) && !fast) {
-        zoomStep = 1;
+      if(nozoom) { 
+         nozoom = !nozoom;
+         return;
       }
-      ren3d.camera.view[14] += zoomStep;
-      if(ren3d.camera.view[14] > 0) {
-// window.console.log("calling my zoomIn.. cap it..");
-        ren3d.camera.view[14]=0;
-      } 
+      cameraZoomingIn(true,fast);
+    };
+
+    ren3d.camera.zoomOut = function(fast) {
+      if(nozoom) { 
+        nozoom = !nozoom;
+        return;
+      }
+      cameraZoomingIn(false,fast);
     };
 
     var _camera=ren3d.camera.position;
@@ -266,6 +306,37 @@ window.console.log("  DID not pick anything");
 
   ren3d.render();
 })
+
+// inward = true for zoomIn
+// inward = false for zoomOut
+function cameraZoomingIn(inward,fast)
+{
+//window.console.log("calling camera zooming..",fast);
+// var zoomStep = 20;
+  var zoomStep = 2;
+  if (goog.isDefAndNotNull(fast) && fast) {
+    zoomStep = 1;
+  }
+  if(inward) {
+    ren3d.camera.view[14] += zoomStep;
+    } else {
+      ren3d.camera.view[14] -= zoomStep;
+  }
+  if(ren3d.camera.view[14] > 0) {
+//window.console.log("calling my zoomIn.. cap it..");
+    ren3d.camera.view[14]=0;
+  } 
+}
+
+function zoomIn()
+{
+  cameraZoomingIn(true);
+}
+
+function zoomOut()
+{
+  cameraZoomingIn(false);
+}
 
 //http://stackoverflow.com/questions/11871077/proper-way-to-detect-webgl-support
 function webgl_detect()
@@ -371,6 +442,15 @@ function initRenderer() {
   ren3d = new X.renderer3D();
 
   ren3d.container='mainView';
+
+
+  var r=ren3d;
+
+// suppress zoom in and out via mousewheel
+//  ren3d.interactor.config.MOUSEWHEEL_ENABLED = false;
+// disable default tooltip-caption 
+//  ren3d.interactor.config.HOVERING_ENABLED = false;
+
   ren3d.init();
 }
 
@@ -506,6 +586,7 @@ function selectLandmark()
       }
   }
 }
+
 
 // similar to selectLandmark but for demo.html
 function toggleAllLandmark()
@@ -941,7 +1022,8 @@ function loadLandmark() {
 function autoLandmark(){
 // bring in the random points
   for(var i=0; i<meshs.length; i++) {
-      hlite(meshs[i][0]);
+      var _m=meshs[i][0];
+      hlite(_m);
   }
   document.getElementById('autoLandmarkbtn').style.display = 'none';
 }
@@ -993,7 +1075,8 @@ function addSphere(loc, color, radius, caption) {
 
 function hlite(mesh) {
   var _f=mesh.file;
-  var _n=_f.split('/').pop().toLowerCase().split('.').shift();
+//  var _n=_f.split('/').pop().toLowerCase().split('.').shift();
+  var _n=mesh['id'];
   var numberOfPoints = mesh.points.count;
 //window.console.log("mesh of "+_n+" --> point count "+numberOfPoints);
   var max0,min0,max1,min1,max2,min2;

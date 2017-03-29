@@ -73,7 +73,7 @@ window.console.log("renderer's bbox is "+ren3d.bbox);
       }
     }
     ren3d.interactor.onMouseDown = function() {
-window.console.log("mouse down..")
+//window.console.log("mouse down..")
       if(add_landmark) {
         var _pos = ren3d.interactor.mousePosition;
 window.console.log("  current mouse position is.."+_pos[0]+","+_pos[1]);
