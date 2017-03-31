@@ -38,6 +38,7 @@ The JSON payload must be a serialized object that describes the model:
 - `caption`: a caption for the entire model, which may be longer text content
 - `boundingBox`: the default state of the bounding box feature. Set to `True` or `False` to show or hide the bounding box on load. Default: `False`.
 - `rotate`: the default state of the rotating animation of the model. Set to `True` or `False` to enable or disable animation on load. Default: `False`.
+- `color`: an array of float values indicating RGB color
 - `mesh`: an array of `mesh` objects described next
 - `volume`: a `volume` object described below
 - `landmark`: an array of `landmark` objects described below
@@ -78,6 +79,7 @@ An example model specification for a model with one mesh and one landmark.
     "id": "MOD1234",
     "label": "My Model",
     "caption": "This is my model. It is very nice. I hope you like it.",
+    "color": [0.00, 0.00, 0.00]
     "mesh" : [ {
         "id": "MESH7890",
         "url": "https://www.example.org/path/to/MOD1234.obj",
