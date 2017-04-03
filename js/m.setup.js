@@ -147,8 +147,12 @@ window.consow.log("NOT handling volume yet..");
             model_label=tmp['label'];
             model_id=tmp['id'];
             model_caption=tmp['caption'];
-            var _tmp=tmp['color'];
-            model_color=tmp['color']; // background color of viewer
+            var _tmp=tmp['color']; // background color of viewer
+            if(_tmp) {
+              model_color=_tmp;
+              } else {
+                model_color=[1,1,1];
+            }
             break;
             }
           case "view":
