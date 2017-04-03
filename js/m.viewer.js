@@ -510,7 +510,7 @@ _nn+='<div class="panel panel-default col-md-12 col-xs-12">';
 _nn+='<div class="panel-heading">';
 _nn+='<div class="panel-title row" style="background-color:transparent">'
 
-var _bb='<button id="'+_visible_name+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white"  onClick="openMesh('+i+',\'eye_'+_name+'\',\''+_opacity_name+'\',\''+_landmark_list+'\')" title="hide or show mesh"><span id="eye_'+_name+'" class="glyphicon glyphicon-eye-open" style="color:'+RGBTohex(color)+';"></span> </button>';
+var _bb='<button id="'+_visible_name+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white"  onClick="openMesh('+i+',\'eye_'+_name+'\',\''+_opacity_name+'\',\''+_landmark_list+'\')" title="click to change opacity of mesh"><span id="eye_'+_name+'" class="glyphicon glyphicon-eye-open" style="color:'+RGBTohex(color)+';"></span> </button>';
 
 var _bbb='<button id="'+_landmark_name+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white"  onClick="openLandmark('+i+',\''+_opacity_name+'\',\''+_landmark_list+'\')" title="click to expand landmarks"><span class="glyphicon glyphicon-map-marker" style="color:#407CCA"></span> </button>';
 
