@@ -4,6 +4,7 @@
 //   viewer.html  (using default localhost data)
 //   viewer.html?model="http:..."
 //   viewer.html?mesh="http:..."&landmark="http:..."
+//   viewer.html?...&view="";
 //
 // from view.html
 //    meshesClick()
@@ -53,6 +54,7 @@ var show_box = true;
 //==== Mesh ====
 var initial_mesh_list={};
 var mesh_list={};
+var mesh_opacity_list=[];
 var show_mesh = true;
 
 //==== Landmark ====
@@ -115,6 +117,7 @@ jQuery(document).ready(function() {
 // suppress the showing of the landmarks
   toggleAllLandmark();
 
+
 // stackoverflow.com/question/17462936/xtk-flickering-in-overlay-mesh
 // resolve multiple mesh transparent object being rendered causing flickering
 // effect
@@ -122,108 +125,12 @@ jQuery(document).ready(function() {
 
   show_caption=false;
 
-  ren3d.interactor.onMouseDown = function(event) {
-    if(saved_color != null) {
-      ren3d.get(saved_id).color = saved_color;
-//      ren3d.get(saved_id).transform.translateY(-1);
-      saved_color=null;
-    }
-    // grab the current mouse position
-    var _pos = ren3d.interactor.mousePosition;
-//
-window.console.log("  current mouse position is.."+_pos);
-//var _c = ren3d.camera.unproject_(_pos[0], _pos[1], 0);
-//window.console.log("  and c is "+_c[0]+" "+_c[1]+" "+_c[2]);
-
-    // pick the current object
-    var _id = ren3d.pick(_pos[0], _pos[1]);
-
-window.console.log("picking the current object..",_id);
-
-    if (_id != 0) {
-      var _obj=ren3d.get(_id);
-// this is particular to the mousehead mesh, need to figure out
-// how to calc on the fly or store landmark params somewhere.
-
-      if(show_caption) {
-//window.console.log("show_caption..");
-        if(ren3d.get(_id).caption) {
-          var _j=ren3d.get(_id).caption;
-
-          showLabel(_j['description'],_j['link']);
-window.console.log("trying to show Label..");
-window.console.log(_j['description'],_j['link']);
-          } else { 
-window.console.log("  this object "+_id+ " does not have caption..");
-        }
-        return; // show_caption
-      }
-      
-      // highlight the object
-      if(ren3d.get(_id).caption && !add_landmark) {
-//window.console.log("  picking obj .."+_id);
-        saved_color=ren3d.get(_id).color;
-        var obj=ren3d.get(_id);
-        saved_id=_id;
-        ren3d.get(_id).color = [1, 1, 1];
-//ren3d.get(saved_id).transform.translateY(1);
-        return;
-      }
-
-      if( add_landmark ) {
-        var _targetlist=ren3d.pick3d(_pos[0],_pos[1], 0.4, 0.08, _obj);
-        var m=[];
-        var plist=[];
-// [[march_point,[roi_points]],...[march_point,[roi_points]]
-// stop at the first set roi_points that has length > 0 
-//window.console.log(" picking "+_id+ " no c=0");
-        if(_targetlist != null) {
-          for(var i=0; i<_targetlist.length; i++) {
-            if(_targetlist[i][1].length !=0) {
-              m=_targetlist[i][0];
-              plist=_targetlist[i][1];
-              break;
-            }
-          }
-        }
-            
-        if(plist.length ==0)
-          return;
-
-        for(var i=0; i< plist.length; i++) {
-          var _p=plist[i];
-          if(i == 0) {
-            var _s=addSphere(_p,[0.25,1,0.4],0.04, _c);
-            insertLandmark(_s,_obj);
-            } else {
-              var _c={ "description":"fake landmark" };
-              var _s=addSphere(_p,[0.25,1,0.6],0.04, _c);
-              insertLandmark(_s,_obj);
-          }
-        }
-      }
-    } else {
-window.console.log("  DID not pick anything");
-    }
-  }
-
-  ren3d.interactor.onMouseUp = function(event) {
-//window.console.log("on interator mouse up..");
-    if(saved_color == null) {
-      return;
-    }
-    // grab the object and turn it red
-    ren3d.get(saved_id).color = saved_color;
-//window.console.log("  reset "+saved_id + " with "+saved_color);
-//    ren3d.get(saved_id).transform.translateY(-1);
-    saved_color=null;
-    saved_id=null;
-  }
+  ren3d.interactor.onMouseDown = myMouseDownFunc;
+  ren3d.interactor.onMouseUp = myMouseUpFunc;
 
 // zoom in alittle
 // replace default X camera's zoom,
   ren3d.camera.zoomIn = function() {
-    
     cameraZoomingIn(true,false);
   };
 
@@ -237,9 +144,11 @@ window.console.log("  DID not pick anything");
     loadingDiv.style.display = 'none';
 
     if( first_time ) {
+      setupViewerBackground();
       first_time=false;
       setupClipSlider();
       initClipSlider();
+      initOpacitySliders();
       if (vol) { // use bounding box if vol exists
         var _y=(vol.bbox[3] - vol.bbox[2] + 1)*1.3;
         ren3d.camera.position = [ 0, _y, 0];
@@ -251,7 +160,13 @@ window.console.log("  DID not pick anything");
 //window.console.log("using renderer3d, y max "+ren3d.bbox[3]+" y min "+ ren3d.bbox[2]);
 //window.console.log("and now "+_y);
       }
-      saveView();
+      if(!hasViews) {
+        saveView();
+        } else {
+          loadView();
+          goView();
+      }
+dumpView();
     }
     if(first_time_vol && vol) {
 
@@ -280,6 +195,116 @@ window.console.log("  DID not pick anything");
 
   ren3d.render();
 })
+
+function setupViewerBackground()
+{
+  var id='mainView';
+  if(model_color) {
+    var color=RGBTohex(model_color);
+    document.getElementById(id).style.backgroundColor = color;
+  }
+}
+
+function myMouseDownFunc() {
+window.console.log("in myMouseDownFunc..");
+  if(saved_color != null) {
+    ren3d.get(saved_id).color = saved_color;
+//      ren3d.get(saved_id).transform.translateY(-1);
+    saved_color=null;
+  }
+ // grab the current mouse position
+ var _pos = ren3d.interactor.mousePosition;
+//
+window.console.log("  current mouse position is.."+_pos);
+//var _c = ren3d.camera.unproject_(_pos[0], _pos[1], 0);
+//window.console.log("  and c is "+_c[0]+" "+_c[1]+" "+_c[2]);
+
+  // pick the current object
+  var _id = ren3d.pick(_pos[0], _pos[1]);
+
+window.console.log("picking the current object..",_id);
+
+  if (_id != 0) {
+    var _obj=ren3d.get(_id);
+// this is particular to the mousehead mesh, need to figure out
+// how to calc on the fly or store landmark params somewhere.
+
+    if(show_caption) {
+//window.console.log("show_caption..");
+      if(ren3d.get(_id).caption) {
+        var _j=ren3d.get(_id).caption;
+
+        showLabel(_j['description'],_j['link']);
+window.console.log("trying to show Label..");
+window.console.log(_j['description'],_j['link']);
+        } else { 
+window.console.log("  this object "+_id+ " does not have caption..");
+      }
+      return; // show_caption
+    }
+    
+    // highlight the object
+    if(ren3d.get(_id).caption && !add_landmark) {
+//window.console.log("  picking obj .."+_id);
+      saved_color=ren3d.get(_id).color;
+      var obj=ren3d.get(_id);
+      saved_id=_id;
+      ren3d.get(_id).color = [1, 1, 1];
+//ren3d.get(saved_id).transform.translateY(1);
+      return;
+    }
+
+// treat this as dynamic landmark to be added
+    if( add_landmark ) {  
+      var _targetlist=ren3d.pick3d(_pos[0],_pos[1], 0.4, 0.08, _obj);
+      var m=[];
+      var plist=[];
+// [[march_point,[roi_points]],...[march_point,[roi_points]]
+// stop at the first set roi_points that has length > 0 
+//window.console.log(" picking "+_id+ " no c=0");
+      if(_targetlist != null) {
+        for(var i=0; i<_targetlist.length; i++) {
+          if(_targetlist[i][1].length !=0) {
+            m=_targetlist[i][0];
+            plist=_targetlist[i][1];
+            break;
+          }
+        }
+      }
+          
+      if(plist.length ==0)
+        return;
+
+      for(var i=0; i< plist.length; i++) {
+        var _p=plist[i];
+        if(i == 0) {
+          var _s=addSphere(_p,[0.25,1,0.4],0.04, _c);
+          insertLandmark(_s,_obj);
+          } else {
+            var _c={ "description":"fake landmark" };
+            var _s=addSphere(_p,[0.25,1,0.6],0.04, _c);
+            insertLandmark(_s,_obj);
+        }
+      }
+    }
+  } else {
+window.console.log("  DID not pick anything");
+  }
+}
+
+function myMouseUpFunc() {
+window.console.log("in myMouseUpFunc..");
+  if(saved_color == null) {
+    return;
+  }
+  // grab the object and turn it red
+  ren3d.get(saved_id).color = saved_color;
+//window.console.log("  reset "+saved_id + " with "+saved_color);
+//    ren3d.get(saved_id).transform.translateY(-1);
+  saved_color=null;
+  saved_id=null;
+}
+
 
 // inward = true for zoomIn
 // inward = false for zoomOut
@@ -315,12 +340,12 @@ function cameraZoomingIn(inward,fast)
 
 function zoomIn()
 {
-  cameraZoomingIn(true);
+  cameraZoomingIn(true,false);
 }
 
 function zoomOut()
 {
-  cameraZoomingIn(false);
+  cameraZoomingIn(false,false);
 }
 
 //http://stackoverflow.com/questions/11871077/proper-way-to-detect-webgl-support
@@ -386,7 +411,14 @@ function saveView() {
   /* copy it over */
   for(var i=0; i< ren3d.camera.view.length; i++)
     save_view_matrix[i]=ren3d.camera.view[i];
-  stringIt("saveView", save_view_matrix);
+}
+
+function dumpView() {
+  var tmp_matrix=[];
+  // view: [ { "matrix": [..]} ]
+  for(var i=0; i< ren3d.camera.view.length; i++)
+    tmp_matrix[i]=ren3d.camera.view[i];
+  stringIt("dumpView", tmp_matrix);
 }
 
 function goView() {
@@ -402,10 +434,11 @@ function resetView() {
 function loadView() {
   var _v = view_load();
   if(_v) {
-    for(var i=0; i< _v.length; i++) 
-      ren3d.camera.view[i]=_v[i];
+    for(var i=0; i< _v.length; i++) { 
+      save_view_matrix[i]=_v[i];
+    }
   }
-  ren3d.render();
+  stringIt("loadView", save_view_matrix);
 }
 
 function spinView() {
@@ -453,17 +486,20 @@ function RGBTohex(rgb) {
 }
 
 //var name=fname.split('/').pop().toLowerCase().split('.').shift();
-function addMeshListEntry(label,name,i,color,href)
+function addMeshListEntry(label,name,i,color,opacity,href)
 {
   var _name = name.replace(/ +/g, "");
   var _collapse_name=i+'_collapse';
   var _visible_name=i+'_visible';
-  var _reset_name=_name+'_reset';
   var _reset_btn=_name+'_reset_btn';
 
 // landmark's name is always lowercased
   var gname=_name.toLowerCase();
-  var _landmark_name=gname+'_landmark_list';
+  var _landmark_list=gname+'_landmark_list';
+  var _opacity_name=gname+'_opacity';
+  var _opacity_reset=gname+'_opacity_reset';
+  var landmarkDiv=_landmark_list+'Div';
+  var sliderDiv=_opacity_name+'Div';
 
   var _nn='';
 
@@ -471,13 +507,16 @@ _nn+='<div class="panel panel-default col-md-12 col-xs-12">';
 _nn+='<div class="panel-heading">';
 _nn+='<div class="panel-title row" style="background-color:transparent">'
 
-_nn+='<button id="'+_visible_name+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white"  onClick="toggleMesh('+i+',\'eye_'+_name+'\')" title="hide or show mesh"><span id="eye_'+_name+'" class="glyphicon glyphicon-eye-open" style="color:'+RGBTohex(color)+';"></span> </button>';
+var _bb='<button id="'+_visible_name+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white"  onClick="openMesh('+i+',\'eye_'+_name+'\',\''+_opacity_name+'\',\''+_landmark_list+'\')" title="hide or show mesh"><span id="eye_'+_name+'" class="glyphicon glyphicon-eye-open" style="color:'+RGBTohex(color)+';"></span> </button>';
+
+var _bbb='<button id="'+_visible_name+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white"  onClick="openLandmark('+i+',\''+_opacity_name+'\',\''+_landmark_list+'\')" title="click to expand landmarks"><span class="glyphicon glyphicon-map-marker" style="color:#407CCA"></span> </button>';
 
 if(hasLandmarks) {
    if(href) {
-      _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand landmarks"></a><a href="'+href+'">'+label+'<span class="glyphicon glyphicon-link" style="font-size:12px;color:grey"></span></a>';
+      _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand landmarks">'+_bb+_bbb+'</a>';
+      _nn+='<a href="'+href+'">'+label+'<span class="glyphicon glyphicon-link" style="font-size:12px;color:grey"></span></a>';
       } else {
-      _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand landmarks"></a><a>'+label+'</a>';
+      _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand landmarks">'+_bb+_bbb+'</a><a>'+label+'</a>';
    }
   } else {
     if(href) {
@@ -486,34 +525,120 @@ if(hasLandmarks) {
         _nn+='<a>'+label+'</a>';
     }
 }
-_nn+='</div></div> <!-- panel-heading -->';
+_nn+='</div></div> <!-- panel-title, panel-heading -->';
 
-_nn+=' <div id="'+_collapse_name+'" class="panel-collapse collapse"> <div class="panel-body" >';
+_nn+=' <div id="'+_collapse_name+'" class="panel-collapse collapse">';
+_nn+=' <div class="panel-body" id="'+_name+ '" style="background-color:white;opacity:1;padding:0px;"> ';
 
-_nn+= ' <div id="'+_name+ '" class="row" style="background-color:white;opacity:1;"> ';
-/****
-_nn+= ' <button id="'+_reset_btn+ '" title="restore settings" type="button" class="btn btn-xs btn-primary pull-right" onclick="toggleResetMesh('+ i+ ','+ '\''+ name+ '\');" style="font-size:12px;margin-top:2px; margin-right:20px" >Reset</button>';
-****/
-_nn+= '<div id="'+_landmark_name+'" class="landmarkcontrol row pull-right">';
-_nn+= '</div>';
-_nn+= '</div>';
+_nn+= '<div id="'+landmarkDiv+'" class="row">';
+_nn+= '<div id="'+_landmark_list+'" class="landmarkcontrol row pull-right"></div>';
+_nn+='</div> <!-- landmark Div -->';
+
+var _ss= makeSliderStubs(_opacity_name, _opacity_reset, opacity);
+_nn+=_ss;
 
 // last bits
-_nn+= '</div> <!-- panel-body --> </div> </div> <!-- panel -->';
+_nn+= '</div> <!-- panel-body -->';
+_nn+= ' </div> </div> <!-- panel-collapse, panel -->';
 
   jQuery('#meshlist').append(_nn);
-//window.console.log(_nn);
+window.console.log("MM",_nn);
 }
 
 // TEST MEI
 function addTESTMeshListEntry(label,name,i,color)
 {
   var _name = name.replace(/ +/g, "");
-  var _nn='<button class="btn btn-sq-sm" disabled=true style="background-color:'+RGBTohex(color)+';"/><input id='+_name+' type=checkbox checked="" onClick=toggleMesh('+i+') value='+i+' name="mesh">'+label+'</input><br>';
+  var _nn='<button class="btn btn-sq-sm" disabled=true style="background-color:'+RGBTohex(color)+';"/><input id='+_name+' type=checkbox checked="" onClick=openMesh('+i+') value='+i+' name="mesh">'+label+'</input><br>';
   jQuery('#TESTmeshlist').append(_nn);
 //window.console.log(_nn);
 }
 
+function makeSliderStubs(sliderId, resetId, opacity)
+{ //mesh_opacity_list=[];
+  var _nn='';
+  var sliderDiv=sliderId+'Div';
+
+_nn+='<div id=\''+sliderDiv+'\' class="row col-md-12 col-xs-12" style="margin-top:10px; margin-left:5px; display:none" >';
+_nn+='<div id=\''+ sliderId +'\' title="move slider to adjust opacity" style="background:rgb(51, 122, 183)"> </div>';
+_nn+='<div class="row col-md-10 col-xs-10 pull-right">';
+_nn+='<button id=\''+resetId+'\' class="btn btn-xs btn-success" style="margin:10px; title="Reset opacity" onclick="reset_opacity(\''+sliderId+'\');">Reset</button>';
+_nn+='</div> <!-- opacityDiv -->';
+
+  mesh_opacity_list.push( { 'id':sliderId, 'reset':resetId , 'opacity':opacity});
+  return _nn;
+}
+
+function initOpacitySliders()
+{
+  var cnt=mesh_opacity_list.length;  
+  for(var i=0; i<cnt; i++) {
+    setupOpacitySlider(i);
+  }
+}
+
+function setupOpacitySlider(idx) {
+    var item=mesh_opacity_list[idx];
+    var sid=item['id'];
+    var rid=item['reset'];
+    var op=item['opacity'];
+    var _s='#'+sid;
+
+window.console.log("init..",_s, " ", sid);
+
+    jQuery(_s).slider({
+      slide: function( event, ui ) {
+       updateOpacitySlider(sid, ui.value);
+      }
+    });
+    jQuery(_s).width(100 + '%');
+    jQuery(_s).slider("option", "value", op); // by default
+    jQuery(_s).slider("option", "min", 0);
+    jQuery(_s).slider("option", "max", 1);
+    jQuery(_s).slider("option", "step", 0.1);
+}
+
+function updateOpacitySlider(sid, op) {
+window.console.log("sid opacity slider..", sid);
+  var cnt=mesh_opacity_list.length;
+  for(var i=0; i<cnt; i++) {
+     if(mesh_opacity_list[i]['id']==sid) {
+window.console.log(mesh_opacity_list[i]['id'], " and ", sid);
+       resetOpacitySlider(i, op);
+       return;
+     }
+  }
+}
+
+function reset_opacity(sid) {
+  var cnt=mesh_opacity_list.length;
+  for(var i=0; i<cnt; i++) {
+     if(mesh_opacity_list[i]['id']==sid) {
+       var op=mesh_opacity_list[i]['opacity'];
+       resetOpacitySlider(i, op);
+       return;
+     }
+  }
+}
+
+function resetOpacitySlider(idx,op) {
+window.console.log("reset opacity..",idx," with ",op);
+//  mesh_opacity_list[idx]['opacity']=op;
+  var item=mesh_opacity_list[idx];
+  var id=item['id'];
+
+  var _m=meshs[idx];
+  var _mm=_m[0];
+  _mm.opacity=op;
+  if(op == 0) {
+    _mm.visible=false;
+    } else {
+      _mm.visible=true;
+  }
+
+  var _s='#'+id;
+  jQuery(_s).slider("option", "value", op); // by default
+}
 
 function toggleAddLandmark() 
 {
@@ -528,14 +653,15 @@ function toggleAddLandmark()
 function addLandmarkListEntry(name,i,color,label,href)
 {
   var _name = name.replace(/ +/g, "");
-  var _landmark_name='#'+_name+'_landmark_list';
+  var _landmark_list='#'+_name+'_landmark_list';
   var _nn='';
   if(href) {
     _nn+='<div class="row col-md-12 col-xs-12"><input id='+_name+'_'+i+' type=checkbox checked="" onClick="toggleLandmark(\''+_name+'\','+i+');" value='+i+' name="landmark"></input><a href="'+href+'" style="color:inherit">'+" "+label+'</a><span class="glyphicon glyphicon-link" style="font-size:12px;color:grey"></span></div>';
     } else {
       _nn+='<div class="row col-md-12 col-xs-12"><input id='+_name+'_'+i+' type=checkbox checked="" onClick="toggleLandmark(\''+_name+'\','+i+');" value='+i+' name="landmark" style="color:inherit">'+" "+label+'</input></div>';
   }
-  jQuery(_landmark_name).append(_nn);
+  jQuery(_landmark_list).append(_nn);
+//window.console.log("LLL",_nn);
 }
 
 function addTESTLandmarkListEntry(name,i,color,label)
@@ -658,7 +784,41 @@ function toggleVolume() {
   }
 }
 
-function toggleMesh(i,eye_name) {
+function openLandmark(i,opacity_name,landmark_name) {
+  var _mesh=meshs[i][0];
+  var landmarkDiv=landmark_name+'Div';
+  var sliderDiv=opacity_name+'Div';
+  resetCollapse(i,'landmark',landmarkDiv, sliderDiv);
+  document.getElementById(landmarkDiv).style.display = '';
+  document.getElementById(sliderDiv).style.display = 'none';
+}
+
+// just in case if the panel was opened by the other open
+// then need to close it and then reopen it 
+function resetCollapse(i,type,landmarkDiv, sliderDiv) {
+  var _collapse_name=i+'_collapse';
+  var id='#'+_collapse_name;
+  if($(id).hasClass('in')) {
+    if(type == 'mesh') {
+      if(document.getElementById(sliderDiv).style.display == 'none') {
+        $(id).removeClass('in');
+      }
+    } else {
+      if(document.getElementById(landmarkDiv).style.display == 'none') {
+        $(id).removeClass('in');
+      }
+    }
+  }
+}
+
+function openMesh(i,eye_name,opacity_name,landmark_name) {
+  var landmarkDiv=landmark_name+'Div';
+  var sliderDiv=opacity_name+'Div';
+  resetCollapse(i,'mesh',landmarkDiv, sliderDiv);
+  document.getElementById(landmarkDiv).style.display = 'none';
+  document.getElementById(sliderDiv).style.display = '';
+
+/* SWITCH to using slider to control 
   var _mesh=meshs[i][0];
   var eye='#'+eye_name;
   _mesh.visible = !_mesh.visible;
@@ -667,6 +827,7 @@ function toggleMesh(i,eye_name) {
     } else {
       $(eye).removeClass('glyphicon-eye-open').addClass('glyphicon-eye-close');
   }
+*/
 }
 
 // check with points
@@ -904,7 +1065,11 @@ function addMesh(t) { // color, url, caption
   var _mesh = new X.mesh();
   _mesh.color = t['color'];
   _mesh.file = encodeURI(t['url']);
-  _mesh.caption = t['label']
+  _mesh.caption = t['label'];
+  var _opacity=t['opacity'];
+  if(_opacity == undefined)
+    _opacity=1;
+  _mesh.opacity = _opacity;
 //  _mesh.caption = t['caption'];
 //  _mesh.label = t['label'];
 //  _mesh.id= t['id'];
@@ -921,7 +1086,7 @@ function addMesh(t) { // color, url, caption
   if(TESTMODE) {
     addTESTMeshListEntry(_label,_name,_cnt-1,t['color']);
     } else {
-      addMeshListEntry(_label,_name,_cnt-1,t['color'],_href);
+      addMeshListEntry(_label,_name,_cnt-1,t['color'],_opacity,_href);
   }
 }
 

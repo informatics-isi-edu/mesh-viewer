@@ -14,10 +14,12 @@ var vol_json=null;
 var view_json=null;
 var anno_json=null;
 var hasLandmarks=false;
+var hasViews=false;
 
 var model_label=null;
 var model_id=null;
 var model_caption=null;
+var model_color=null;
 
 // should be a very small file and used for testing and so can ignore
 // >>Synchronous XMLHttpRequest on the main thread is deprecated
@@ -111,9 +113,11 @@ var myProcessArg=function(kvp0, kvp1) {
             // only when there are landmark that we enable the btn
             if(!TESTMODE) {
               var p = document.getElementById('landmarkbtn');
-              p.style.display = '';
-              hasLandmarks=true;
+              if(p) {
+                p.style.display = '';
+              }
             }
+            hasLandmarks=true;
             break;
             }
           case 'volume':
@@ -130,15 +134,37 @@ window.consow.log("NOT handling volume yet..");
             var klist=Object.keys(tmp);
             var mi=klist.find(function(m) { return m=='mesh' });
             var li=klist.find(function(m) { return m=='landmark'});
+            var vi=klist.find(function(m) { return m=='view'});
             if(mi != undefined) {
               myProcessArg('mesh',{ "mesh": tmp['mesh']}); 
             }
             if(li != undefined) {
               myProcessArg('landmark',{"landmark": tmp['landmark']});
             }
+            if(vi != undefined) {
+              myProcessArg('view',{"view": tmp['view']});
+            }
             model_label=tmp['label'];
             model_id=tmp['id'];
             model_caption=tmp['caption'];
+            var _tmp=tmp['color'];
+            model_color=tmp['color']; // background color of viewer
+            break;
+            }
+          case "view":
+            { // "-1,0,0,0,0,0,1,0,0,1,0,0,0,0,-10.206781387329102,1"
+            var tmp;
+            if( typeof kvp1 === 'object') { // already in parsed
+              tmp=kvp1;
+              } else { // this is an url
+                var t=kvp1.trim();
+                var tt=ckExist(t);
+                tt=trimQ(tt);
+                tmp= JSON.parse(tt);
+            }
+            view_json=tmp;
+            hasViews=true;
+window.console.log("loading the view..");
             break;
             }
           default:
@@ -161,6 +187,7 @@ var foo_initial_mesh_json='\
       "label": "Back Skull",\
       "url": "http://localhost/data/3mesh/JI296CCMB.obj",\
       "color": [1.00, 0.80, 0.40],\
+      "opacity": 1,\
       "caption": {\
                    "description":"a skull mesh at the back of head",\
                    "link": { "label":"gene expression",\
@@ -172,6 +199,7 @@ var foo_initial_mesh_json='\
       "label": "Maxilla",\
       "url": "http://localhost/data/3mesh/Maxilla.obj",\
       "color": [1.00, 0.46, 0.19],\
+      "opacity": 1,\
       "caption": {\
                    "description":"a Mandible Maxilla",\
                    "link": { "label":"gene expression",\
@@ -188,6 +216,7 @@ var foo_mesh_json='\
       "label": "Mandible",\
       "url": "http://localhost/data/3mesh/Mandible.obj",\
       "color": [0.53, 0.90, 0.90],\
+      "opacity": 1,\
       "caption": {\
                    "description":"a Mandible Mandible",\
                    "link": { "label":"gene expression",\
@@ -326,8 +355,8 @@ var foo_view_json='\
 // just one for now
 function view_load() {
    if(view_json) {
-     var _v=$.parseJSON(view_json);
-     return _v['view'][0]['matrix'];
+       var _v= view_json['view'][0]['matrix'];
+     return _v;
    } 
    return null;
 }

@@ -11,12 +11,14 @@
 debug=true;
 
 var add_landmark=false;
+var TESTMODE=false;
 
 // global scoped data
 var ren3d=null; // 3d renderer
 
 var meshs=[];   // mesh objects
 var vol=null;   // volume objects
+var landmarks=[];
 var first_time=true;
 var first_time_vol=true;
 
@@ -49,6 +51,7 @@ window.onload = function() {
   for (var i=0;i<initial_mesh_list['mesh'].length;i++) {
      addMesh(initial_mesh_list['mesh'][i]);
   }
+  loadLandmark();
 
 // stackoverflow.com/question/17462936/xtk-flickering-in-overlay-mesh
 // resolve multiple mesh transparent object being rendered causing flickering
@@ -246,49 +249,12 @@ function addVolume(t) { // color, url, caption, <id/new>
   jQuery('#2dViews').show();
 }
 
-// create mesh object 
-//    add to the local mesh list
-//    add to 3D renderer
-//    add to ui's meshlist 
-function addMesh(t) { // color, url, caption
-  var _mesh = new X.mesh();
-  _mesh.color = t['color'];
-  _mesh.file = encodeURI(t['url']);
-  _mesh.caption = JSON.stringify(t['caption']);
-printDebug("caption is.."+_mesh.caption);
-  ren3d.add(_mesh);
-
-  var _cnt=meshs.push(_mesh);
-  addMeshListEntry(t['url'],_cnt,t['color']);
-}
-
-// adding a new mesh after rendering
-function loadMesh() {
-  for (var i=0;i<mesh_list['mesh'].length;i++) {
-     addMesh(mesh_list['mesh'][i]);
-  }
-  document.getElementById('lastbtn').style.display = 'none';
-  document.getElementById('landmarkbtn').style.display = '';
-}
-
 // adding volume after initial rendering
 function loadVol() {
   var _v=vol_load();
   addVolume(_v['volume'][0]); // one and only one
   document.getElementById('volbtn').style.display = 'none';
-  var loadingDiv = document.getElementById('loading');
-  loadingDiv.style.display = '';
   jQuery('#forVolume').show();
-}
-
-// given a mesh name, find the mesh that matches it
-function lookupMesh(n) {  
-  for(var i=0; i< meshs.length; i++) {
-    var _n=meshs[i].file.split('/').pop().toLowerCase().split('.').shift();
-    if( _n == n )
-      return meshs[i];
-  }
-  return null;
 }
 
 function clip3d(near) {
@@ -428,4 +394,126 @@ function showLabel(jval,lval) {
      _p.replaceWith(_nn);
     }
   });//dialog
+}
+
+/*XXX*************************************************/
+
+function addLandmarkListEntry(name,i,color,label,href)
+{
+  var _name = name.replace(/ +/g, "");
+  var _landmark_name='#'+_name+'_landmark_list';
+  var _nn='';
+  if(href) {
+    _nn+='<div class="row col-md-12 col-xs-12"><input id='+_name+'_'+i+' type=checkbox checked="" onClick="toggleLandmark(\''+_name+'\','+i+');" value='+i+' name="landmark"></input><a href="'+href+'" style="color:inherit">'+" "+label+'</a><span class="glyphicon glyphicon-link" style="font-size:12px;color:grey"></span></div>';
+    } else {
+      _nn+='<div class="row col-md-12 col-xs-12"><input id='+_name+'_'+i+' type=checkbox checked="" onClick="toggleLandmark(\''+_name+'\','+i+');" value='+i+' name="landmark" style="color:inherit">'+" "+label+'</input></div>';
+  }
+  jQuery(_landmark_name).append(_nn);
+}
+
+function addTESTLandmarkListEntry(name,i,color,label)
+{
+  var _name = name.replace(/ +/g, "");
+  var _nn='<button class="btn" disabled=true style="background-color:'+RGBTohex(color)+';"/><input type="checkbox" class="mychkbox" id="'+_name+'_'+i+'d" onClick="toggleDistance(\''+_name+'\','+i+');"/><label for="'+_name+'_'+i+'d" style="display:none" name="distance"></label><input id='+_name+'_'+i+' type=checkbox checked="" onClick="toggleLandmark(\''+_name+'\','+i+');" value='+i+' name="landmark">'+label+'</input><br>';
+    jQuery('#TESTlandmarklist').append(_nn);
+window.console.log(_nn);
+}
+
+function getHref(t) {
+  var _cap=t['caption'];
+  if(_cap && _cap['link']) {
+     var href= _cap['link']['url'];
+     window.console.log(">>",href,"<<");
+     return href;
+  }
+  return(null);
+}
+
+// create mesh object 
+//    add to the local mesh list
+//    add to 3D renderer
+//    add to ui's meshlist 
+function addMesh(t) { // color, url, caption
+  var _mesh = new X.mesh();
+  _mesh.color = t['color'];
+  _mesh.file = encodeURI(t['url']);
+  _mesh.caption = t['label']
+//  _mesh.caption = t['caption'];
+//  _mesh.label = t['label'];
+//  _mesh.id= t['id'];
+  ren3d.add(_mesh);
+
+// meshs[0] is the _mesh, meshs[1] is the original object
+  var _cnt=meshs.push([_mesh,t]);
+  var _name=t['id'];
+  var _label=t['label'];
+ 
+  var _href=getHref(t);
+  if(TESTMODE) {
+    addTESTMeshListEntry(_label,_name,_cnt-1,t['color']);
+    } else {
+      addMeshListEntry(_label,_name,_cnt-1,t['color'],_href);
+  }
+}
+
+// adding a new mesh after rendering
+function loadMesh() {
+  if(mesh_list) {
+    for (var i=0;i<mesh_list['mesh'].length;i++) {
+       addMesh(mesh_list['mesh'][i]);
+    }
+  }
+  document.getElementById('lastbtn').style.display = 'none';
+  document.getElementById('landmarkbtn').style.display = '';
+}
+
+
+function lookupMeshByID(id) {
+window.console.log("lookupMeshByID..",id);
+  for(var i=0; i< meshs.length; i++) {
+    var _m=meshs[i][1];
+    var _id=_m['id'].toLowerCase();
+    if( _id == id )
+      return meshs[i][0]; // return the X.mesh
+  }
+  return null;
+}
+
+
+function addLandmark(p) {
+  var _g=p['group'].toLowerCase();
+  var _mesh=lookupMeshByID(_g);
+  if( _mesh == null ) {
+    window.console.log("BAD BAD.. can not find mesh for "+_g);
+    return;
+  }
+  var _c=p['color'];
+  var _r=p['radius'];
+  var _loc=p['point'];
+  var _cap=p['caption'];
+  var _label=p['label'];
+  var _s=addSphere(_loc, _c, _r, _cap);
+
+  if( landmarks[_g] == null ) {
+    landmarks[_g]=[];
+    landmarks[_g].push(_s);
+    } else {
+      landmarks[_g].push(_s);
+  }
+
+  var _href=getHref(p);
+  if(TESTMODE) {
+    addTESTLandmarkListEntry(_g,landmarks[_g].length,_mesh.color,_label);
+    } else {
+      addLandmarkListEntry(_g,landmarks[_g].length,_mesh.color,_label,_href);
+  }
+}
+
+function loadLandmark() {
+  var _l=landmark_load();
+  if(_l) {
+    for(var i=0; i< _l['landmark'].length;i++) {
+      addLandmark(_l['landmark'][i]);
+    }
+  }
 }

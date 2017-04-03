@@ -1,20 +1,3 @@
-.glyphicon.glyphicon-one-fine-full-dot {
-    margin-top: -.7em;
-    overflow: hidden;
-}
-.glyphicon.glyphicon-one-fine-full-dot:before {
-    content:"\25cf";
-    font-size: 2em;
-    color: #337ab7;
-}
-.glyphicon.glyphicon-one-fine-empty-dot {
-    margin-top: -.7em;
-    overflow: hidden;
-}
-.glyphicon.glyphicon-one-fine-empty-dot:before {
-    content:"\25cb";
-    font-size: 2em;
-}
 /* bootstrap's panel */
 .list-group-item {
        margin-left: 10px;
