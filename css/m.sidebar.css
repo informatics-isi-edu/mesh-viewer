@@ -105,3 +105,8 @@
   color:black;
 }
 
+.h-slider {
+  background: -webkit-linear-gradient(left, hsl(0,0%,98%) 1%,hsl(214,100%,36%) 100%);
+  background: -moz-linear-gradient(left, hsl(0,0%,98%) 1%,hsl(214,100%,36%) 100%);
+}
+

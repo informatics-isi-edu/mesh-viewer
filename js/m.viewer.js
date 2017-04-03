@@ -199,6 +199,7 @@ dumpView();
 function setupViewerBackground()
 {
   var id='mainView';
+window.console.log("model_color is..",model_color);
   if(model_color) {
     var color=RGBTohex(model_color);
     document.getElementById(id).style.backgroundColor = color;
@@ -316,11 +317,11 @@ function cameraZoomingIn(inward,fast)
   var s=Math.abs(tmp);
 
   var slow=false;
-  if (fast!=undefined && !fast) {
+  if (fast!=undefined && !fast && s<100) {
     slow=true;
   }
 
-  if (s < 100 || slow) {
+  if (slow) {
     zoomStep = 1;
   }
 //window.console.log("zoomStep is..",zoomStep);
@@ -429,6 +430,7 @@ function goView() {
 
 function resetView() {
   ren3d.resetViewAndRender();
+  goView();
 }
 
 function loadView() {
@@ -491,6 +493,7 @@ function addMeshListEntry(label,name,i,color,opacity,href)
   var _name = name.replace(/ +/g, "");
   var _collapse_name=i+'_collapse';
   var _visible_name=i+'_visible';
+  var _landmark_name=i+'_landmark'; // place holder
   var _reset_btn=_name+'_reset_btn';
 
 // landmark's name is always lowercased
@@ -509,7 +512,7 @@ _nn+='<div class="panel-title row" style="background-color:transparent">'
 
 var _bb='<button id="'+_visible_name+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white"  onClick="openMesh('+i+',\'eye_'+_name+'\',\''+_opacity_name+'\',\''+_landmark_list+'\')" title="hide or show mesh"><span id="eye_'+_name+'" class="glyphicon glyphicon-eye-open" style="color:'+RGBTohex(color)+';"></span> </button>';
 
-var _bbb='<button id="'+_visible_name+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white"  onClick="openLandmark('+i+',\''+_opacity_name+'\',\''+_landmark_list+'\')" title="click to expand landmarks"><span class="glyphicon glyphicon-map-marker" style="color:#407CCA"></span> </button>';
+var _bbb='<button id="'+_landmark_name+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white"  onClick="openLandmark('+i+',\''+_opacity_name+'\',\''+_landmark_list+'\')" title="click to expand landmarks"><span class="glyphicon glyphicon-map-marker" style="color:#407CCA"></span> </button>';
 
 if(hasLandmarks) {
    if(href) {
@@ -520,9 +523,10 @@ if(hasLandmarks) {
    }
   } else {
     if(href) {
-      _nn+='<a href="'+href+'">'+label+'<span id="eye_'+_name+'" class="glyphicon glyphicon-link" style="font-size:12px;color:grey"></span></a>';
+      _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand landmarks">'+_bb+'</a>';
+      _nn+='<a href="'+href+'">'+label+'<span class="glyphicon glyphicon-link" style="font-size:12px;color:grey"></span></a>';
       } else {
-        _nn+='<a>'+label+'</a>';
+        _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand landmarks">'+_bb+'</a><a>'+label+'</a>';
     }
 }
 _nn+='</div></div> <!-- panel-title, panel-heading -->';
@@ -560,7 +564,10 @@ function makeSliderStubs(sliderId, resetId, opacity)
   var sliderDiv=sliderId+'Div';
 
 _nn+='<div id=\''+sliderDiv+'\' class="row col-md-12 col-xs-12" style="margin-top:10px; margin-left:5px; display:none" >';
+_nn+='<div id=\''+ sliderId +'\' title="move slider to adjust opacity" class="h-slider"> </div>';
+/*
 _nn+='<div id=\''+ sliderId +'\' title="move slider to adjust opacity" style="background:rgb(51, 122, 183)"> </div>';
+*/
 _nn+='<div class="row col-md-10 col-xs-10 pull-right">';
 _nn+='<button id=\''+resetId+'\' class="btn btn-xs btn-success" style="margin:10px; title="Reset opacity" onclick="reset_opacity(\''+sliderId+'\');">Reset</button>';
 _nn+='</div> <!-- opacityDiv -->';
