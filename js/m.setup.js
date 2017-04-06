@@ -111,11 +111,9 @@ var myProcessArg=function(kvp0, kvp1) {
             }
             landmark_json=tmp;
             // only when there are landmark that we enable the btn
-            if(!TESTMODE) {
-              var p = document.getElementById('landmarkbtn');
-              if(p) {
-                p.style.display = '';
-              }
+            var p = document.getElementById('landmarkbtn');
+            if(p) {
+              p.style.display = '';
             }
             hasLandmarks=true;
             break;
@@ -268,7 +266,7 @@ var foo_landmark_json='\
          "point": [8.502269744873047, 6.578330039978027, 69.94249725341797],\
          "caption": { \
                  "description":"Tail end of Skull, JI296CCMB",\
-                 "link": { "label": "point",\
+                 "link": { "label": "landmark",\
                            "url":"https://www.example.com/path/to/info/about/LND5678" }\
                     }\
                  },\
@@ -281,7 +279,7 @@ var foo_landmark_json='\
          "point": [15.606300354003906, 9.819620132446289,71.14600372314453],\
          "caption": { \
                  "description":"Front tip of Skull",\
-                 "link": { "label":"point",\
+                 "link": { "label":"landmark",\
                            "url":"https://www.example.com/path/to/info/about/LND5679" }\
                     }\
                   },\
@@ -294,7 +292,7 @@ var foo_landmark_json='\
          "point": [7.819620132446289,10.14050006866455,67.17459869384766],\
          "caption": { \
                  "description":"Lowermost tip of Skull",\
-                 "link": { "label":"point",\
+                 "link": { "label":"landmark",\
                            "url":"https://www.example.com/path/to/info/about/LND5680" }\
                     }\
                   },\
@@ -307,7 +305,7 @@ var foo_landmark_json='\
          "point": [13.516400337219238,11.584600448608398,70.9854965209961],\
          "caption": { \
                  "description":"Lowermost tip of Maxilla",\
-                 "link": { "label":"point",\
+                 "link": { "label":"landmark",\
                            "url":"https://www.example.com/path/to/info/about/LND5681" }\
                     }\
                   },\
@@ -320,7 +318,7 @@ var foo_landmark_json='\
          "point": [11.42609977722168,12.432299613952637,70.46399688720703],\
          "caption": { \
                  "description":"Superior tip",\
-                 "link": { "label":"point",\
+                 "link": { "label":"landmark",\
                            "url":"https://www.example.com/path/to/info/about/LND5682" }\
                     }\
                    },\
@@ -333,7 +331,7 @@ var foo_landmark_json='\
          "point": [15.551799774169922,9.578940391540527,69.4209976196289],\
          "caption": { \
                  "description":"Anterior tip",\
-                 "link": { "label":"point",\
+                 "link": { "label":"landmark",\
                            "url":"https://www.example.com/path/to/info/about/LND5683" }\
                      }\
              } ]\

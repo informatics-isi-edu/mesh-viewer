@@ -15,7 +15,7 @@
 //    resetView()
 //    zoomIn()
 //    zoomOut()
-//    jpgDownload(null) ** not completed
+//    jpgDownload(null) ** not enabled
 //    dismissMeshes()
 //    dismissClip()
 //    reset_clipPlane()
@@ -29,6 +29,7 @@
  [0.53, 0.90, 0.90]  light aqua 
  [1.00, 0.46, 0.19]  light orange 
 */
+var TESTMODE=false; // to track demo.html and view.html requirements
 
 // global scoped data
 var ren3d=null; // 3d renderer
@@ -80,16 +81,19 @@ jQuery(document).ready(function() {
     return;
   }
 
-  // set the height of meshes slideout
   var h=window.innerHeight;
   var m= document.getElementById('meshes');
   var h= Math.floor(h*0.80);
   var hh=h+"px";
-//  window.console.log("height is..",hh);
-  if(m) {
+  if(m)
     m.style.maxHeight=hh;
-  }
+//  window.console.log("height is..",hh);
 
+  var tmp = document.getElementById('TESTING');
+  if(tmp) {
+    TESTMODE=true;
+  }
+  
   var args=document.location.href.split('?');
   if (args.length >= 2) { // there are some url to pick up
     processArgs(args);
@@ -120,6 +124,9 @@ jQuery(document).ready(function() {
   ren3d.config.ORDERING_ENABLED=false;
   show_caption=false;
 
+//  ren3d.interactor.onMouseDown = myMouseDownFunc;
+//  ren3d.interactor.onMouseUp = myMouseUpFunc;
+
 // zoom in alittle
 // replace default X camera's zoom,
   ren3d.camera.zoomIn = function() {
@@ -141,7 +148,7 @@ jQuery(document).ready(function() {
       setupClipSlider();
       initClipSlider();
       initOpacitySliders();
-      if (vol) { // use vol bounding box if vol exists
+      if (vol) { // use bounding box if vol exists
         var _y=(vol.bbox[3] - vol.bbox[2] + 1)*1.3;
         ren3d.camera.position = [ 0, _y, 0];
 //window.console.log("using vol, y max "+vol.bbox[3]+" y min "+ vol.bbox[2]);
@@ -158,6 +165,7 @@ jQuery(document).ready(function() {
           loadView();
           goView();
       }
+dumpView();
     }
     if(first_time_vol && vol) {
 
@@ -191,13 +199,13 @@ jQuery(document).ready(function() {
 function setupViewerBackground()
 {
   var id='mainView';
+window.console.log("model_color is..",model_color);
   if(model_color) {
     var color=RGBTohex(model_color);
     document.getElementById(id).style.backgroundColor = color;
   }
 }
 
-// NOT IN USE
 function myMouseDownFunc() {
 window.console.log("in myMouseDownFunc..");
   if(saved_color != null) {
@@ -285,7 +293,6 @@ window.console.log("  DID not pick anything");
   }
 }
 
-// NOT IN USE
 function myMouseUpFunc() {
 window.console.log("in myMouseUpFunc..");
   if(saved_color == null) {
@@ -367,9 +374,8 @@ function webgl_detect()
   return false;
 }
 
-// NOT IN USE, dynamically insert landmark being pointed at
 function insertLandmark(_s,_obj) {
-//window.console.log("PANIC, insertLandmark, should double check here..");
+window.console.log("PANIC, insertLandmark, should double check here..");
    var _g=_obj.file.split('/').pop().toLowerCase().split('.').shift();
    var _cap= { "description":"user added landmark" };
 //window.console.log("==> insertLandmark, adding a new landmark for "+_g);
@@ -384,7 +390,6 @@ function insertLandmark(_s,_obj) {
    addLandmarkListEntry(_g,landmarks[_g].length,_obj.color,_label,null);
 }
 
-// NOT IN USE
 function askForLabel(g)
 {
   return "new landmark for "+g;
@@ -462,14 +467,15 @@ function initRenderer() {
 //http://stackoverflow.com/questions/10380269/change-the-config-attribute
 //-of-an-interactor-for-disabling-some-user-events?rq=1
 
-//limit mouse interactions
 // disable default tooltip-caption 
+//  ren3d.interactor.config.HOVERING_ENABLED = false;
+
 // suppress zoom in and out via mousewheel
-  { 
+
+  if(!TESTMODE) {
     ren3d.interactor.config.HOVERING_ENABLED = false;
-// suppress the picking by xtk due to webgl2
-//    ren3d.interactor.onMouseDown = myMouseDownFunc;
-//    ren3d.interactor.onMouseUp = myMouseUpFunc;
+    ren3d.interactor.onMouseDown = myMouseDownFunc;
+    ren3d.interactor.onMouseUp = myMouseUpFunc;
     ren3d.interactor.config.MOUSEWHEEL_ENABLED = false;
     ren3d.interactor.init();
   }
@@ -543,7 +549,16 @@ _nn+= '</div> <!-- panel-body -->';
 _nn+= ' </div> </div> <!-- panel-collapse, panel -->';
 
   jQuery('#meshlist').append(_nn);
-//window.console.log("MM",_nn);
+window.console.log("MM",_nn);
+}
+
+// TEST MEI
+function addTESTMeshListEntry(label,name,i,color)
+{
+  var _name = name.replace(/ +/g, "");
+  var _nn='<button class="btn btn-sq-sm" disabled=true style="background-color:'+RGBTohex(color)+';"/><input id='+_name+' type=checkbox checked="" onClick=openMesh('+i+') value='+i+' name="mesh">'+label+'</input><br>';
+  jQuery('#TESTmeshlist').append(_nn);
+//window.console.log(_nn);
 }
 
 function makeSliderStubs(sliderId, resetId, opacity)
@@ -579,7 +594,7 @@ function setupOpacitySlider(idx) {
     var op=item['opacity'];
     var _s='#'+sid;
 
-//window.console.log("init..",_s, " ", sid);
+window.console.log("init..",_s, " ", sid);
 
     jQuery(_s).slider({
       slide: function( event, ui ) {
@@ -594,11 +609,11 @@ function setupOpacitySlider(idx) {
 }
 
 function updateOpacitySlider(sid, op) {
-//window.console.log("sid opacity slider..", sid);
+window.console.log("sid opacity slider..", sid);
   var cnt=mesh_opacity_list.length;
   for(var i=0; i<cnt; i++) {
      if(mesh_opacity_list[i]['id']==sid) {
-//window.console.log(mesh_opacity_list[i]['id'], " and ", sid);
+window.console.log(mesh_opacity_list[i]['id'], " and ", sid);
        resetOpacitySlider(i, op);
        return;
      }
@@ -635,6 +650,16 @@ window.console.log("reset opacity..",idx," with ",op);
   jQuery(_s).slider("option", "value", op); // by default
 }
 
+function toggleAddLandmark() 
+{
+  add_landmark = ! add_landmark;
+  if(add_landmark) {
+    jQuery('#toggleAddLandmarkbtn').prop('value','noAdd');
+    } else {
+      jQuery('#toggleAddLandmarkbtn').prop('value','addMore');
+  }
+}
+
 function addLandmarkListEntry(name,i,color,label,href)
 {
   var _name = name.replace(/ +/g, "");
@@ -649,7 +674,14 @@ function addLandmarkListEntry(name,i,color,label,href)
 //window.console.log("LLL",_nn);
 }
 
-// NOT IN USE, for distance calculation
+function addTESTLandmarkListEntry(name,i,color,label)
+{
+  var _name = name.replace(/ +/g, "");
+  var _nn='<button class="btn" disabled=true style="background-color:'+RGBTohex(color)+';"/><input type="checkbox" class="mychkbox" id="'+_name+'_'+i+'d" onClick="toggleDistance(\''+_name+'\','+i+');"/><label for="'+_name+'_'+i+'d" style="display:none" name="distance"></label><input id='+_name+'_'+i+' type=checkbox checked="" onClick="toggleLandmark(\''+_name+'\','+i+');" value='+i+' name="landmark">'+label+'</input><br>';
+    jQuery('#TESTlandmarklist').append(_nn);
+//window.console.log(_nn);
+}
+
 function selectLandmark()
 {
   /* by default, replace all distance selection */
@@ -681,7 +713,7 @@ function selectLandmark()
 }
 
 
-// similar to selectLandmark but for view.html
+// similar to selectLandmark but for demo.html
 function toggleAllLandmark()
 {
   if(!load_landmark) {
@@ -713,6 +745,27 @@ function toggleAllLandmark()
   }
 }
 
+
+function selectMesh()
+{
+  show_mesh = ! show_mesh;
+  var _list=document.getElementsByName("mesh");
+  if (show_mesh) {
+    jQuery('#selectmeshbtn').prop('value','excludeMesh');
+    for (var i=0; i<_list.length;i++) {
+       _list[i].checked=true;
+       var _m=meshs[_list[i].value];
+       _m[0].visible=true;
+    }
+    } else {
+      jQuery('#selectmeshbtn').prop('value','selectMesh');
+      for (var i=0; i<_list.length;i++) {
+        _list[i].checked=false;
+        var _m=meshs[_list[i].value];
+        _m[0].visible=false;
+      }
+  }
+}
 
 function toggle3D() {
   if(vol.visible) {
@@ -787,7 +840,7 @@ function openMesh(i,eye_name,opacity_name,landmark_name) {
 */
 }
 
-// NOT IN USE points for calculating distance
+// check with points
 function notSelected(g,i) {
   for(var j=0; j< points.length; j++) {
     var _g=points[j]['g'];
@@ -998,7 +1051,7 @@ function getHref(t) {
   var _cap=t['caption'];
   if(_cap && _cap['link']) {
      var href= _cap['link']['url'];
-//     window.console.log(">>",href,"<<");
+     window.console.log(">>",href,"<<");
      return href;
   }
   return(null);
@@ -1040,7 +1093,11 @@ function addMesh(t) { // color, url, caption
   var _label=t['label'];
  
   var _href=getHref(t);
-  addMeshListEntry(_label,_name,_cnt-1,t['color'],_opacity,_href);
+  if(TESTMODE) {
+    addTESTMeshListEntry(_label,_name,_cnt-1,t['color']);
+    } else {
+      addMeshListEntry(_label,_name,_cnt-1,t['color'],_opacity,_href);
+  }
 }
 
 // adding a new mesh after rendering
@@ -1099,7 +1156,11 @@ function addLandmark(p) {
   }
 
   var _href=getHref(p);
-  addLandmarkListEntry(_g,landmarks[_g].length,_mesh.color,_label,_href);
+  if(TESTMODE) {
+    addTESTLandmarkListEntry(_g,landmarks[_g].length,_mesh.color,_label);
+    } else {
+      addLandmarkListEntry(_g,landmarks[_g].length,_mesh.color,_label,_href);
+  }
 }
 
 // adding landmarks after initial rendering
@@ -1113,6 +1174,12 @@ function loadLandmark() {
     for(var i=0; i< _l['landmark'].length;i++) {
       addLandmark(_l['landmark'][i]);
     }
+  }
+  // this is for view.html
+  if(TESTMODE) {
+    document.getElementById('landmarkbtn').style.display = 'none';
+    jQuery('#forLandmark').show();
+    jQuery('#forDistance').show();
   }
 }
 
@@ -1254,13 +1321,15 @@ function clip3d(near) {
 }
 
 function toggleBox() {
-window.console.log(" calling toggleBox..");
+//window.console.log(" calling toggleBox..");
   show_box = !show_box;
   if(show_box) {
     gbbox.visible=true;
-    $('#boxbtn').addClass('pick');
+    if(! TESTMODE)
+      $('#boxbtn').addClass('pick');
     } else {
-        gbbox.visible=false;
+      gbbox.visible=false;
+      if(! TESTMODE)
         $('#boxbtn').removeClass('pick');
   }
 }

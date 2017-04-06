@@ -8,7 +8,7 @@
   goog.require('X.mesh');
   goog.require('X.volume');
 //MEI's xtk only
-  goog.require('X.debug');
+//  goog.require('X.debug');
   goog.require('X.cube');
   goog.require('X.sphere');
   goog.require('X.cylinder');
