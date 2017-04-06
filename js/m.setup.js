@@ -152,11 +152,11 @@ window.consow.log("NOT handling volume yet..");
               } else {
                 model_color=[1,1,1];
             }
-            var _tmp=tmp['bbox']; // bounding box's color
+            _tmp=tmp['bbox']; // bounding box's color
             if(_tmp) {
               model_bbox=_tmp;
               } else {
-                model_color=[1,1,0];
+                model_bbox=[1,1,0];
             }
             break;
             }
