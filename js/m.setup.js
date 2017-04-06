@@ -20,6 +20,7 @@ var model_label=null;
 var model_id=null;
 var model_caption=null;
 var model_color=null;
+var model_bbox=null;
 
 // should be a very small file and used for testing and so can ignore
 // >>Synchronous XMLHttpRequest on the main thread is deprecated
@@ -150,6 +151,12 @@ window.consow.log("NOT handling volume yet..");
               model_color=_tmp;
               } else {
                 model_color=[1,1,1];
+            }
+            var _tmp=tmp['bbox']; // bounding box's color
+            if(_tmp) {
+              model_bbox=_tmp;
+              } else {
+                model_color=[1,1,0];
             }
             break;
             }

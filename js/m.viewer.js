@@ -1312,7 +1312,7 @@ function makeBBox(r,v) {
       gbbox.normals.add(0, 0, 0);
     }
     if(v==null) {
-      gbbox.color=[0,1,1];
+      gbbox.color=model_bbox;
       } else {
         gbbox.color=[1,1,1];
     }
