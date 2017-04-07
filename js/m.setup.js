@@ -212,8 +212,6 @@ window.console.log("NOT handling volume yet..");
             }
             view_json=tmp;
             hasViews=true;
-window.console.log("view string is", JSON.stringify(tmp));
-window.console.log("loading the view..", view_json);
             break;
             }
           default:
