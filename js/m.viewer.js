@@ -33,6 +33,7 @@
 // global scoped data
 var ren3d=null; // 3d renderer
 
+var callString=null;
 var meshs=[];   // mesh objects -- [_mesh, _meshjson]
 var vol=null;   // volume objects
 var gbbox=null; // global bounding box
@@ -40,8 +41,10 @@ var gbbox=null; // global bounding box
 var sliceAx=null;
 var sliceSag=null;
 var sliceCor=null;
-var landmarks=[];  // sphere objects
-var first_time=true;
+var landmarks=[];  // sphere objects -- [_landmark, _landmarkjson]
+var landmarklist=[]; // sphere separated by the meshid
+var first_time_show=true;
+var first_time_render=true;
 var first_time_vol=true;
 
 var add_landmark=false;
@@ -90,6 +93,7 @@ jQuery(document).ready(function() {
     m.style.maxHeight=hh;
   }
 
+  callString=document.location.href;
   var args=document.location.href.split('?');
   if (args.length >= 2) { // there are some url to pick up
     processArgs(args);
@@ -109,10 +113,7 @@ jQuery(document).ready(function() {
   }
 
 // load the landmarks
-  toggleAllLandmark();
-// suppress the showing of the landmarks
-  toggleAllLandmark();
-
+  preloadLandmark();
 
 // stackoverflow.com/question/17462936/xtk-flickering-in-overlay-mesh
 // resolve multiple mesh transparent object being rendered causing flickering
@@ -135,11 +136,10 @@ jQuery(document).ready(function() {
     var loadingDiv = document.getElementById('loading');
     loadingDiv.style.display = 'none';
 
-    if( first_time ) {
+    if( first_time_show ) {
       setupViewerBackground();
-      first_time=false;
+      first_time_show=false;
       setupClipSlider();
-      initClipSlider();
       initOpacitySliders();
       if (vol) { // use vol bounding box if vol exists
         var _y=(vol.bbox[3] - vol.bbox[2] + 1)*1.3;
@@ -178,6 +178,13 @@ jQuery(document).ready(function() {
   };
 
   ren3d.onRender = function() {
+// clip it if preset
+    if( first_time_render ) {
+      first_time_render=false;
+      if(model_clip >=0) {
+        initClipSlider(model_clip);
+      }
+    }
 // rotate the camera in X-direction
     if(spin_view) {
       ren3d.camera.rotate([1, 0]);
@@ -374,14 +381,16 @@ function insertLandmark(_s,_obj) {
    var _cap= { "description":"user added landmark" };
 //window.console.log("==> insertLandmark, adding a new landmark for "+_g);
 
-   if( landmarks[_g] == null ) {
-     landmarks[_g]=[];
-     landmarks[_g].push(_s);
+   landmarks.push([_s, p]);
+   if( landmarklist[_g] == null ) {
+     landmarklist[_g]=[];
+     landmarklist[_g].push(_s);
+  var _cnt=meshs.push([_mesh,t]);
      } else {
-       landmarks[_g].push(_s);
+       landmarklist[_g].push(_s);
    }
    var _label=askForLabel(_g);
-   addLandmarkListEntry(_g,landmarks[_g].length,_obj.color,_label,null);
+   addLandmarkListEntry(_g,landmarklist[_g].length,_obj.color,_label,null);
 }
 
 // NOT IN USE
@@ -391,30 +400,22 @@ function askForLabel(g)
 }
 
 function stringIt(msg, v) {
-  var str="{";
+  var str="[";
   for(var i=0; i<v.length; i++) {
     str=str+" "+v[i].toString();
     if(i!=v.length-1) {
        str=str+",";
     } else {
-          str=str+"}";
+          str=str+"]";
     }
   }
-  window.console.log(msg+" "+str);
+  return str;
 }
 
 function saveView() {
   /* copy it over */
   for(var i=0; i< ren3d.camera.view.length; i++)
     save_view_matrix[i]=ren3d.camera.view[i];
-}
-
-function dumpView() {
-  var tmp_matrix=[];
-  // view: [ { "matrix": [..]} ]
-  for(var i=0; i< ren3d.camera.view.length; i++)
-    tmp_matrix[i]=ren3d.camera.view[i];
-  stringIt("dumpView", tmp_matrix);
 }
 
 function goView() {
@@ -666,7 +667,7 @@ function selectLandmark()
       var _g=(_list[i].id).split('_').shift();
       var _i=_list[i].value-1;
       _list[i].checked=true;
-      landmarks[_g][_i].visible=true;
+      landmarklist[_g][_i].visible=true;
     }
     } else {
       jQuery('#selectlandmarkbtn').prop('value','selectLandmark');
@@ -675,11 +676,33 @@ function selectLandmark()
         var _g=(_list[i].id).split('_').shift();
         var _i=_list[i].value-1;
         _list[i].checked=false;
-        landmarks[_g][_i].visible=false;
+        landmarklist[_g][_i].visible=false;
       }
   }
 }
 
+function preloadLandmark()
+{
+  if(!load_landmark) {
+    loadLandmark();
+    var vis_count=0;
+    var _list=document.getElementsByName("landmark");
+    for (var i=0; i<_list.length;i++) {
+      var _g=(_list[i].id).split('_').shift();
+      var _i=_list[i].value-1;
+      if(landmarklist[_g][_i].visible == true){
+         _list[i].checked=true;
+         vis_count++;
+         } else {
+           _list[i].checked=false;
+      }
+    }
+    if(vis_count > 0) {
+      show_landmark=true;
+      $('#landmarkbtn').addClass('pick');
+    }
+  }
+}
 
 // similar to selectLandmark but for view.html
 function toggleAllLandmark()
@@ -695,20 +718,18 @@ function toggleAllLandmark()
   if(show_landmark) {
     $('#landmarkbtn').addClass('pick');
     for (var i=0; i<_list.length;i++) {
-      _list[i].checked=false;
       var _g=(_list[i].id).split('_').shift();
       var _i=_list[i].value-1;
       _list[i].checked=true;
-      landmarks[_g][_i].visible=true;
+      landmarklist[_g][_i].visible=true;
     }
     } else {
       $('#landmarkbtn').removeClass('pick');
       for (var i=0; i<_list.length;i++) {
-        _list[i].checked=true;
         var _g=(_list[i].id).split('_').shift();
         var _i=_list[i].value-1;
         _list[i].checked=false;
-        landmarks[_g][_i].visible=false;
+        landmarklist[_g][_i].visible=false;
       }
   }
 }
@@ -853,8 +874,8 @@ function computeDistance() {
 function toggleDistance(g,i) {
 /* If the landmark is visible, track the last two */
   var _i=i-1;
-  var p=landmarks[g][_i].visible;
-  if (landmarks[g][_i].visible) { 
+  var p=landmarklist[g][_i].visible;
+  if (landmarklist[g][_i].visible) { 
     var _a=g+'_'+i+'d';
     var _aa=document.getElementById(_a);
     if(_aa.checked) {
@@ -940,13 +961,13 @@ function toggleCalcDistance() {
 
 function toggleLandmark(g,i) {
   var _i=i-1;
-  landmarks[g][_i].visible = !landmarks[g][_i].visible;
+  landmarklist[g][_i].visible = !landmarklist[g][_i].visible;
   if(calcDistance) {
-     if(landmarks[g][_i].visible) {
+     if(landmarklist[g][_i].visible) {
        enableDistance(g,i);
        } else {
          if( !disableDistance(g,i) ) { // reset, if failed to disable
-           landmarks[g][_i].visible = !landmarks[g][_i].visible;
+           landmarklist[g][_i].visible = !landmarklist[g][_i].visible;
            checkLandmark(g,i);
          }
      }
@@ -1088,18 +1109,21 @@ function addLandmark(p) {
   var _r=p['radius'];
   var _loc=p['point'];
   var _cap=p['caption'];
+  var _vis=p['visible'];
   var _label=p['label'];
-  var _s=addSphere(_loc, _c, _r, _cap);
+  var _s=addSphere(_loc, _c, _r, _vis, _cap);
 
-  if( landmarks[_g] == null ) {
-    landmarks[_g]=[];
-    landmarks[_g].push(_s);
+  
+  landmarks.push([_s, p]);
+  if( landmarklist[_g] == null ) {
+    landmarklist[_g]=[];
+    landmarklist[_g].push(_s);
     } else {
-      landmarks[_g].push(_s);
+      landmarklist[_g].push(_s);
   }
 
   var _href=getHref(p);
-  addLandmarkListEntry(_g,landmarks[_g].length,_mesh.color,_label,_href);
+  addLandmarkListEntry(_g,landmarklist[_g].length,_mesh.color,_label,_href);
 }
 
 // adding landmarks after initial rendering
@@ -1151,21 +1175,25 @@ function showLabel(jval,lval) {
   });//dialog
 }
 
-function addSphereByIdx(mesh, pt, color, radius) {
+function addSphereByIdx(mesh, pt, color, visible, radius) {
   var _l=mesh.points.get(pt);
   var _m='pt '+String(pt)+' out of '+mesh.points.count;
   var caption= { "type":"POINT","data": _m };
-  return addSphere(_l, color, radius, caption);
+  return addSphere(_l, color, radius, visible, caption);
 }
 
 var newSphere;
-function addSphere(loc, color, radius, caption) {
+function addSphere(loc, color, radius, visible,caption) {
+  // deep copy the caption..
+  var _cap = JSON.stringify(caption);
+  var _caption=JSON.parse(_cap);
   newSphere = new X.sphere();
   newSphere.center = loc;
-  caption['data']=caption['data']+'<br>x: '+String(loc[0])+'<br>y: '+String(loc[1])+'<br>z: '+String(loc[2]);
+  _caption['data']=caption['description']+'<br>x: '+String(loc[0])+'<br>y: '+String(loc[1])+'<br>z: '+String(loc[2]);
   newSphere.color = color;
   newSphere.radius = radius; 
-  newSphere.caption = JSON.stringify(caption);
+  newSphere.visible=visible;
+  newSphere.caption = JSON.stringify(_caption);
   ren3d.add(newSphere);
   return newSphere;
 }
@@ -1188,11 +1216,11 @@ function hlite(mesh) {
        max1=min1=currentPoint[1]; max1_j=min1_j=0;
        max2=min2=currentPoint[2]; max2_j=min2_j=0;
 window.console.log("first point.."+currentPoint[0]+" "+currentPoint[1]+" "+currentPoint[2]);
-//       addSphereByIdx(mesh,j, [1,1,1], 0.08);
+//       addSphereByIdx(mesh,j, [1,1,1], true,0.08);
        continue;
        } else {
            if (j % lim == 0 ) {
-             addSphereByIdx(mesh,j, [0,0,1], 0.05);
+             addSphereByIdx(mesh,j, [0,0,1],true, 0.05);
            }
            if(currentPoint[0]>max0) 
              { max0=currentPoint[0]; max0_j=j; }
@@ -1214,23 +1242,23 @@ window.console.log("first point.."+currentPoint[0]+" "+currentPoint[1]+" "+curre
   window.console.log("max2 j "+max2_j + " min2 j "+min2_j);
 
 //console.log("max-min -- start");
-addSphereByIdx(mesh,max0_j, [1,0,1], 0.08);
-addSphereByIdx(mesh,min0_j, [1,0,1], 0.08);
-addSphereByIdx(mesh,max1_j, [1,0,1], 0.08);
-addSphereByIdx(mesh,min1_j, [1,0,1], 0.08);
-addSphereByIdx(mesh,max2_j, [1,0,1], 0.08);
-addSphereByIdx(mesh,min2_j, [1,0,1], 0.08);
+addSphereByIdx(mesh,max0_j, [1,0,1], true, 0.08);
+addSphereByIdx(mesh,min0_j, [1,0,1], true, 0.08);
+addSphereByIdx(mesh,max1_j, [1,0,1], true, 0.08);
+addSphereByIdx(mesh,min1_j, [1,0,1], true, 0.08);
+addSphereByIdx(mesh,max2_j, [1,0,1], true, 0.08);
+addSphereByIdx(mesh,min2_j, [1,0,1], true, 0.08);
 //console.log("max-min -- end");
 
 var t=numberOfPoints-1;
 //console.log("last -- start");
 for(var i=0; i<10; i++) {
-addSphereByIdx(mesh,t-i, [0,1,0], 0.04);
+addSphereByIdx(mesh,t-i, [0,1,0], true, 0.04);
 }
 //console.log("last -- end");
 //console.log("begin -- start");
 for(var i=0; i<10; i++) {
-addSphereByIdx(mesh,i, [1,0.5,0], 0.04);
+addSphereByIdx(mesh,i, [1,0.5,0], true, 0.04);
 }
 //console.log("begin -- end");
 

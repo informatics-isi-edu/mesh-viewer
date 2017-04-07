@@ -185,7 +185,8 @@ if(target) {
 
 /* slide from 1 to 100 */
 function clipPlane(event, ui) {
-  clip3d(ui.value/100);
+  var _c=(ui.value/100);
+  clip3d(_c);
 }
 
 function reset_clipPlane() {

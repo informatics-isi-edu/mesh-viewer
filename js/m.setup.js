@@ -21,6 +21,7 @@ var model_id=null;
 var model_caption=null;
 var model_color=null;
 var model_bbox=null;
+var model_clip=null;
 
 // should be a very small file and used for testing and so can ignore
 // >>Synchronous XMLHttpRequest on the main thread is deprecated
@@ -88,7 +89,12 @@ var myProcessArg=function(kvp0, kvp1) {
               tmp=kvp1;
               } else { // this is an url
                 var t=kvp1.trim();
-                var tt=ckExist(t);
+                var tt;
+                if(isURL(t)) {
+                  tt=ckExist(t);
+                  } else {
+                    tt=t;
+                }
                 tt=trimQ(tt);
                 tmp= JSON.parse(tt);
             }
@@ -106,7 +112,12 @@ var myProcessArg=function(kvp0, kvp1) {
               tmp=kvp1;
               } else { // this is an url
                 var t=kvp1.trim();
-                var tt=ckExist(t);
+                var tt;
+                if(isURL(t)) {
+                  tt=ckExist(t);
+                  } else {
+                    tt=t;
+                }
                 tt=trimQ(tt);
                 tmp= JSON.parse(tt);
             }
@@ -121,7 +132,22 @@ var myProcessArg=function(kvp0, kvp1) {
             }
           case 'volume':
             {
-window.consow.log("NOT handling volume yet..");
+window.console.log("NOT handling volume yet..");
+            var tmp;
+            if( typeof kvp1 === 'object') { // already in parsed
+              tmp=kvp1;
+              } else { // this is an url
+                var t=kvp1.trim();
+                var tt;
+                if(isURL(t)) {
+                  tt=ckExist(t);
+                  } else {
+                    tt=t;
+                }
+                tt=trimQ(tt);
+                tmp= JSON.parse(tt);
+            }
+            vol_json=tmp;
             break;
             }
           case 'model':
@@ -134,6 +160,7 @@ window.consow.log("NOT handling volume yet..");
             var mi=klist.find(function(m) { return m=='mesh' });
             var li=klist.find(function(m) { return m=='landmark'});
             var vi=klist.find(function(m) { return m=='view'});
+            var oi=klist.find(function(m) { return m=='volume'});
             if(mi != undefined) {
               myProcessArg('mesh',{ "mesh": tmp['mesh']}); 
             }
@@ -143,20 +170,27 @@ window.consow.log("NOT handling volume yet..");
             if(vi != undefined) {
               myProcessArg('view',{"view": tmp['view']});
             }
+            if(oi != undefined) {
+              myProcessArg('volume',{"volume": tmp['volume']});
+            }
             model_label=tmp['label'];
             model_id=tmp['id'];
             model_caption=tmp['caption'];
-            var _tmp=tmp['color']; // background color of viewer
+            var _tmp=tmp['bgcolor']; // background color of viewer
             if(_tmp) {
               model_color=_tmp;
               } else {
                 model_color=[1,1,1];
             }
-            _tmp=tmp['bbox']; // bounding box's color
+            _tmp=tmp['bboxcolor']; // bounding box's color
             if(_tmp) {
               model_bbox=_tmp;
               } else {
                 model_bbox=[1,1,0];
+            }
+            _tmp=tmp['clip']; // clip plane's value,change to int
+            if(_tmp) {
+              model_clip=parseInt(_tmp);
             }
             break;
             }
@@ -165,15 +199,21 @@ window.consow.log("NOT handling volume yet..");
             var tmp;
             if( typeof kvp1 === 'object') { // already in parsed
               tmp=kvp1;
-              } else { // this is an url
+              } else { // this is an url or a string
                 var t=kvp1.trim();
-                var tt=ckExist(t);
+                var tt;
+                if(isURL(t)) {
+                  tt=ckExist(t);
+                  } else {
+                    tt=t;
+                }
                 tt=trimQ(tt);
                 tmp= JSON.parse(tt);
             }
             view_json=tmp;
             hasViews=true;
-window.console.log("loading the view..");
+window.console.log("view string is", JSON.stringify(tmp));
+window.console.log("loading the view..", view_json);
             break;
             }
           default:
@@ -187,6 +227,18 @@ window.console.log("loading the view..");
     }
   }
   return; 
+}
+
+
+// http://stackoverflow.com/questions/5717093/check-if-a-javascript-string-is-a-url
+function isURL(str) {
+  var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+  '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|'+ // domain name
+  '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+  '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+  '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+  '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+  return pattern.test(str);
 }
 
 
