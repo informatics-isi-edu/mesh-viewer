@@ -37,14 +37,15 @@
     border-radius: 2px;
 }
 
+/****  old map marker
 .panel-heading .accordion-toggle:after {
     font-size: 14px;
-    font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
-    content: "\e062"; /* glyphicon-tree-conifer */
+    font-family: 'Glyphicons Halflings';  
+    content: "\e062"; 
     float: left;
     margin-right:10px;
     color: #337ab7;
 }
-
+****/
 
 

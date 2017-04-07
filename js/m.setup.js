@@ -14,10 +14,14 @@ var vol_json=null;
 var view_json=null;
 var anno_json=null;
 var hasLandmarks=false;
+var hasViews=false;
 
 var model_label=null;
 var model_id=null;
 var model_caption=null;
+var model_color=null;
+var model_bbox=null;
+var model_clip=null;
 
 // should be a very small file and used for testing and so can ignore
 // >>Synchronous XMLHttpRequest on the main thread is deprecated
@@ -85,7 +89,12 @@ var myProcessArg=function(kvp0, kvp1) {
               tmp=kvp1;
               } else { // this is an url
                 var t=kvp1.trim();
-                var tt=ckExist(t);
+                var tt;
+                if(isURL(t)) {
+                  tt=ckExist(t);
+                  } else {
+                    tt=t;
+                }
                 tt=trimQ(tt);
                 tmp= JSON.parse(tt);
             }
@@ -103,22 +112,42 @@ var myProcessArg=function(kvp0, kvp1) {
               tmp=kvp1;
               } else { // this is an url
                 var t=kvp1.trim();
-                var tt=ckExist(t);
+                var tt;
+                if(isURL(t)) {
+                  tt=ckExist(t);
+                  } else {
+                    tt=t;
+                }
                 tt=trimQ(tt);
                 tmp= JSON.parse(tt);
             }
             landmark_json=tmp;
             // only when there are landmark that we enable the btn
-            if(!TESTMODE) {
-              var p = document.getElementById('landmarkbtn');
+            var p = document.getElementById('landmarkbtn');
+            if(p) {
               p.style.display = '';
-              hasLandmarks=true;
             }
+            hasLandmarks=true;
             break;
             }
           case 'volume':
             {
-window.consow.log("NOT handling volume yet..");
+window.console.log("NOT handling volume yet..");
+            var tmp;
+            if( typeof kvp1 === 'object') { // already in parsed
+              tmp=kvp1;
+              } else { // this is an url
+                var t=kvp1.trim();
+                var tt;
+                if(isURL(t)) {
+                  tt=ckExist(t);
+                  } else {
+                    tt=t;
+                }
+                tt=trimQ(tt);
+                tmp= JSON.parse(tt);
+            }
+            vol_json=tmp;
             break;
             }
           case 'model':
@@ -130,15 +159,59 @@ window.consow.log("NOT handling volume yet..");
             var klist=Object.keys(tmp);
             var mi=klist.find(function(m) { return m=='mesh' });
             var li=klist.find(function(m) { return m=='landmark'});
+            var vi=klist.find(function(m) { return m=='view'});
+            var oi=klist.find(function(m) { return m=='volume'});
             if(mi != undefined) {
               myProcessArg('mesh',{ "mesh": tmp['mesh']}); 
             }
             if(li != undefined) {
               myProcessArg('landmark',{"landmark": tmp['landmark']});
             }
+            if(vi != undefined) {
+              myProcessArg('view',{"view": tmp['view']});
+            }
+            if(oi != undefined) {
+              myProcessArg('volume',{"volume": tmp['volume']});
+            }
             model_label=tmp['label'];
             model_id=tmp['id'];
             model_caption=tmp['caption'];
+            var _tmp=tmp['bgcolor']; // background color of viewer
+            if(_tmp) {
+              model_color=_tmp;
+              } else {
+                model_color=[1,1,1];
+            }
+            _tmp=tmp['bboxcolor']; // bounding box's color
+            if(_tmp) {
+              model_bbox=_tmp;
+              } else {
+                model_bbox=[1,1,0];
+            }
+            _tmp=tmp['clip']; // clip plane's value,change to int
+            if(_tmp) {
+              model_clip=parseInt(_tmp);
+            }
+            break;
+            }
+          case "view":
+            { // "-1,0,0,0,0,0,1,0,0,1,0,0,0,0,-10.206781387329102,1"
+            var tmp;
+            if( typeof kvp1 === 'object') { // already in parsed
+              tmp=kvp1;
+              } else { // this is an url or a string
+                var t=kvp1.trim();
+                var tt;
+                if(isURL(t)) {
+                  tt=ckExist(t);
+                  } else {
+                    tt=t;
+                }
+                tt=trimQ(tt);
+                tmp= JSON.parse(tt);
+            }
+            view_json=tmp;
+            hasViews=true;
             break;
             }
           default:
@@ -155,12 +228,25 @@ window.consow.log("NOT handling volume yet..");
 }
 
 
+// http://stackoverflow.com/questions/5717093/check-if-a-javascript-string-is-a-url
+function isURL(str) {
+  var pattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+  '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|'+ // domain name
+  '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+  '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+  '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+  '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+  return pattern.test(str);
+}
+
+
 var foo_initial_mesh_json='\
 { "mesh" : [ { \
       "id": "JI296CCMB",\
       "label": "Back Skull",\
       "url": "http://localhost/data/3mesh/JI296CCMB.obj",\
       "color": [1.00, 0.80, 0.40],\
+      "opacity": 1,\
       "caption": {\
                    "description":"a skull mesh at the back of head",\
                    "link": { "label":"gene expression",\
@@ -172,6 +258,7 @@ var foo_initial_mesh_json='\
       "label": "Maxilla",\
       "url": "http://localhost/data/3mesh/Maxilla.obj",\
       "color": [1.00, 0.46, 0.19],\
+      "opacity": 1,\
       "caption": {\
                    "description":"a Mandible Maxilla",\
                    "link": { "label":"gene expression",\
@@ -188,6 +275,7 @@ var foo_mesh_json='\
       "label": "Mandible",\
       "url": "http://localhost/data/3mesh/Mandible.obj",\
       "color": [0.53, 0.90, 0.90],\
+      "opacity": 1,\
       "caption": {\
                    "description":"a Mandible Mandible",\
                    "link": { "label":"gene expression",\
@@ -235,7 +323,7 @@ var foo_landmark_json='\
          "point": [8.502269744873047, 6.578330039978027, 69.94249725341797],\
          "caption": { \
                  "description":"Tail end of Skull, JI296CCMB",\
-                 "link": { "label": "point",\
+                 "link": { "label": "landmark",\
                            "url":"https://www.example.com/path/to/info/about/LND5678" }\
                     }\
                  },\
@@ -248,7 +336,7 @@ var foo_landmark_json='\
          "point": [15.606300354003906, 9.819620132446289,71.14600372314453],\
          "caption": { \
                  "description":"Front tip of Skull",\
-                 "link": { "label":"point",\
+                 "link": { "label":"landmark",\
                            "url":"https://www.example.com/path/to/info/about/LND5679" }\
                     }\
                   },\
@@ -261,7 +349,7 @@ var foo_landmark_json='\
          "point": [7.819620132446289,10.14050006866455,67.17459869384766],\
          "caption": { \
                  "description":"Lowermost tip of Skull",\
-                 "link": { "label":"point",\
+                 "link": { "label":"landmark",\
                            "url":"https://www.example.com/path/to/info/about/LND5680" }\
                     }\
                   },\
@@ -274,7 +362,7 @@ var foo_landmark_json='\
          "point": [13.516400337219238,11.584600448608398,70.9854965209961],\
          "caption": { \
                  "description":"Lowermost tip of Maxilla",\
-                 "link": { "label":"point",\
+                 "link": { "label":"landmark",\
                            "url":"https://www.example.com/path/to/info/about/LND5681" }\
                     }\
                   },\
@@ -287,7 +375,7 @@ var foo_landmark_json='\
          "point": [11.42609977722168,12.432299613952637,70.46399688720703],\
          "caption": { \
                  "description":"Superior tip",\
-                 "link": { "label":"point",\
+                 "link": { "label":"landmark",\
                            "url":"https://www.example.com/path/to/info/about/LND5682" }\
                     }\
                    },\
@@ -300,7 +388,7 @@ var foo_landmark_json='\
          "point": [15.551799774169922,9.578940391540527,69.4209976196289],\
          "caption": { \
                  "description":"Anterior tip",\
-                 "link": { "label":"point",\
+                 "link": { "label":"landmark",\
                            "url":"https://www.example.com/path/to/info/about/LND5683" }\
                      }\
              } ]\
@@ -326,8 +414,8 @@ var foo_view_json='\
 // just one for now
 function view_load() {
    if(view_json) {
-     var _v=$.parseJSON(view_json);
-     return _v['view'][0]['matrix'];
+       var _v= view_json['view'][0]['matrix'];
+     return _v;
    } 
    return null;
 }
