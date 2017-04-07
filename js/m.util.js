@@ -63,7 +63,7 @@ function clip2json()
   return cjson;
 }
 
-function snapshot(fname) {
+function snapshot() {
 /* easy way 
   var _str=callString;
   var vjson=view2json();
@@ -87,6 +87,24 @@ window.console.log("NEW=>",nstr);
   var nstr=JSON.stringify(_model);
 window.console.log("model", nstr);
   return nstr;
+}
+
+function modelDownload(fname) {
+  var dname=fname;
+  if(dname == null) {
+    var f = new Date().getTime();
+    var ff= f.toString();
+    dname="model_"+ff+".json";
+  }
+  var txt=snapshot();
+  var dload = document.createElement('a');
+  dload.href = URL.createObjectURL(new Blob([txt], {type: 'text/plain'}));
+  dload.download = dname;
+  dload.style.display='none';
+  document.body.appendChild(dload);
+  dload.click();
+  document.body.removeChild(dload);
+  delete dload;
 }
 
 function jpgDownload0(fname) {

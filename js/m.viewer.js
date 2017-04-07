@@ -618,8 +618,7 @@ function reset_opacity(sid) {
 }
 
 function resetOpacitySlider(idx,op) {
-window.console.log("reset opacity..",idx," with ",op);
-//  mesh_opacity_list[idx]['opacity']=op;
+//window.console.log("reset opacity..",idx," with ",op);
   var item=mesh_opacity_list[idx];
   var id=item['id'];
 
