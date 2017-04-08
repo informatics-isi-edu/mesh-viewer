@@ -44,6 +44,7 @@ function trimQ(s) {
   if( s && typeof s === 'string') {
     var str=s.trim(); // trim the ' or "
     if( (str[0] == "\"" && str[ str.length-1 ] == "\"")
+     || (str[0] == "[" && str[ str.length-1 ] == "]")
      || (str[0] == "\'" && str[ str.length-1 ] == "\'"))
     str=str.substr(1,str.length-2);
     return str;
