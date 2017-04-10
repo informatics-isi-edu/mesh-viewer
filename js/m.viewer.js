@@ -552,11 +552,8 @@ function makeSliderStubs(sliderId, resetId, opacity)
   var _nn='';
   var sliderDiv=sliderId+'Div';
 
-_nn+='<div id=\''+sliderDiv+'\' class="row col-md-12 col-xs-12" style="margin-top:10px; margin-left:5px; display:none" >';
-_nn+='<div id=\''+ sliderId +'\' title="move slider to adjust opacity" class="h-slider"> </div>';
-/*
-_nn+='<div id=\''+ sliderId +'\' title="move slider to adjust opacity" style="background:rgb(51, 122, 183)"> </div>';
-*/
+_nn+='<div id=\''+sliderDiv+'\' class="row col-md-12 col-xs-12" style="margin-left:5px; display:none" >Opacity';
+_nn+='<div id=\''+ sliderId +'\' style="margin-top:5px" title="move slider to adjust opacity" class="h-slider"> </div>';
 _nn+='<div class="row col-md-10 col-xs-10 pull-right">';
 _nn+='<button id=\''+resetId+'\' class="btn btn-xs btn-success" style="margin:10px; title="Reset opacity" onclick="reset_opacity(\''+sliderId+'\');">Reset</button>';
 _nn+='</div> <!-- opacityDiv -->';
