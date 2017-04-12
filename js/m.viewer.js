@@ -1053,7 +1053,7 @@ function addMesh(t) { // color, url, caption
 
 // meshs[0] is the _mesh, meshs[1] is the original object
   var _cnt=meshs.push([_mesh,t]);
-  var _name=t['id'];
+  var _name=t['id'].toString();
   var _label=t['label'];
  
   var _href=getHref(t);
