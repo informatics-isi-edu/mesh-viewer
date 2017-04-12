@@ -72,14 +72,15 @@ window.console.log(args[1]);
   var params = args[1].split('&');
   for (var i=0; i < params.length; i++) {
     var param = unescape(params[i]);
-    if (param.indexOf('=') == -1) {
+    var splitIndex = param.indexOf('='); 
+    if (splitIndex == -1) {
       // only one -- expect it to be meshurl
       var url=param.replace(new RegExp('/$'),'').trim();
       var tmp=ckExist(url);
       var tt=trimQ(tmp);
       initial_mesh_json=JSON.parse(tt);
       } else {
-        var kvp = param.split('=');
+        var kvp = [param.substring(0,splitIndex), param.substring(splitIndex+1,param.length)];
 
 var myProcessArg=function(kvp0, kvp1) {
         switch (kvp0.trim()) {
