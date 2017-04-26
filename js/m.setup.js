@@ -19,8 +19,8 @@ var hasViews=false;
 var model_label=null;
 var model_id=null;
 var model_caption=null;
-var model_color=null;
-var model_bbox=null;
+var model_color=[1,1,1];
+var model_bbox=[1,1,0];
 var model_clip=null;
 
 // should be a very small file and used for testing and so can ignore
@@ -134,7 +134,7 @@ var myProcessArg=function(kvp0, kvp1) {
             }
           case 'volume':
             {
-window.console.log("NOT handling volume yet..");
+//window.console.log("NOT handling volume yet..");
             var tmp;
             if( typeof kvp1 === 'object') { // already in parsed
               tmp=kvp1;
@@ -271,8 +271,7 @@ var foo_initial_mesh_json='\
 }';
 
 var foo_mesh_json='\
-{ "mesh" : \
-  [{\
+{ "mesh" : [{ \
       "id": "Mandible",\
       "label": "Mandible",\
       "url": "http://localhost/data/3mesh/Mandible.obj",\
