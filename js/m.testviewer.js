@@ -93,17 +93,20 @@ jQuery(document).ready(function() {
     m.style.maxHeight=hh;
   }
 
-  var tmp = document.getElementById('TESTING');
-  if(tmp) {
-    TESTMODE=true;
-  }
-
   callString=document.location.href;
   var args=document.location.href.split('?');
   if (args.length >= 2) { // there are some url to pick up
     processArgs(args);
     } else {
       setupWithDefaults();
+  }
+
+  var tmp = document.getElementById('TESTING');
+  if(tmp) {
+    TESTMODE=true;
+    // make sure addLandmark btn is off (got turned on by processArgs..)
+    var p = document.getElementById('landmarkbtn');
+    p.style.display = 'none';
   }
 
   var _m=mesh_load();
