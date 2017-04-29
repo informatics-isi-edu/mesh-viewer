@@ -385,7 +385,6 @@ function insertLandmark(_s,_obj) {
    if( landmarklist[_g] == null ) {
      landmarklist[_g]=[];
      landmarklist[_g].push(_s);
-  var _cnt=meshs.push([_mesh,t]);
      } else {
        landmarklist[_g].push(_s);
    }
@@ -1036,13 +1035,14 @@ function addVolume(t) { // color, url, caption, <id/new>
 //    add to 3D renderer
 //    add to ui's meshlist 
 // t needs to have color, label, 
+// meshs[0] is the X.mesh object, meshs[1] is the json 
 function addMesh(t) { // color, url, caption
   var _mesh = new X.mesh();
+  var _idx=meshs.length;
 //
   var _color= t['color'];
   if(_color == undefined) {
-    var _i=meshs.length;
-    _color=getDefaultColor(_i);
+    _color=getDefaultColor(_idx);
   }
   _mesh.color = _color;
 //
@@ -1054,7 +1054,7 @@ function addMesh(t) { // color, url, caption
 //
   var _label=t['label'];
   if(_label == undefined ) {
-    _label='no desc';
+    _label=chopForStub(_url);
   }
 //
   var _href=getHref(t);
@@ -1086,7 +1086,7 @@ function addMesh(t) { // color, url, caption
   var _cnt=meshs.push([_mesh,t]);
   var _name=_id.toString();
  
-  addMeshListEntry(_label,_name,_cnt-1,_color,_opacity,_href);
+  addMeshListEntry(_label,_name,_idx,_color,_opacity,_href);
 }
 
 // adding a new mesh after rendering

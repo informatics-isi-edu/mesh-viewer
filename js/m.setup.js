@@ -20,20 +20,23 @@ var model_label='Default Mesh';
 var model_id='model id';
 var model_caption=null;
 var model_color=[1,1,1];
-var model_bbox=[1,1,0];
+var model_bbox=[0,0,0];
 var model_clip=null;
 
 /*
-#DF0F0F    red (0.847, 0.057, 0.057)
+#FFCC66    orange (1.00, 0.80, 0.40)
 #868600    yellow (0.527, 0.527, 0)
 #009600    green (0, 0.592, 0)
 #008E8E    cyan (0, 0.559, 0.559)
 #5050FC    blue (0.316, 0.316, 0.991)
 #B700B7    magenta (0.718, 0, 0.718)
 */
-var defaultColor=[ [0.847, 0.057, 0.057], [0.527, 0.527, 0],
-                   [0, 0.592, 0], [0, 0.559, 0.559],
-                   [0.316, 0.316, 0.991], [0.718, 0, 0.718]];
+var defaultColor=[ [1.00, 0.80, 0.40],
+                   [0, 0.559, 0.559],
+                   [0, 0.592, 0],
+                   [0.718, 0, 0.718],
+                   [0.527, 0.527, 0],
+                   [0.316, 0.316, 0.991]];
 
 // just in case myColor is too little
 function getDefaultColor(p) {
