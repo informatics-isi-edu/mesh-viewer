@@ -1035,29 +1035,58 @@ function addVolume(t) { // color, url, caption, <id/new>
 //    add to the local mesh list
 //    add to 3D renderer
 //    add to ui's meshlist 
+// t needs to have color, label, 
 function addMesh(t) { // color, url, caption
   var _mesh = new X.mesh();
-  _mesh.color = t['color'];
-  _mesh.file = encodeURI(t['url']);
-  _mesh.caption = { 'description':t['label'],'link':getHref(t) };
+//
+  var _color= t['color'];
+  if(_color == undefined) {
+    var _i=meshs.length;
+    _color=getDefaultColor(_i);
+  }
+  _mesh.color = _color;
+//
+  var _url=t['url'];
+  if(_url == undefined) {
+    throw new Error("mesh must have an url!");
+  }
+  _mesh.file = encodeURI(_url);
+//
+  var _label=t['label'];
+  if(_label == undefined ) {
+    _label='no desc';
+  }
+//
+  var _href=getHref(t);
+//
+  var _caption = t['caption'];
+  if(_caption == undefined) {
+    _caption = { 'description':_label,'link':_href };
+  }
+  _mesh.caption=_caption;
+//
   var _opacity=t['opacity'];
-  if(_opacity == undefined)
+  if(_opacity == undefined) {
     _opacity=1;
+  }
   _mesh.opacity = _opacity;
-//  _mesh.caption = t['caption'];
-//  _mesh.label = t['label'];
-//  _mesh.id= t['id'];
+//
+  var _id=t['id']; 
+  if(_id == undefined) {
+   // chop from url
+     _id=chopForStub(_url);
+  }
+  _mesh.id= _id;
+//
   var loadingDiv = document.getElementById('loading');
   loadingDiv.style.display ='';
   ren3d.add(_mesh);
 
 // meshs[0] is the _mesh, meshs[1] is the original object
   var _cnt=meshs.push([_mesh,t]);
-  var _name=t['id'].toString();
-  var _label=t['label'];
+  var _name=_id.toString();
  
-  var _href=getHref(t);
-  addMeshListEntry(_label,_name,_cnt-1,t['color'],_opacity,_href);
+  addMeshListEntry(_label,_name,_cnt-1,_color,_opacity,_href);
 }
 
 // adding a new mesh after rendering

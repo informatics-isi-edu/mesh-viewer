@@ -16,12 +16,38 @@ var anno_json=null;
 var hasLandmarks=false;
 var hasViews=false;
 
-var model_label=null;
-var model_id=null;
+var model_label='Default Mesh';
+var model_id='model id';
 var model_caption=null;
 var model_color=[1,1,1];
 var model_bbox=[1,1,0];
 var model_clip=null;
+
+/*
+#DF0F0F    red (0.847, 0.057, 0.057)
+#868600    yellow (0.527, 0.527, 0)
+#009600    green (0, 0.592, 0)
+#008E8E    cyan (0, 0.559, 0.559)
+#5050FC    blue (0.316, 0.316, 0.991)
+#B700B7    magenta (0.718, 0, 0.718)
+*/
+var defaultColor=[ [0.847, 0.057, 0.057], [0.527, 0.527, 0],
+                   [0, 0.592, 0], [0, 0.559, 0.559],
+                   [0.316, 0.316, 0.991], [0.718, 0, 0.718]];
+
+// just in case myColor is too little
+function getDefaultColor(p) {
+  var len=defaultColor.length;
+  var t= (p+len) % len;
+  return defaultColor[t];
+}
+
+// ...file.obj
+function chopForStub(url){
+  var s=url.split('/').pop();
+  var ss=s.slice(0, -4);
+  return ss;
+}
 
 // should be a very small file and used for testing and so can ignore
 // >>Synchronous XMLHttpRequest on the main thread is deprecated
@@ -74,7 +100,7 @@ window.console.log(args[1]);
     var param = unescape(params[i]);
     var splitIndex = param.indexOf('='); 
     if (splitIndex == -1) {
-      // only one -- expect it to be meshurl
+      // only one -- expect it to be mesh json
       var url=param.replace(new RegExp('/$'),'').trim();
       var tmp=ckExist(url);
       var tt=trimQ(tmp);
@@ -84,6 +110,20 @@ window.console.log(args[1]);
 
 var myProcessArg=function(kvp0, kvp1) {
         switch (kvp0.trim()) {
+          case 'url': // special case, when only mesh url being passed in
+            {
+            var t=kvp1.trim();
+            // create a default mesh url json
+//{ "mesh" : [ { "url": "http://localhost/data/3mesh/JI296CCMB.obj" } ] }
+            if(initial_mesh_json == null) {
+              var tt={ "mesh" : [ { "url": t} ]};
+              initial_mesh_json= tt;
+              } else {
+                var tt= {"url":t};
+                initial_mesh_json["mesh"].push(tt); 
+            }
+            break;
+            }
           case 'mesh': // 
             {
             var tmp;
