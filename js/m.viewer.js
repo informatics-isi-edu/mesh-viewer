@@ -489,8 +489,9 @@ function addMeshListEntry(label,name,i,color,opacity,href)
 {
   var _name = name.replace(/ +/g, "");
   var _collapse_name=i+'_collapse';
-  var _visible_name=i+'_visible';
-  var _landmark_name=i+'_landmark'; // place holder
+  var _visible_name_n=i+'_visible';
+  var _opacity_name_n=i+'_opacity';
+  var _landmark_name_n=i+'_landmark'; // place holder
   var _reset_btn=_name+'_reset_btn';
 
 // landmark's name is always lowercased
@@ -507,23 +508,25 @@ _nn+='<div class="panel panel-default col-md-12 col-xs-12">';
 _nn+='<div class="panel-heading">';
 _nn+='<div class="panel-title row" style="background-color:transparent">'
 
-var _bb='<button id="'+_visible_name+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white"  onClick="openMesh('+i+',\'eye_'+_name+'\',\''+_opacity_name+'\',\''+_landmark_list+'\')" title="click to change opacity of mesh"><span id="eye_'+_name+'" class="glyphicon glyphicon-eye-open" style="color:'+RGBTohex(color)+';"></span> </button>';
+var _bb='<button id="'+_visible_name_n+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white; padding:0px 5px 0px 0px;"  onClick="openMesh('+i+',\'visible_'+_name+'\',\''+_opacity_name+'\',\''+_landmark_list+'\',\'opacity_'+_name+'\')" title="click to visibility of mesh"><span id="visible_'+_name+'" class="glyphicon glyphicon-eye-open" style="color:'+RGBTohex(color)+';"></span> </button>';
 
-var _bbb='<button id="'+_landmark_name+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white"  onClick="openLandmark('+i+',\''+_opacity_name+'\',\''+_landmark_list+'\')" title="click to expand landmarks"><span class="glyphicon glyphicon-map-marker" style="color:#407CCA"></span> </button>';
+_bb=_bb+'<button id="'+_opacity_name_n+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white; padding:0px 0px 0px 0px;"  onClick="opacityMesh('+i+',\'opacity_'+_name+'\',\''+_opacity_name+'\',\''+_landmark_list+'\')" title="click to change opacity of mesh"><span id="opacity_'+_name+'" class="glyphicon glyphicon-triangle-right" style="color:#407CCA"></span> </button>';
+
+var _bbb='<button id="'+_landmark_name_n+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white; padding:0px 5px 0px 0px;"  onClick="openLandmark('+i+',\''+_opacity_name+'\',\''+_landmark_list+'\')" title="click to expand landmarks"><span class="glyphicon glyphicon-map-marker" style="color:#407CCA"></span> </button>';
 
 if(hasLandmarks) {
    if(href) {
-      _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand landmarks">'+_bb+_bbb+'</a>';
+      _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand meshlist">'+_bb+_bbb+'</a>';
       _nn+='<a href="'+href+'">'+label+'<span class="glyphicon glyphicon-link" style="font-size:12px;color:grey"></span></a>';
       } else {
-      _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand landmarks">'+_bb+_bbb+'</a><a>'+label+'</a>';
+      _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand meshlist">'+_bb+_bbb+'</a><a>'+label+'</a>';
    }
   } else {
     if(href) {
-      _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand landmarks">'+_bb+'</a>';
+      _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand meshlist">'+_bb+'</a>';
       _nn+='<a href="'+href+'">'+label+'<span class="glyphicon glyphicon-link" style="font-size:12px;color:grey"></span></a>';
       } else {
-        _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand landmarks">'+_bb+'</a><a>'+label+'</a>';
+        _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand meshlist">'+_bb+'</a><a>'+label+'</a>';
     }
 }
 _nn+='</div></div> <!-- panel-title, panel-heading -->';
@@ -585,7 +588,7 @@ function setupOpacitySlider(idx) {
     });
     jQuery(_s).width(100 + '%');
     jQuery(_s).slider("option", "value", op); // by default
-    jQuery(_s).slider("option", "min", 0);
+    jQuery(_s).slider("option", "min", 0.1);
     jQuery(_s).slider("option", "max", 1);
     jQuery(_s).slider("option", "step", 0.1);
 }
@@ -772,35 +775,66 @@ function resetCollapse(i,type,landmarkDiv, sliderDiv) {
   var _collapse_name=i+'_collapse';
   var id='#'+_collapse_name;
   if($(id).hasClass('in')) {
-    if(type == 'mesh') {
-      if(document.getElementById(sliderDiv).style.display == 'none') {
-        $(id).removeClass('in');
-      }
-    } else {
-      if(document.getElementById(landmarkDiv).style.display == 'none') {
-        $(id).removeClass('in');
-      }
+    switch (type) { 
+      case 'mesh':
+        {
+        if(document.getElementById(sliderDiv).style.display == 'none') {
+          $(id).removeClass('in');
+        }
+        break;
+        }
+      case 'landmark':
+        {
+        if(document.getElementById(landmarkDiv).style.display == 'none') {
+          $(id).removeClass('in');
+        }
+        break;
+        }
+      case 'none':
+        {
+/*
+        if(document.getElementById(landmarkDiv).style.display == 'none'
+         || document.getElementById(sliderDiv).style.display == 'none') {
+          $(id).removeClass('in');
+        }
+*/
+        break;
+        }
     }
   }
 }
 
-function openMesh(i,eye_name,opacity_name,landmark_name) {
+function openMesh(i,eye_name,opacity_name,landmark_name,opacity_btn) {
+  var landmarkDiv=landmark_name+'Div';
+  var sliderDiv=opacity_name+'Div';
+  document.getElementById(landmarkDiv).style.display = 'none';
+  document.getElementById(sliderDiv).style.display = 'none';
+
+  var _mesh=meshs[i][0];
+  var eye='#'+eye_name;
+  var _btn=i+"_opacity";
+  _mesh.visible = !_mesh.visible;
+  if(_mesh.visible) {
+    $(eye).removeClass('glyphicon-eye-close').addClass('glyphicon-eye-open');
+    document.getElementById(_btn).disabled=false;
+    document.getElementById(opacity_btn).style.color="#407CCA";
+    } else {
+      $(eye).removeClass('glyphicon-eye-open').addClass('glyphicon-eye-close');
+      document.getElementById(_btn).disabled=true;
+      document.getElementById(opacity_btn).style.color="#DCDCDC";
+  }
+}
+
+
+function opacityMesh(i,eye_name,opacity_name,landmark_name) {
+  var _btn=i+"_opacity";
+  var _d=document.getElementById(_btn).disabled;
+
   var landmarkDiv=landmark_name+'Div';
   var sliderDiv=opacity_name+'Div';
   resetCollapse(i,'mesh',landmarkDiv, sliderDiv);
   document.getElementById(landmarkDiv).style.display = 'none';
   document.getElementById(sliderDiv).style.display = '';
-
-/* SWITCH to using slider to control 
-  var _mesh=meshs[i][0];
-  var eye='#'+eye_name;
-  _mesh.visible = !_mesh.visible;
-  if(_mesh.visible) {
-    $(eye).removeClass('glyphicon-eye-close').addClass('glyphicon-eye-open');
-    } else {
-      $(eye).removeClass('glyphicon-eye-open').addClass('glyphicon-eye-close');
-  }
-*/
 }
 
 // NOT IN USE points for calculating distance
