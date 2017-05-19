@@ -508,7 +508,7 @@ _nn+='<div class="panel panel-default col-md-12 col-xs-12">';
 _nn+='<div class="panel-heading">';
 _nn+='<div class="panel-title row" style="background-color:transparent">'
 
-var _bb='<button id="'+_visible_name_n+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white; padding:0px 5px 0px 0px;"  onClick="openMesh('+i+',\'visible_'+_name+'\',\''+_opacity_name+'\',\''+_landmark_list+'\',\'opacity_'+_name+'\')" title="click to visibility of mesh"><span id="visible_'+_name+'" class="glyphicon glyphicon-eye-open" style="color:'+RGBTohex(color)+';"></span> </button>';
+var _bb='<button id="'+_visible_name_n+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white; padding:0px 5px 0px 0px;"  onClick="openMesh('+i+',\'visible_'+_name+'\',\''+_opacity_name+'\',\''+_landmark_list+'\',\'opacity_'+_name+'\')" title="click to change visibility of mesh"><span id="visible_'+_name+'" class="glyphicon glyphicon-eye-open" style="color:'+RGBTohex(color)+';"></span> </button>';
 
 _bb=_bb+'<button id="'+_opacity_name_n+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white; padding:0px 0px 0px 0px;"  onClick="opacityMesh('+i+',\'opacity_'+_name+'\',\''+_opacity_name+'\',\''+_landmark_list+'\')" title="click to change opacity of mesh"><span id="opacity_'+_name+'" class="glyphicon glyphicon-triangle-right" style="color:#407CCA"></span> </button>';
 
