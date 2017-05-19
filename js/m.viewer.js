@@ -508,23 +508,23 @@ _nn+='<div class="panel panel-default col-md-12 col-xs-12">';
 _nn+='<div class="panel-heading">';
 _nn+='<div class="panel-title row" style="background-color:transparent">'
 
-var _bb='<button id="'+_visible_name_n+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white; padding:0px 5px 0px 0px;"  onClick="openMesh('+i+',\'visible_'+_name+'\',\''+_opacity_name+'\',\''+_landmark_list+'\',\'opacity_'+_name+'\')" title="click to change visibility of mesh"><span id="visible_'+_name+'" class="glyphicon glyphicon-eye-open" style="color:'+RGBTohex(color)+';"></span> </button>';
+var _bb='<button id="'+_visible_name_n+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white; padding:0px 10px 2px 0px;"  onClick="openMesh('+i+',\'visible_'+_name+'\',\''+_opacity_name+'\',\''+_landmark_list+'\',\'opacity_'+_name+'\')" title="click to change visibility of mesh"><span id="visible_'+_name+'" class="glyphicon glyphicon-eye-open" style="color:'+RGBTohex(color)+';"></span> </button>';
 
-_bb=_bb+'<button id="'+_opacity_name_n+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white; padding:0px 0px 0px 0px;"  onClick="opacityMesh('+i+',\'opacity_'+_name+'\',\''+_opacity_name+'\',\''+_landmark_list+'\')" title="click to change opacity of mesh"><span id="opacity_'+_name+'" class="glyphicon glyphicon-triangle-right" style="color:#407CCA"></span> </button>';
+_bb=_bb+'<button id="'+_opacity_name_n+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white; padding:0px 0px 0px 0px;"  onClick="opacityMesh('+i+',\'opacity_'+_name+'\',\''+_opacity_name+'\',\''+_landmark_list+'\')" title="click to change opacity of mesh"><span id="opacity_'+_name+'" class="glyphicon glyphicon-tasks" style="color:#407CCA"></span> </button>';
 
 var _bbb='<button id="'+_landmark_name_n+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white; padding:0px 5px 0px 0px;"  onClick="openLandmark('+i+',\''+_opacity_name+'\',\''+_landmark_list+'\')" title="click to expand landmarks"><span class="glyphicon glyphicon-map-marker" style="color:#407CCA"></span> </button>';
 
 if(hasLandmarks) {
    if(href) {
       _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand meshlist">'+_bb+_bbb+'</a>';
-      _nn+='<a href="'+href+'">'+label+'<span class="glyphicon glyphicon-link" style="font-size:12px;color:grey"></span></a>';
+      _nn+='<a href="'+href+'">'+label+'<span class="glyphicon glyphicon-link" style="font-size:2px;color:#aeaeae"></span></a>';
       } else {
-      _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand meshlist">'+_bb+_bbb+'</a><a>'+label+'</a>';
+      _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand meshlist">'+_bb+_bbb+'</a><p>'+label+'</p>';
    }
   } else {
     if(href) {
       _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand meshlist">'+_bb+'</a>';
-      _nn+='<a href="'+href+'">'+label+'<span class="glyphicon glyphicon-link" style="font-size:12px;color:grey"></span></a>';
+      _nn+='<a href="'+href+'">'+label+'<span class="glyphicon glyphicon-link" style="font-size:2px;color:#aeaeae"></span></a>';
       } else {
         _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#meshlist" href="#' +_collapse_name+'" title="click to expand meshlist">'+_bb+'</a><a>'+label+'</a>';
     }
@@ -804,14 +804,14 @@ function resetCollapse(i,type,landmarkDiv, sliderDiv) {
   }
 }
 
-function openMesh(i,eye_name,opacity_name,landmark_name,opacity_btn) {
+function openMesh(i,label_name,opacity_name,landmark_name,opacity_btn) {
   var landmarkDiv=landmark_name+'Div';
   var sliderDiv=opacity_name+'Div';
   document.getElementById(landmarkDiv).style.display = 'none';
   document.getElementById(sliderDiv).style.display = 'none';
 
   var _mesh=meshs[i][0];
-  var eye='#'+eye_name;
+  var eye='#'+label_name;
   var _btn=i+"_opacity";
   _mesh.visible = !_mesh.visible;
   if(_mesh.visible) {
@@ -825,16 +825,23 @@ function openMesh(i,eye_name,opacity_name,landmark_name,opacity_btn) {
   }
 }
 
+function toggleOpacityIcon(btn) {
+  var opacity='#'+btn;
+  if($(opacity).hasClass('glyphicon-triangle-right')) {
+    $(opacity).removeClass('glyphicon-triangle-right').addClass('glyphicon-triangle-bottom');
+    } else { 
+    $(opacity).removeClass('glyphicon-triangle-bottom').addClass('glyphicon-triangle-right');
+  }
+}
 
-function opacityMesh(i,eye_name,opacity_name,landmark_name) {
-  var _btn=i+"_opacity";
-  var _d=document.getElementById(_btn).disabled;
+function opacityMesh(i,label_name,opacity_name,landmark_name) {
 
   var landmarkDiv=landmark_name+'Div';
   var sliderDiv=opacity_name+'Div';
   resetCollapse(i,'mesh',landmarkDiv, sliderDiv);
   document.getElementById(landmarkDiv).style.display = 'none';
   document.getElementById(sliderDiv).style.display = '';
+//  toggleOpacityIcon(label_name);
 }
 
 // NOT IN USE points for calculating distance
