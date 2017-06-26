@@ -38,7 +38,7 @@ var defaultColor=[ [1.00, 0.80, 0.40],
                    [0.527, 0.527, 0],
                    [0.316, 0.316, 0.991]];
 
-// just in case myColor is too little
+// just in case my defaultColor is too little
 function getDefaultColor(p) {
   var len=defaultColor.length;
   var t= (p+len) % len;

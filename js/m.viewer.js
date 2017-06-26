@@ -543,6 +543,7 @@ _nn+=_ss;
 
 // last bits
 _nn+= '</div> <!-- panel-body -->';
+
 _nn+= ' </div> </div> <!-- panel-collapse, panel -->';
 
   jQuery('#meshlist').append(_nn);

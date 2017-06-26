@@ -20,6 +20,12 @@
 //
 //   meshes, label is used to display on the legends
 //           id is used to link between mesh and its landmarks points
+//
+//  calling all.html to get to the testing meshviewer
+//
+// http://localhost/meshviewer/all.html?
+//    volume=http://localhost/data/3mesh/3volume.json&
+//    mesh=http://localhost/data/3mesh/3mesh.json
 //**************************************************************
 
 /*
