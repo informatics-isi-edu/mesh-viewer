@@ -101,4 +101,4 @@ An example model specification for a model with one mesh and one landmark.
 }
 ```
 
-
+Sample plots are sample.png, sample1.png
