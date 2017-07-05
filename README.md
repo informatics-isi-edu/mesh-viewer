@@ -101,8 +101,21 @@ An example model specification for a model with one mesh and one landmark.
 }
 ```
 
-Sample plots are sample1.png, sample2.png
+An Example with view 
 
 ```
-(view.html?model=http://localhost/data/3mesh/3model.json&view=http://localhost/data/3mesh/3view.json)
+view.html?model=http://localhost/data/3mesh/3model.json&view=http://localhost/data/3mesh/3view.json
 ```
+
+the 3view.json
+
+```
+{
+  "view" : [ {
+      "matrix": [ -0.39207977056503296, -0.29684534668922424, 0.8707215785980225, 0, 0.6848435401916504, -0.7261472940444946, 0.06082262843847275, 0, 0.6142174601554871, 0.620155394077301, 0.48800042271614075, 0, 0, 0, -10.206781387329102, 1 ]
+}]
+}
+
+```
+
+Sample plots are sample1.png, sample2.png
