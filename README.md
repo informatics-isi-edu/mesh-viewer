@@ -102,3 +102,7 @@ An example model specification for a model with one mesh and one landmark.
 ```
 
 Sample plots are sample1.png, sample2.png
+
+```
+(view.html?model=http://localhost/data/3mesh/3model.json&view=http://localhost/data/3mesh/3view.json)
+```
