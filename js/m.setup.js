@@ -46,9 +46,10 @@ function getDefaultColor(p) {
 }
 
 // ...file.obj
+// ...file.obj.gz
 function chopForStub(url){
   var s=url.split('/').pop();
-  var ss=s.slice(0, -4);
+  var ss=s.split('.')[0];
   return ss;
 }
 
