@@ -16,6 +16,7 @@ var anno_json=null;
 var hasLandmarks=false;
 var hasViews=false;
 
+
 var model_label='Default Mesh';
 var model_id='model id';
 var model_caption=null;
@@ -86,7 +87,7 @@ function trimQ(s) {
   return s;
 }
 
-
+// THIS is for internal testing only
 function setupWithDefaults()
 {
   initial_mesh_json=$.parseJSON(foo_initial_mesh_json);
@@ -95,6 +96,44 @@ function setupWithDefaults()
   vol_json=$.parseJSON(foo_vol_json);
   view_json=foo_view_json;
   anno_json=foo_anno_json;
+}
+
+// expect ends with .obj, or .obj.gz
+function notMesh(fobj) {
+  var fname=fobj.name; 
+  var i=fname.indexOf('obj.gz');
+  var ii=fname.indexOf('obj');
+  if(i || ii) {
+    return 0;
+    } else {
+      return 1;
+  }
+}
+
+// this is for preview run where local mesh file is being picked
+// up using html5's file reader
+function selectLocalFiles(files) {
+  var cnt = files.length;
+  var mesh_i=0;
+  for(var i=0; i<cnt; i++) {
+    var fobj=files[i];
+    if( notMesh(fobj) )
+      continue;
+    // create a default mesh url json
+//{ "mesh" : [ { "url": "abc.obj" } ] }
+    var tt= {"url": fobj};
+    if(initial_mesh_json == null) {
+      var ttt={ "mesh" : [ tt ]};
+      initial_mesh_json= ttt;
+      } else {
+        initial_mesh_json["mesh"].push(tt);
+        mesh_i=initial_mesh_json["mesh"].length-1;
+    }
+// what needs to happen when a new mesh is injected
+    addMesh(tt);
+    setNeed2Show();
+    setupOpacitySlider(mesh_i);
+  }
 }
 
 function processArgs(args) {

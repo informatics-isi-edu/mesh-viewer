@@ -73,6 +73,12 @@ var show_caption=false;
 var save_view_matrix = new Float32Array(16);
 var spin_view=false;
 
+//==== only start the rendering if there is something to render ====
+var need2Show=false;
+
+function setNeed2Show() {
+  need2Show=true;
+}
 
 // MAIN
 jQuery(document).ready(function() {
@@ -98,7 +104,7 @@ jQuery(document).ready(function() {
   if (args.length >= 2) { // there are some url to pick up
     processArgs(args);
     } else {
-      setupWithDefaults();
+//      setupWithDefaults();
   }
 
   var _m=mesh_load();
@@ -111,6 +117,9 @@ jQuery(document).ready(function() {
        addMesh(initial_mesh_list['mesh'][i]);
     }
   }
+
+  if(initial_mesh_list)
+    need2Show=true;
 
 // load the landmarks
   preloadLandmark();
@@ -132,12 +141,17 @@ jQuery(document).ready(function() {
   };
 
   ren3d.onShowtime = function(){
+
 //window.console.log("calling onShowtime");
     var loadingDiv = document.getElementById('loading');
     loadingDiv.style.display = 'none';
+    setupViewerBackground();
+
+    if(!need2Show) { 
+      return;
+    }
 
     if( first_time_show ) {
-      setupViewerBackground();
       first_time_show=false;
       setupClipSlider();
       initOpacitySliders();
@@ -178,6 +192,11 @@ jQuery(document).ready(function() {
   };
 
   ren3d.onRender = function() {
+
+    if(!need2Show) { 
+      return;
+    }
+
 // clip it if preset
     if( first_time_render ) {
       first_time_render=false;
@@ -192,7 +211,6 @@ jQuery(document).ready(function() {
   };
 
   ren3d.render();
-  var rr=ren3d;
 })
 
 function setupViewerBackground()
@@ -1062,6 +1080,34 @@ function getHref(t) {
   return(null);
 }
 
+//
+// Reading files using the HTML5 FileReader.
+//
+// must be .obj, .obj.gz skip all others
+function readLocal2Mesh(mobj,fobj) {
+
+  // setup callback for errors during reading
+  var errorHandler = function(e) {
+    window.console.log('FileReader Error:' + e.target.error.code);
+  };
+  // setup callback after reading
+  var loadHandler = function(mobj, fobj) {
+    return function(e) {
+     // reading complete
+     var data = e.target.result;
+     mobj.filedata = data;
+    }
+  };
+
+
+  var reader = new FileReader();
+  reader.onerror = errorHandler;
+  reader.onload = (loadHandler)(mobj,fobj); // bind the current type
+
+  // start reading this file
+  reader.readAsArrayBuffer(fobj);
+};
+
 
 function addVolume(t) { // color, url, caption, <id/new>
   vol = new X.volume();
@@ -1092,7 +1138,18 @@ function addMesh(t) { // color, url, caption
   if(_url == undefined) {
     throw new Error("mesh must have an url!");
   }
-  _mesh.file = encodeURI(_url);
+  if(typeof _url == "object") { // this is a local file
+    if( _url instanceof File) {
+      _mesh.file = _url.name;
+      readLocal2Mesh(_mesh,_url);
+      // reset _url
+      _url=_url.name;
+      } else {
+        throw new Error("local mesh must be a File object type!");
+    }
+    } else {
+      _mesh.file = encodeURI(_url);
+  }
 //
   var _label=t['label'];
   if(_label == undefined ) {
@@ -1349,7 +1406,6 @@ function clip3d(near) {
 }
 
 function toggleBox() {
-window.console.log(" calling toggleBox..");
   show_box = !show_box;
   if(show_box) {
     gbbox.visible=true;

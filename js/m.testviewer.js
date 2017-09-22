@@ -1087,6 +1087,7 @@ function loadMesh() {
        addMesh(mesh_list['mesh'][i]);
     }
   }
+
   document.getElementById('lastbtn').style.display = 'none';
   document.getElementById('landmarkbtn').style.display = '';
 }

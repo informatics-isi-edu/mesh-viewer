@@ -45,6 +45,19 @@ html, body {
     color: white;
 }
 
+.dropzone {
+        margin-top: 100px;
+        width: 660px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+}
+
+.dropzone span {
+        font-size: 2em;
+}
+
+
 </style>
 
 <script type='text/javascript' src='js/jquery.js'></script>
@@ -53,7 +66,7 @@ html, body {
 <script type='text/javascript' src='js/alertify.min.js'></script>
 <script type='text/javascript' src='js/bootstrap.js'></script>
 
-<!-- for debug     
+<!-- for debug 
 <script type="text/javascript" src="X/lib/google-closure-library/closure/goog/base.js"></script>
 <script type="text/javascript" src="X/xtk-deps.js"></script>
 <script type="text/javascript" src="js/default.js"></script>
@@ -110,9 +123,13 @@ html, body {
       <button id="spinbtn" class="btn btn-success" title="turn on or off animated rotation of the model" onclick="spinView()">
            <span class="glyphicon glyphicon-refresh"></span> 
               Rotate</button>
-      <button id="resetbtn" class="btn btn-success" title="reset orientation of  the model" onclick="resetView()">
+      <button id="resetbtn" class="btn btn-success" title="reset orientation of the model" onclick="resetView()">
            <span class="glyphicon glyphicon-home"></span>
                Reset</button>
+      <input id='filebutton' type='file' multiple onchange='selectLocalFiles(this.files)' style='display: none;'></input>
+      <button id="selectbtn" class="btn btn-success" title="select a file" onclick='javascript:document.getElementById("filebutton").click();'>
+           <span class="glyphicon glyphicon-file"></span>
+               Select</button>
     </div>
   </div> <!-- control-block -->
 
