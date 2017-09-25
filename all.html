@@ -63,7 +63,9 @@
   </div>
   <div id='forTop' style='margin-top:10px;' >
     <input id="volbtn" type="button" value="addVol" onclick="loadVol();"/>
-    <input id="lastbtn" type="button" value="addMoreMesh"  onclick="loadMesh();"/>
+    <input id="lastbtn" type="button" value="addFixedMesh"  onclick="loadMesh();"/>
+    <input id='filebutton' type='file' multiple onchange='selectLocalFiles(this.files)' style='display: none;'></input>
+    <input id="selectbtn" type="button" value="addALocalMesh" onclick='javascript:document.getElementById("filebutton").click();'/>
     <input id="landmarkbtn" type="button" value="addLandmark" style="display:none"  onclick="loadLandmark();"/>
   </div>
   <div id='forVolume' style="margin-top:10px;display:none;">

@@ -79,6 +79,13 @@ var show_caption=false;
 var save_view_matrix = new Float32Array(16);
 var spin_view=false;
 
+//==== only start the rendering if there is something to render ====
+var need2Show=false;
+
+function setNeed2Show() {
+  need2Show=true;
+}
+
 
 // MAIN
 jQuery(document).ready(function() {
@@ -1037,6 +1044,34 @@ function getHref(t) {
   return(null);
 }
 
+//
+// Reading files using the HTML5 FileReader.
+//
+// must be .obj, .obj.gz skip all others
+function readLocal2Mesh(mobj,fobj) {
+
+  // setup callback for errors during reading
+  var errorHandler = function(e) {
+    window.console.log('FileReader Error:' + e.target.error.code);
+  };
+  // setup callback after reading
+  var loadHandler = function(mobj, fobj) {
+    return function(e) {
+     // reading complete
+     var data = e.target.result;
+     mobj.filedata = data;
+    }
+  };
+
+
+  var reader = new FileReader();
+  reader.onerror = errorHandler;
+  reader.onload = (loadHandler)(mobj,fobj); // bind the current type
+
+  // start reading this file
+  reader.readAsArrayBuffer(fobj);
+};
+
 
 function addVolume(t) { // color, url, caption, <id/new>
   vol = new X.volume();
@@ -1047,36 +1082,106 @@ function addVolume(t) { // color, url, caption, <id/new>
   jQuery('#2dViews').show();
 }
 
+
+function randomString(len) {
+  var text = "";
+  var alist = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for(var i = 0; i < len; i++) {
+     text += alist.charAt(Math.floor(Math.random() * alist.length));
+  }
+  return text;
+}
+
 // create mesh object 
 //    add to the local mesh list
 //    add to 3D renderer
 //    add to ui's meshlist 
+// t needs to have color, label, 
+// meshs[0] is the X.mesh object, meshs[1] is the json 
 function addMesh(t) { // color, url, caption
   var _mesh = new X.mesh();
-  _mesh.color = t['color'];
-  _mesh.file = encodeURI(t['url']);
-  _mesh.caption = { 'description':t['label'],'link':getHref(t) };
+  var _idx=meshs.length;
+//
+  var _color= t['color'];
+  if(_color == undefined) {
+    _color=getDefaultColor(_idx);
+    t['color']=_color;
+  }
+  _mesh.color = _color;
+//
+  var _url=t['url'];
+  if(_url == undefined) {
+    throw new Error("mesh must have an url!");
+  }
+  if(typeof _url == "object") { // this is a local file
+    if( _url instanceof File) {
+      _mesh.file = _url.name;
+      readLocal2Mesh(_mesh,_url);
+      // reset _url
+      _url=_url.name;
+      t['url']=_url;
+      } else {
+        throw new Error("local mesh must be a File object type!");
+    }
+    } else {
+      _mesh.file = encodeURI(_url);
+  }
+//
+  var _label=t['label'];
+  if(_label == undefined ) {
+    _label=chopForStub(_url);
+    t['label']=_label;
+  }
+//
+  var _href=getHref(t);
+//
+  var _caption = t['caption'];
+  if(_caption == undefined) {
+    _caption = { 'description':_label,'link':_href };
+    t['caption']=_caption;
+  }
+  _mesh.caption=_caption;
+//
   var _opacity=t['opacity'];
-  if(_opacity == undefined)
+  if(_opacity == undefined) {
     _opacity=1;
+    t['opacity']=_opacity;
+  }
   _mesh.opacity = _opacity;
-//  _mesh.caption = t['caption'];
-//  _mesh.label = t['label'];
-//  _mesh.id= t['id'];
+//
+  var _id=t['id']; 
+  if(_id == undefined) {
+   // reuse label
+     _id=_label;
+     t['id']=_id;
+  }
+  _mesh.id= _id;
+//
+
+// if the label already exists, then alter the name
+// still allow it in order for user to test 'alignment'
+  var tmp=lookupMeshByID(_id);
+  if(tmp) {
+    var r=randomString(4);
+    _id=_id+"_"+r;
+    _label=_label+" "+r;
+    t['id']=_id;
+    t['label']=_label;
+  }
+
   var loadingDiv = document.getElementById('loading');
   loadingDiv.style.display ='';
   ren3d.add(_mesh);
 
 // meshs[0] is the _mesh, meshs[1] is the original object
   var _cnt=meshs.push([_mesh,t]);
-  var _name=t['id'].toString();
-  var _label=t['label'];
+  var _name=_id.toString();
  
-  var _href=getHref(t);
   if(TESTMODE) {
-    addTESTMeshListEntry(_label,_name,_cnt-1,t['color']);
+window.console.log("XXX add entry -- ", _name);
+    addTESTMeshListEntry(_label,_name,_idx,_color);
     } else {
-      addMeshListEntry(_label,_name,_cnt-1,t['color'],_opacity,_href);
+      addMeshListEntry(_label,_name,_idx,_color,_opacity,_href);
   }
 }
 
@@ -1106,10 +1211,11 @@ function loadVol() {
 
 // meshs[1],
 function lookupMeshByID(id) {  
+  var target=id.toLowerCase();
   for(var i=0; i< meshs.length; i++) {
     var _m=meshs[i][1];
     var _id=_m['id'].toLowerCase();
-    if( _id == id )
+    if( _id == target )
       return meshs[i][0]; // return the X.mesh
   }
   return null;
@@ -1394,7 +1500,7 @@ function makeBBox(r,v) {
 function addTESTMeshListEntry(label,name,i,color)
 {
   var _name = name.replace(/ +/g, "");
-  var _nn='<button class="btn btn-sq-sm" disabled=true style="background-color:'+RGBTohex(color)+';"/><input id='+_name+' type=checkbox checked="" onClick=openMesh('+i+') value='+i+' name="mesh">'+label+'</input><br>';
+  var _nn='<button class="btn btn-sq-sm" disabled=true style="background-color:'+RGBTohex(color)+';"/><input id='+_name+' type=checkbox checked="" onClick=toggleMesh('+i+') value='+i+' name="mesh">'+label+'</input><br>';
   jQuery('#TESTmeshlist').append(_nn);
 //window.console.log(_nn);
 }
@@ -1439,4 +1545,17 @@ function selectMesh()
 }
 
 
+function toggleMesh(idx) {
+  var _list=document.getElementsByName("mesh");
+  var len=_list.length;
+  if(idx<len) {
+    var chk= _list[idx].checked;
+    var _m=meshs[_list[idx].value];
+    if(chk) {
+      _m[0].visible=true;
+      } else {
+        _m[0].visible=false;
+    }
+ }
+}
 

@@ -1,7 +1,7 @@
 //**************************************************************
 //   m.viewer.js
 //
-//   viewer.html  (using default localhost data)
+//   viewer.html  (awaits on-demand local data file selection)
 //   viewer.html?model="http:..."
 //   viewer.html?mesh="http:..."&landmark="http:..."
 //   viewer.html?...&view="";
@@ -19,6 +19,7 @@
 //    dismissMeshes()
 //    dismissClip()
 //    reset_clipPlane()
+//    selectLocalFiles()
 //
 //   meshes, label is used to display on the legends
 //           id is used to link between mesh and its landmarks points
@@ -1118,6 +1119,16 @@ function addVolume(t) { // color, url, caption, <id/new>
   jQuery('#2dViews').show();
 }
 
+
+function randomString(len) {
+  var text = "";
+  var alist = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for(var i = 0; i < len; i++) {
+     text += alist.charAt(Math.floor(Math.random() * alist.length));
+  }
+  return text;
+}
+
 // create mesh object 
 //    add to the local mesh list
 //    add to 3D renderer
@@ -1125,12 +1136,15 @@ function addVolume(t) { // color, url, caption, <id/new>
 // t needs to have color, label, 
 // meshs[0] is the X.mesh object, meshs[1] is the json 
 function addMesh(t) { // color, url, caption
+
+// continue only if the mesh is new
   var _mesh = new X.mesh();
   var _idx=meshs.length;
 //
   var _color= t['color'];
   if(_color == undefined) {
     _color=getDefaultColor(_idx);
+    t['color']=_color;
   }
   _mesh.color = _color;
 //
@@ -1144,6 +1158,7 @@ function addMesh(t) { // color, url, caption
       readLocal2Mesh(_mesh,_url);
       // reset _url
       _url=_url.name;
+      t['url']=_url;
       } else {
         throw new Error("local mesh must be a File object type!");
     }
@@ -1154,29 +1169,45 @@ function addMesh(t) { // color, url, caption
   var _label=t['label'];
   if(_label == undefined ) {
     _label=chopForStub(_url);
+    t['label']=_label;
   }
-//
+
   var _href=getHref(t);
 //
   var _caption = t['caption'];
   if(_caption == undefined) {
     _caption = { 'description':_label,'link':_href };
+    t['caption']=_caption;
   }
   _mesh.caption=_caption;
 //
   var _opacity=t['opacity'];
   if(_opacity == undefined) {
     _opacity=1;
+    t['opacity']=_opacity;
   }
   _mesh.opacity = _opacity;
 //
   var _id=t['id']; 
   if(_id == undefined) {
-   // chop from url
-     _id=chopForStub(_url);
+   // reuse label
+     _id=_label;
+     t['id']=_id;
   }
   _mesh.id= _id;
 //
+
+// if the label already exists, then alter the name
+// still allow it in order for user to test 'alignment'
+  var tmp=lookupMeshByID(_id);
+  if(tmp) {
+    var r=randomString(4);
+    _id=_id+"_"+r;
+    _label=_label+" "+r;
+    t['id']=_id;
+    t['label']=_label;
+  }
+
   var loadingDiv = document.getElementById('loading');
   loadingDiv.style.display ='';
   ren3d.add(_mesh);
@@ -1188,7 +1219,7 @@ function addMesh(t) { // color, url, caption
   addMeshListEntry(_label,_name,_idx,_color,_opacity,_href);
 }
 
-// adding a new mesh after rendering
+// adding a new mesh after rendering the initial set
 function loadMesh() {
   if(mesh_list) {
     for (var i=0;i<mesh_list['mesh'].length;i++) {
@@ -1213,11 +1244,13 @@ function loadVol() {
 
 // meshs[1],
 function lookupMeshByID(id) {  
+  var target=id.toLowerCase();
   for(var i=0; i< meshs.length; i++) {
     var _m=meshs[i][1];
     var _id=_m['id'].toLowerCase();
-    if( _id == id )
+    if( _id == target ) {
       return meshs[i][0]; // return the X.mesh
+    }
   }
   return null;
 }

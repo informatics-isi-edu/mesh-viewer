@@ -7,8 +7,8 @@
 //
 //**************************************************************
 var hostname=window.location.hostname;
-var initial_mesh_json=null;
-var mesh_json=null;
+var initial_mesh_json=null; // master mesh list
+var mesh_json=null; // this is used just for testing of adding mesh on demand
 var landmark_json=null;
 var vol_json=null;
 var view_json=null;
@@ -101,8 +101,8 @@ function setupWithDefaults()
 // expect ends with .obj, or .obj.gz
 function notMesh(fobj) {
   var fname=fobj.name; 
-  var i=fname.indexOf('obj.gz');
-  var ii=fname.indexOf('obj');
+  var i=fname.indexOf('.obj.gz');
+  var ii=fname.indexOf('.obj');
   if(i || ii) {
     return 0;
     } else {
@@ -131,8 +131,10 @@ function selectLocalFiles(files) {
     }
 // what needs to happen when a new mesh is injected
     addMesh(tt);
+// in case there is no initial mesh, this force it to continue the initialization
     setNeed2Show();
-    setupOpacitySlider(mesh_i);
+// this might be duplicating in a particular case but that is okay
+    setupOpacitySlider(mesh_i); 
   }
 }
 
