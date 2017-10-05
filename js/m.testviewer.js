@@ -594,6 +594,9 @@ function initOpacitySliders()
 }
 
 function setupOpacitySlider(idx) {
+// no slider is made for in TESTMODE
+    if(TESTMODE)
+      return;
     var item=mesh_opacity_list[idx];
     var sid=item['id'];
     var rid=item['reset'];
