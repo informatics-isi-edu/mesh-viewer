@@ -113,7 +113,7 @@ html, body {
       <button id="resetbtn" class="btn btn-success" title="reset orientation of the model" onclick="resetView()">
            <span class="glyphicon glyphicon-home"></span>
                Reset</button>
-      <input id='filebutton' type='file' multiple onchange='selectLocalFiles(this.files)' style='display: none;'></input>
+      <input id='filebutton' class='btn btn-success' type='file' onchange='selectLocalFiles(this.files)' style='display:none'/>
       <button id="selectbtn" class="btn btn-success" title="open a mesh file to ingest" onclick='javascript:document.getElementById("filebutton").click();'>
            <span class="glyphicon glyphicon-file"></span>
                Open</button>

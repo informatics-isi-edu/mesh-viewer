@@ -46,12 +46,32 @@ function getDefaultColor(p) {
   return defaultColor[t];
 }
 
+//https://stackoverflow.com/questions/4434076/best-way-to-alphanumeric-check-in-javascript
+//https://stackoverflow.com/questions/784586/convert-special-characters-to-html-in-javascript
+function HTMLEncode(str){
+  var i = str.length,
+      aRet = [];
+  while (i--) {
+    var iC = str[i].charCodeAt();
+    if (!(iC > 47 && iC < 58) && // numeric (0-9)
+        !(iC > 64 && iC < 91) && // upper alpha (A-Z)
+        !(iC > 96 && iC < 123)) { // lower alpha (a-z)
+      aRet[i] = '_';
+    } else {
+      aRet[i] = str[i];
+    }
+   }
+  return aRet.join('');    
+}
+
 // ...file.obj
 // ...file.obj.gz
 function chopForStub(url){
   var s=url.split('/').pop();
   var ss = s.replace(/.gz/,"").replace(/.obj/,"");
-  return ss;
+  // if file has funny characters.. change it..
+  var sss=HTMLEncode(ss);
+  return sss;
 }
 
 // should be a very small file and used for testing and so can ignore
@@ -113,6 +133,8 @@ function notMesh(fobj) {
 // this is for preview run where local mesh file is being picked
 // up using html5's file reader
 function selectLocalFiles(files) {
+window.console.log("just started on selectLocalFiles..");
+  var f=files;
   var cnt = files.length;
   var mesh_i=0;
   for(var i=0; i<cnt; i++) {

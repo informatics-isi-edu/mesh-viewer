@@ -1088,22 +1088,32 @@ function getHref(t) {
 function readLocal2Mesh(mobj,fobj) {
 
   // setup callback for errors during reading
+/*
   var errorHandler = function(e) {
     window.console.log('FileReader Error:' + e.target.error.code);
   };
+*/
   // setup callback after reading
-  var loadHandler = function(mobj, fobj) {
+  var loadHandler = function(mObj) {
+window.console.log("file got loaded..");
     return function(e) {
      // reading complete
      var data = e.target.result;
-     mobj.filedata = data;
+     mObj.filedata = data;
+    }
+  };
+  var loadendHandler = function(mObj) {
+window.console.log("XXX file got loadedend..");
+    return function(e) {
+     // a read...
     }
   };
 
 
   var reader = new FileReader();
-  reader.onerror = errorHandler;
-  reader.onload = (loadHandler)(mobj,fobj); // bind the current type
+//  reader.onerror = errorHandler;
+  reader.onload = (loadHandler)(mobj); // bind the current type
+  reader.onloadend = (loadendHandler)(mobj);
 
   // start reading this file
   reader.readAsArrayBuffer(fobj);
