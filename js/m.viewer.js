@@ -125,10 +125,6 @@ jQuery(document).ready(function() {
 // load the landmarks
   preloadLandmark();
 
-// stackoverflow.com/question/17462936/xtk-flickering-in-overlay-mesh
-// resolve multiple mesh transparent object being rendered causing flickering
-// effect
-  ren3d.config.ORDERING_ENABLED=false;
   show_caption=false;
 
 // zoom in alittle
