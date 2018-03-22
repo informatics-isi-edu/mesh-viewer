@@ -1139,6 +1139,22 @@ function randomString(len) {
   return text;
 }
 
+
+// Check if a URI already has encoded pieces before attempting to encode it.
+// If a URI has been encoded, nothing is done and the same uri is returned.
+function safeEncodeURI(uri) {
+  uri = uri || '';
+  // This is based on:
+  // https://stackoverflow.com/questions/17564837/how-to-know-if-a-url-is-decoded-encoded
+  // It's possible the given URI encoded reserved characters from the set ";,/?:@&=+$#",
+  // so it's checked against decodeURIComponent(), which will catch chars in the
+  // reserved set.
+  if (decodeURIComponent(uri) === uri) {
+    return encodeURI(uri);
+  }
+  return uri;
+}
+
 // create mesh object 
 //    add to the local mesh list
 //    add to 3D renderer
@@ -1173,7 +1189,7 @@ function addMesh(t) { // color, url, caption
         throw new Error("local mesh must be a File object type!");
     }
     } else {
-      _mesh.file = encodeURI(_url);
+      _mesh.file = safeEncodeURI(_url);
   }
 //
   var _label=t['label'];
@@ -1333,7 +1349,7 @@ function showLabel(jval,lval) {
      _p.replaceWith(_nn);
       _p=jQuery('#dlink');
      if (typeof lval != "undefined") {
-       _nn='<a id="dlink" href="'+encodeURI(lval['url'])+'">'+lval['label']+'</a>'
+       _nn='<a id="dlink" href="'+safeEncodeURI(lval['url'])+'">'+lval['label']+'</a>'
        } else {
        _nn='<a id="dlink" href=""></a>'
      }
