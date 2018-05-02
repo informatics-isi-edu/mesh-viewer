@@ -1068,13 +1068,21 @@ sliceCor.onScroll = updateCor;
 }
 
 function getHref(t) {
-  var _cap=t['caption'];
-  if(_cap && _cap['link']) {
-     var href= _cap['link']['url'];
-//     window.console.log(">>",href,"<<");
-     return href;
+  if (t['link'] && t['link']['url']) {
+    return t['link']['url'];
   }
   return(null);
+}
+
+function getLabel(t) {
+  var _label = t['link']['label'];
+  if(_label == undefined) {
+    _label = t['label'];
+  }
+  if (_label == undefined) {
+    _label = chopForStub(t['url']);
+  }
+  return _label;
 }
 
 //
@@ -1188,13 +1196,8 @@ function addMesh(t) { // color, url, caption
       _mesh.file = safeEncodeURI(_url);
   }
 //
-  var _label=t['label'];
-  if(_label == undefined ) {
-    _label=chopForStub(_url);
-    t['label']=_label;
-  }
-
-  var _href=getHref(t);
+  var _label = getLabel(t);
+  var _href = getHref(t);
 //
   var _caption = t['caption'];
   if(_caption == undefined) {
