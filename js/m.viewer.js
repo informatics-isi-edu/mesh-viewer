@@ -1074,15 +1074,19 @@ function getHref(t) {
   return(null);
 }
 
+// Get the Label for a mesh
+// Try these locations in order until one works:
+//  * mesh.link.label
+//  * mesh.label
+//  * basename(mesh.url)
 function getLabel(t) {
-  var _label = t['link']['label'];
-  if(_label == undefined) {
-    _label = t['label'];
+  if (t['link'] != undefined && t['link']['label'] != undefined) {
+    return t['link']['label'];
   }
-  if (_label == undefined) {
-    _label = chopForStub(t['url']);
+  if (t['label'] != undefined) {
+    return t['label'];
   }
-  return _label;
+  return chopForStub(t['url']);
 }
 
 //
