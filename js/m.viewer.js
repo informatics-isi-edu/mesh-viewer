@@ -1074,7 +1074,7 @@ function getHref(t) {
   return(null);
 }
 
-// Get the Label for a mesh
+// Get the Label for a mesh or landmark
 // Try these locations in order until one works:
 //  * mesh.link.label
 //  * mesh.label
@@ -1086,7 +1086,10 @@ function getLabel(t) {
   if (t['label'] != undefined) {
     return t['label'];
   }
-  return chopForStub(t['url']);
+  if (t['url'] != undefined) {
+    return chopForStub(t['url']);
+  }
+  return 'unnamed'
 }
 
 //
@@ -1291,13 +1294,20 @@ function addLandmark(p) {
     window.console.log("BAD BAD.. can not find mesh for "+_g);
     return;
   }
+  // Another routine relies on groupids not containing spaces, which will cause the
+  // model not to load. Skipping offending landmarks enables some usage of the model
+  if(_g.indexOf(' ') >= 0) {
+    window.console.error("Landmark 'Group' field may not contain spaces: '"+_g+"'");
+    return;
+  }
+
   var _c=p['color'];
   var _r=p['radius'];
   var _loc=p['point'];
-  var _cap=p['caption'];
   var _vis=p['visible'];
-  var _label=p['label'];
-  var _s=addSphere(_loc, _c, _r, _vis, _cap);
+  var _label = getLabel(p)
+
+  var _s=addSphere(_loc, _c, _r, _vis, _label);
 
   
   landmarks.push([_s, p]);
