@@ -31,12 +31,13 @@ http://example.org/view.html?model=path/to/model.json
 
 Extra options can be passed via query params:
 
-- showmeshes=true -- Show the meshes panel on startup
-- target-url=my-iframe-id -- Open URLs provided by *this* Mesh Viewer in another iframe on the same page with the provided HTML class ID. This assumes you have two iframes, one running this mesh viewer and another that will change based on the links clicked in this mesh viewer.
-  - This applies to all mesh.link.url and landmark.link.url links in the model loaded by this Mesh Viewer. 
+- `showmeshes`: Show the meshes panel on startup. Set to a Boolean value. Default: `false`. 
+- `target-url`: Open URLs provided by *this* Mesh Viewer in another iframe on the same page with the provided HTML class ID. This assumes you have two iframes, one running this mesh viewer and another that will change based on the links clicked in this mesh viewer. This applies to all `mesh.link.url` and `landmark.link.url` links in the model loaded by this Mesh Viewer. Default: `None`.
 
+Example URL with query parameters:
 ```
-<iframe src="http://example.org/view.html?model=path/to/model.json&target-url=my-other-iframe">
+<iframe 
+  src="http://example.org/view.html?model=path/to/model.json&showmeshes=true&target-url=my-other-iframe">
 </iframe>
 ```
 
