@@ -80,9 +80,9 @@ function addCalcHTML(name,i,color,label,href)
   var _landmark_list='#'+_name+'_landmark_list_lc';
   var _nn='';
   if(href) {
-    _nn+='<div class="row col-md-12 col-xs-12"><input id='+_name+'_'+i+' type=checkbox checked="" onClick="toggleLandmark(\''+_name+'\','+i+');" value='+i+' name="landmark"></input><a href="'+href+'" style="color:inherit">'+" "+label+'</a><span class="glyphicon glyphicon-link" style="font-size:12px;color:grey"></span></div>';
+    //_nn+='<div class="row col-md-12 col-xs-12"><input id='+_name+'_'+i+' type=checkbox checked="" onClick="toggleLandmark(\''+_name+'\','+i+');" value='+i+' name="landmark"></input><a href="'+href+'" style="color:inherit">'+" "+label+'</a><span class="glyphicon glyphicon-link" style="font-size:12px;color:grey"></span></div>';
     } else {
-      _nn+='<div class="row col-md-12 col-xs-12"><input id='+_name+'_'+i+' type=checkbox checked="" onClick="toggleLandmark(\''+_name+'\','+i+');" value='+i+' name="landmark" style="color:inherit">'+" "+label+'</input></div>';
+      _nn+='<div class="row col-md-12 col-xs-12">'+label+'</div>';
   }
   jQuery(_landmark_list).append(_nn);
 }
