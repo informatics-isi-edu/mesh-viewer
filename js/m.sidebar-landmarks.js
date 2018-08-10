@@ -1,5 +1,5 @@
 
-function addLandmarkSidebarEntry(label,name,i,color,opacity,href)
+function addLandmarkSidebarEntry(label,name,i,href)
 {
   var _name = name.replace(/ +/g, "");
   var _collapse_name=i+'_collapse_lc';
@@ -22,36 +22,26 @@ function addLandmarkSidebarEntry(label,name,i,color,opacity,href)
   _nn+='<div class="panel panel-default col-md-12 col-xs-12">';
   _nn+='<div class="panel-heading">';
   _nn+='<div class="panel-title row" style="background-color:transparent">'
-
-  // var _bb='<button id="'+_visible_name_n+'" class="pull-left" style="display:inline-block;outline: none;border:none; background-color:white; padding:0px 10px 2px 0px;"  onClick="openMesh('+i+',\'visible_'+_name+'\',\''+_opacity_name+'\',\''+_landmark_list+'\',\'opacity_'+_name+'\')" title="click to change visibility of mesh"><span id="visible_'+_name+'" class="glyphicon glyphicon-eye-open" style="color:'+RGBTohex(color)+';"></span> </button>';
   var _bb='';
-  // _bb=_bb+'<button id="'+_opacity_name_n+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white; padding:0px 0px 0px 0px;"  onClick="opacityMesh('+i+',\'opacity_'+_name+'\',\''+_opacity_name+'\',\''+_landmark_list+'\')" title="click to change opacity of mesh"><span id="opacity_'+_name+'" class="glyphicon glyphicon-tasks" style="color:#407CCA"></span> </button>';
-
   var _bbb='<button id="'+_landmark_name_n+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white; padding:0px 5px 0px 0px;"  onClick="openLandmark('+i+',\''+_opacity_name+'\',\''+_landmark_list+'\')" title="click to expand landmarks"><span class="glyphicon glyphicon-map-marker" style="color:#407CCA"></span> </button>';
-  //var _bbb=''
 
   // If a URL was specified in the query params, set it for all <a> tags. 
   // This enables these links to be opened within another iframe. 
   _target = '';
   if (targetURL != undefined) {
     _target = ' target="' + targetURL + '" ';
-  } 
-  // if(hasLandmarks) {
-  //    if(href) {
-  //       _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#landmarklist" href="#' +_collapse_name+'" title="click to expand landmarklist">'+_bb+_bbb+'</a>';
-  //       _nn+='<a href="'+href+'"'+_target+'>'+label+'<span class="glyphicon glyphicon-link" style="font-size:2px;color:#aeaeae"></span></a>';
-  //       } else {
-        _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#landmarklist_lc" href="#' +_collapse_name+'" title="click to expand landmarklist">'+_bb+_bbb+'</a><p>'+label+'</p>';
-  //    }
-  //   } else {
-  //     if(href) {
-  //       _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#landmarklist" href="#' +_collapse_name+'" title="click to expand landmarklist">'+_bb+'</a>';
-  //       _nn+='<a href="'+href+'"'+_target+'>'+label+'<span class="glyphicon glyphicon-link" style="font-size:2px;color:#aeaeae"></span></a>';
-  //       } else {
-  // _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#landmarklist" href="#' +_collapse_name+'" title="click to expand landmarklist">'+_bb+'</a><a>'+label+'</a>';
-  //     }
-  // }
+  }
+  html_label = '';
+  console.log(href);
+  if (href != undefined) {
+    console.log(href);
+    html_label = '<a href="'+href+'"'+_target+'>'+label+'<span class="glyphicon glyphicon-link" style="font-size:2px;color:#aeaeae"></span></a>'
+  } else {
+    html_label = '<p>'+label+'</p>'
+  }
 
+  _nn+='<a class="accordion-toggle" data-toggle="collapse" data-parent="#landmarklist_lc" href="#' +_collapse_name+'" title="click to expand landmarklist">'+_bb+_bbb+'</a>';
+  _nn+=html_label;
 
   _nn+='</div></div> <!-- panel-title, panel-heading -->';
 
@@ -120,7 +110,8 @@ function calculateLandmarkDistances()
   jQuery('#landmarklist').empty();
 
   var lmark_calculations = []
-  for(var i = 0; i < landmarks.length; i++) {
+  for(var i = 0; i < landmarks.length; i++)
+  {
     if (!landmarks[i][0].visible)
       continue;
 
@@ -128,10 +119,14 @@ function calculateLandmarkDistances()
       'landmark': landmarks[i][1],
       'distances': []
     }
-    addLandmarkSidebarEntry(lmark_calculation.landmark.link.label, lmark_calculation.landmark.id, i, null, null);
+    addLandmarkSidebarEntry(lmark_calculation.landmark.link.label,
+                            lmark_calculation.landmark.id,
+                            i,
+                            lmark_calculation.landmark.link.url);
 
 
-    for(var j = 0; j < landmarks.length; j++) {
+    for(var j = 0; j < landmarks.length; j++)
+    {
       if (!landmarks[j][0].visible || i == j)
         continue;
 
