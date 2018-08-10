@@ -63,7 +63,7 @@ var show_mesh = true;
 //==== Landmark ====
 var calcDistance = false;
 var points=[]; // only keeps last two
-var show_landmark = true;
+var show_landmark = false;
 
 //==== Label/Picking ====
 var saved_color=null;
