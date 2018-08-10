@@ -52,9 +52,6 @@ function addLandmarkSidebarEntry(label,name,i,href)
   _nn+= '<div id="'+_landmark_list+'" class="landmarkcontrol row pull-right"></div>';
   _nn+='</div> <!-- landmark Div -->';
 
-  var _ss= makeSliderStubs(_opacity_name, _opacity_reset, opacity);
-  _nn+=_ss;
-
   // last bits
   _nn+= '</div> <!-- panel-body -->';
 
@@ -109,6 +106,11 @@ function calculateLandmarkDistances()
 
   jQuery('#landmarklist').empty();
 
+  if (countSelectedLandmarks() < 2)
+  {
+    return
+  }
+
   var lmark_calculations = []
   for(var i = 0; i < landmarks.length; i++)
   {
@@ -155,6 +157,19 @@ function calculateLandmarkDistance(landmark1, landmark2)
   p1 = new X.vector(lp1[0], lp1[1], lp1[2]);
   p2 = new X.vector(lp2[0], lp2[1], lp2[2]);
   return X.vector.distance(p1, p2);
+}
+
+function countSelectedLandmarks()
+{
+  var num_selected = 0;
+  landmarks.forEach(function(landmark)
+  {
+    if (landmark[0].visible)
+    {
+      num_selected++;
+    }
+  });
+  return num_selected;
 }
 
 
