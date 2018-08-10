@@ -117,6 +117,8 @@ function landmarksClick_btn()
 function calculateLandmarkDistances() 
 {
 
+  jQuery('#landmarklist').empty();
+
   var lmark_calculations = []
   for(var i = 0; i < landmarks.length; i++) {
     if (!landmarks[i][0].visible)
