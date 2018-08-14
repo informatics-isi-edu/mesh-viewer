@@ -51,6 +51,8 @@ The JSON payload must be a serialized object that describes the model:
 - `label`: a short text field for the name or title of the model
 - `boundingBox`: the default state of the bounding box feature. Set to `True` or `False` to show or hide the bounding box on load. Default: `False`.
 - `rotate`: the default state of the rotating animation of the model. Set to `True` or `False` to enable or disable animation on load. Default: `False`.
+- `measurement`: the units of distance measurement. Set to a string "cm", "inches", "kilometers"
+- `unitconversion`: the conversion of mesh-viewer units to real world measurement for distance. Computed as unitconversion * Unit distance between points.
 - `bgcolor`: an array of float values indicating RGB for background color
 - `mesh`: an array of `mesh` objects described next
 - `volume`: a `volume` object described below
