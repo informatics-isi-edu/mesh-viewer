@@ -23,6 +23,8 @@ var model_caption=null;
 var model_color=[1,1,1];
 var model_bbox=[0,0,0];
 var model_clip=null;
+var model_measurement=' Units';
+var model_unitconversion=1.0;
 
 /*
 #FFCC66    orange (1.00, 0.80, 0.40)
@@ -282,6 +284,8 @@ var myProcessArg=function(kvp0, kvp1) {
             if(oi != undefined) {
               myProcessArg('volume',{"volume": tmp['volume']});
             }
+            model_measurement = tmp['measurement'];
+            model_unitconversion = tmp['unitconversion'];
             model_label=tmp['label'];
             model_id=tmp['id'];
             model_caption=tmp['caption'];

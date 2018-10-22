@@ -63,7 +63,7 @@ var show_mesh = true;
 //==== Landmark ====
 var calcDistance = false;
 var points=[]; // only keeps last two
-var show_landmark = true;
+var show_landmark = false;
 
 //==== Label/Picking ====
 var saved_color=null;
@@ -1021,6 +1021,9 @@ function toggleCalcDistance() {
   computeDistance();
 }
 
+// Toggle a specific landmark to show up in the mesh viewer
+// g: Group id of the landmark (which refers to which mesh owns it)
+// i: Index of the landmark offset by one in the landmark list
 function toggleLandmark(g,i) {
   var _i=i-1;
   landmarklist[g][_i].visible = !landmarklist[g][_i].visible;

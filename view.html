@@ -63,11 +63,14 @@ html, body {
 
 <!-- for regular --> 
 <script type="text/javascript" src="js/xtk.js"></script>
+<!-- <script type="text/javascript" src="http://get.goXTK.com/xtk.js"></script> -->
+<script type="text/javascript" src="js/m.sidebar-landmarks.js"></script>
 
 <script type="text/javascript" src="js/m.viewer.js"></script>
 <script type="text/javascript" src="js/m.control.js"></script>
 <script type="text/javascript" src="js/m.setup.js"></script>
 <script type="text/javascript" src="js/m.sidebar.js"></script>
+
 <!-- testing
 <script type="text/javascript" src="js/html2canvas.js"></script>
 <script type="text/javascript" src="js/canvas2image.js"></script>
@@ -94,6 +97,9 @@ html, body {
       <button id="landmarkbtn" class="btn btn-success" title="show or hide landmarks on the model"  onclick="toggleAllLandmark()" style="display:none;">
            <span class="glyphicon glyphicon-map-marker"></span>
               Show landmarks</button>
+      <button id="calculatedistbtn" class="btn btn-success" title="Calculate distances for selected landamrks"  onclick="calculateLandmarkDistances()">
+           <span class="glyphicon glyphicon-screenshot"></span>
+              Calculate Distances</button>
       <button id="boxbtn" class="btn btn-success" title="show or hide model bounding box" onclick="toggleBox();">
            <span class="glyphicon glyphicon-picture"></span> 
               Show bounding box</button>
@@ -134,11 +140,23 @@ html, body {
 <!-- for meshes control -->
   <li id='meshes' class='navigationLi col-md-12 col-xs-12' style="background-color:#f9f9f9; display:none">
     <div id='meshesMenu' class='menu'>
-      <div id='meshesLabel' class='menuLabel' style="margin-left:20px;font-size:14px;font-weight:bold">Meshes<button class="pull-right" title="dismiss" onclick="dismissMeshes()" style="border:none;background-color:transparent"><span class="glyphicon glyphicon-remove"></span>
-</button>
+      <div id='meshesLabel' class='menuLabel' style="margin-left:20px;font-size:14px;font-weight:bold">Meshes
+        <button class="pull-right" title="dismiss" onclick="dismissMeshes()" style="border:none;background-color:transparent"><span class="glyphicon glyphicon-remove"></span>
+        </button>
       </div>
 <!-- meshes items are added to here.. -->
       <div id='meshlist' class='panel-group' style="background-color:transparent;"> </div>
+    </div>
+  </li>
+  <!-- for landmarks control -->
+  <li id='landmarks' class='navigationLi col-md-12 col-xs-12' style="background-color:#f9f9f9; display:none">
+    <div id='landmarksMenu' class='menu'>
+      <div id='landmarksLabel' class='menuLabel' style="margin-left:20px;font-size:14px;font-weight:bold">Selected Landmark Distances
+        <button class="pull-right" title="dismiss" onclick="dismissLandmarks()" style="border:none;background-color:transparent"><span class="glyphicon glyphicon-remove"></span>
+        </button>
+      </div>
+<!-- landmark items are added to here.. -->
+      <div id='landmarklist' class='panel-group' style="background-color:transparent;"> </div>
     </div>
   </li>
 <!-- for clip control -->
