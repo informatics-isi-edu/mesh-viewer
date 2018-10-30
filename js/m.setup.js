@@ -23,7 +23,7 @@ var model_caption=null;
 var model_color=[1,1,1];
 var model_bbox=[0,0,0];
 var model_clip=null;
-var model_measurement=' Units';
+var model_measurement='units';
 var model_unitconversion=1.0;
 
 /*
@@ -284,8 +284,19 @@ var myProcessArg=function(kvp0, kvp1) {
             if(oi != undefined) {
               myProcessArg('volume',{"volume": tmp['volume']});
             }
-            model_measurement = tmp['measurement'];
-            model_unitconversion = tmp['unitconversion'];
+            if (tmp['measurement'] == undefined || tmp['measurement'] == null) {
+              console.warn('model.measurement not defined or invalid, defaulting to "' + model_measurement + '"');
+            } else {
+              model_measurement = tmp['measurement'];
+            }
+            if (tmp['unitconversion'] == undefined || Number(tmp['unitconversion']) != tmp['unitconversion']) {
+              console.warn('model.unitconversion not defined or invalid, ' +
+                           'set this value if your measurement calculations ' +
+                           'do not scale distance properly. (Current: 1 Unit = ' +
+                           model_unitconversion + '' + model_measurement + ').');
+            } else {
+              model_unitconversion = tmp['unitconversion'];
+            }
             model_label=tmp['label'];
             model_id=tmp['id'];
             model_caption=tmp['caption'];
