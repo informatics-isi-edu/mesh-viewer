@@ -792,7 +792,9 @@ function openLandmark(i,opacity_name,landmark_name) {
   var sliderDiv=opacity_name+'Div';
   resetCollapse(i,'landmark',landmarkDiv, sliderDiv);
   document.getElementById(landmarkDiv).style.display = '';
-  document.getElementById(sliderDiv).style.display = 'none';
+  if (document.getElementById(sliderDiv) != null) {
+    document.getElementById(sliderDiv).style.display = 'none';
+  }
 }
 
 // just in case if the panel was opened by the other open

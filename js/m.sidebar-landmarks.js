@@ -32,9 +32,7 @@ function addLandmarkSidebarEntry(label,name,i,href)
     _target = ' target="' + targetURL + '" ';
   }
   html_label = '';
-  console.log(href);
   if (href != undefined) {
-    console.log(href);
     html_label = '<a href="'+href+'"'+_target+'>'+label+'<span class="glyphicon glyphicon-link" style="font-size:2px;color:#aeaeae"></span></a>'
   } else {
     html_label = '<p>'+label+'</p>'
@@ -64,14 +62,11 @@ function addLandmarkSidebarEntry(label,name,i,href)
 function addCalcHTML(name,i,color,label,href)
 {
   var _name = name.replace(/ +/g, "");
-  var _landmark_list='#'+_name+'_landmark_list_lc';
-  var _nn='';
-  if(href) {
-    //_nn+='<div class="row col-md-12 col-xs-12"><input id='+_name+'_'+i+' type=checkbox checked="" onClick="toggleLandmark(\''+_name+'\','+i+');" value='+i+' name="landmark"></input><a href="'+href+'" style="color:inherit">'+" "+label+'</a><span class="glyphicon glyphicon-link" style="font-size:12px;color:grey"></span></div>';
-    } else {
-      _nn+='<div class="row col-md-12 col-xs-12">'+label+'</div>';
-  }
-  jQuery(_landmark_list).append(_nn);
+  var gname=_name.toLowerCase();
+  var _landmark_list='#'+gname+'_landmark_list_lc';
+  var _label = '<div class="row col-md-12 col-xs-12">'+label+'</div>';
+
+  jQuery(_landmark_list).append(_label);
 }
 
 
@@ -121,10 +116,10 @@ function calculateLandmarkDistances()
       'landmark': landmarks[i][1],
       'distances': []
     }
-    addLandmarkSidebarEntry(lmark_calculation.landmark.link.label,
+    addLandmarkSidebarEntry(getLabel(lmark_calculation.landmark),
                             lmark_calculation.landmark.id,
                             i,
-                            lmark_calculation.landmark.link.url);
+                            getHref(lmark_calculation.landmark));
 
 
     for(var j = 0; j < landmarks.length; j++)
@@ -140,7 +135,7 @@ function calculateLandmarkDistances()
         'unit_distance': dist,
         'actual_distance': actual_distance
         });
-      calc_label = '(' + actual_distance.toFixed(2) + model_measurement + ') ' + lm.link.label;
+      calc_label = '(' + actual_distance.toFixed(2) + model_measurement + ') ' + getLabel(lm);
       addCalcHTML(lmark_calculation.landmark.id,i,null,calc_label,null);
 
     }
