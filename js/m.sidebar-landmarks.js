@@ -135,7 +135,7 @@ function calculateLandmarkDistances()
         'unit_distance': dist,
         'actual_distance': actual_distance
         });
-      calc_label = '(' + actual_distance.toFixed(2) + model_measurement + ') ' + getLabel(lm);
+      calc_label = '' + actual_distance.toFixed(2) + ' ' + model_measurement + ' to ' + getLabel(lm);
       addCalcHTML(lmark_calculation.landmark.id,i,null,calc_label,null);
 
     }
