@@ -162,6 +162,82 @@ window.console.log("just started on selectLocalFiles..");
   }
 }
 
+function processArguments() {
+  //All arguments here are HTTP URLs. Each GET will fetch JSON.
+  const supportedURLArguments = {
+    'model': setupModel,
+    'meshes': setupMeshes,
+    'landmark': setupLandmarks,
+  }
+
+  const urlParams = new URLSearchParams(window.location.hash);
+  var processedArgs = {}
+  Array.from(urlParams.keys()).forEach(function(arg) {
+    var argValue = urlParams.get(arg);
+    // URLSearchParams was intended for queryparams and not fragments. As such it
+    // will keep the '#' attached to the first arg passed in. Remove it!
+    if (arg[0] == '#') {arg = arg.substr(1);}
+
+    // If the fragment is a URL, fetch the JSON and call the corresponding function
+    // with the result
+    if (supportedURLArguments[arg] != null) {
+      var promise = $.getJSON(argValue).then(function(result) {
+          return result;
+        }).then(function(data) {
+          return supportedURLArguments[arg](data)
+        });
+      processedArgs[arg] = promise;
+    } else {
+      console.warn('The following argument is not supported: ', arg);
+    }
+  });
+
+  // Promise.all() requires an iterable, but our promises are tracked through an object.
+  // The following keeps two lists for keys and values and rebuilds the relationships
+  // after the promises have been resolved. There may be a better way to do this.
+  const promiseKeys = Object.keys(processedArgs);
+  var promiseValues = [];
+  promiseKeys.forEach(function(key) {promiseValues.push(processedArgs[key]);});
+  return Promise.all(promiseValues).then(function(values) {
+    var mappedResults = {};
+    for(var i = 0; i < promiseKeys.length; i++) {
+      mappedResults[promiseKeys[i]] = values[i];
+    }
+    return mappedResults;
+  }).catch(function(response) {
+    console.error('Failed to process all arguments. Please fix the failing argument before continuing.', response)
+  });
+}
+
+function setupModel(model) {
+  return null;
+}
+
+function setupMeshes(meshes) {
+  var formattedMeshes = []
+  meshes.forEach(function (mesh) {
+    var formattedMesh = {
+      'id': mesh.RID,
+      'link': null,
+      'label': mesh.label,
+      'description': mesh.description,
+      'url': 'https://dev.facebase.org' + mesh.url,
+      'opacity': mesh.opacity,
+      'color': parseColor(mesh.color_r, mesh.color_b, mesh.color_g)
+    }
+    formattedMeshes.push(formattedMesh);
+  });
+  return formattedMeshes;
+}
+
+function setupLandmarks(landmarks) {
+  return null;
+}
+
+function parseColor(r, b, g) {
+  return [r/255.0, b/255.0, g/255.0];
+}
+
 function processArgs(args) {
 window.console.log(args[1]);
   var params = args[1].split('&');

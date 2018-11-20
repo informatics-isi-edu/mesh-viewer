@@ -105,14 +105,17 @@ jQuery(document).ready(function() {
   callString=document.location.href;
   var args=document.location.href.split('?');
   if (args.length >= 2) { // there are some url to pick up
-    processArgs(args);
+    //processArgs(args);
     } else {
 //      setupWithDefaults();
   }
 
+  processArguments().then(function(mod) {
   var _m=mesh_load();
   initial_mesh_list=_m[0], mesh_list=_m[1];
-
+  initial_mesh_list = {
+    'mesh': mod.meshes
+  };
   initRenderer();
 
   if(initial_mesh_list) {
@@ -210,6 +213,7 @@ jQuery(document).ready(function() {
   };
 
   ren3d.render();
+})
 })
 
 function setupViewerBackground()
