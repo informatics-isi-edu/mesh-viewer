@@ -102,14 +102,6 @@ jQuery(document).ready(function() {
     m.style.maxHeight=hh;
   }
 
-  callString=document.location.href;
-  var args=document.location.href.split('?');
-  if (args.length >= 2) { // there are some url to pick up
-    //processArgs(args);
-    } else {
-//      setupWithDefaults();
-  }
-
   processArguments().then(function(model) {
 
     // Sets up rend3d
@@ -485,6 +477,10 @@ function preloadLandmarks(landmarks)
   if (load_landmark && landmarks != null)
     return;
   load_landmark=true;
+
+  if (landmarks.length > 1 && document.getElementById('calculatedistbtn').style.display == 'none') {
+    document.getElementById('calculatedistbtn').style.display = '';
+  }
 
   landmarks.forEach(function (landmark) {
     addLandmark(landmark);
@@ -1041,17 +1037,6 @@ function addMesh(t) { // color, url, caption
   addMeshListEntry(_label,_name,_idx,_color,_opacity,_href);
 }
 
-// adding a new mesh after rendering the initial set
-function loadMesh() {
-  if(mesh_list) {
-    for (var i=0;i<mesh_list['mesh'].length;i++) {
-       addMesh(mesh_list['mesh'][i]);
-    }
-  }
-  document.getElementById('lastbtn').style.display = 'none';
-  document.getElementById('landmarkbtn').style.display = '';
-}
-
 // adding volume after initial rendering
 function loadVol() {
   var _v=vol_load();
@@ -1078,6 +1063,10 @@ function lookupMeshByID(id) {
 }
 
 function addLandmark(p) {
+  // Enable the landmarks button
+  if (document.getElementById('landmarkbtn').style.display == 'none')
+    document.getElementById('landmarkbtn').style.display = '';
+
   var _g=p['group'].toLowerCase();
   var _mesh=lookupMeshByID(_g);
   if( _mesh == null ) {

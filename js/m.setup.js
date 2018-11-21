@@ -19,6 +19,15 @@ var model_clip=null;
 var model_measurement='units';
 var model_unitconversion=1.0;
 
+// Most URLs for meshes and landmarks expect to fetch resources from the server
+// they're on, and default to the server's hostname. If you're working locally,
+// this will set the URL to pull data from that remote location instead.
+// You MUST disable CORS on your browser for this to work properly.
+var development_hostname = ''
+if (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+  var development_hostname = 'https://dev.facebase.org';
+
+
 /*
 #FFCC66    orange (1.00, 0.80, 0.40)
 #868600    yellow (0.527, 0.527, 0)
@@ -116,7 +125,7 @@ function processArguments() {
   const supportedURLArguments = {
     'model': setupModel,
     'meshes': setupMeshes,
-    'landmark': setupLandmarks,
+    'landmarks': setupLandmarks,
   }
 
   const urlParams = new URLSearchParams(window.location.hash);
@@ -168,7 +177,25 @@ function setupDefaults() {
 }
 
 function setupModel(model) {
-  return null;
+  if (model.length > 1) {
+    console.warning('Multiple model settings, settings are ambiguous', model)
+  }
+  if (model.length == 1) {
+    const model_settings = model[0];
+    model_id = model_settings.id || model_id;
+    model_caption = model_settings.caption || model_caption;
+    model_color = parseColor(model_settings.bg_color_r,
+                             model_settings.bg_color_g,
+                             model_settings.bg_color_b,
+                             ) || model_color;
+    model_bbox = parseColor(model_settings.bounding_box_color_r,
+                            model_settings.bounding_box_color_g,
+                            model_settings.bounding_box_color_b,
+                             ) || model_bbox;
+    model_clip = model_settings.clip || model_clip;
+    model_measurement = model_settings.model_measurements || model_measurement;
+    model_unitconversion = model_settings.unitconversion || model_unitconversion;
+  }
 }
 
 function setupMeshes(meshes) {
@@ -179,7 +206,7 @@ function setupMeshes(meshes) {
       'link': null,
       'label': mesh.label,
       'description': mesh.description,
-      'url': 'https://dev.facebase.org' + mesh.url,
+      'url': development_hostname + mesh.url,
       'opacity': mesh.opacity,
       'color': parseColor(mesh.color_r, mesh.color_b, mesh.color_g)
     }
@@ -189,11 +216,27 @@ function setupMeshes(meshes) {
 }
 
 function setupLandmarks(landmarks) {
-  return null;
+  var formattedLandmarks = []
+  landmarks.forEach(function (landmark) {
+    var formattedLandmark = {
+      'id': landmark.id,
+      'group': landmark.group,
+      'description': landmark.description,
+      'point': landmark.point,
+      'color': landmark.color,
+      'label': landmark.label,
+      'link': landmark.link,
+      'radius': landmark.radius,
+    }
+    formattedLandmarks.push(formattedLandmark);
+  });
+  return formattedLandmarks;
 }
 
 function parseColor(r, b, g) {
-  return [r/255.0, b/255.0, g/255.0];
+  if (r == null || b == null || g == null)
+    return null
+  return [r/255.0, g/255.0, b/255.0];
 }
 
 // http://stackoverflow.com/questions/5717093/check-if-a-javascript-string-is-a-url
