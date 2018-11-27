@@ -219,17 +219,26 @@ function setupLandmarks(landmarks) {
   var formattedLandmarks = []
   landmarks.forEach(function (landmark) {
     var formattedLandmark = {
-      'id': landmark.id,
-      'group': landmark.group,
+      'id': landmark.RID,
+      'group': landmark.mesh,
       'description': landmark.description,
-      'point': landmark.point,
-      'color': landmark.color,
-      'label': landmark.label,
-      'link': landmark.link,
-      'radius': landmark.radius,
+      'point': [landmark.point_x, landmark.point_y, landmark.point_z],
+      'color': parseColor(landmark.color_r, landmark.color_b, landmark.color_g),
+      'label': landmark.label || '',
+      'link': landmark.link || {'link': null, 'label': null},
+      'radius': landmark.radius || 0.1,
     }
     formattedLandmarks.push(formattedLandmark);
   });
+  if (formattedLandmarks.length > 0) {
+    // Global variable that determines whether landmarks should show up in mesh list
+    // Currently in m.viewer.js, meshes and landmarks have a bit of a circular dependency
+    // on one another when both are collected, and currently require meshes to be constructed
+    // first and landmarks second, with 'hasLandmarks' existing so that meshes know landmarks
+    // do exist before they're ready. m.viewer.js will need to be refactored before 'hasLandmarks'
+    // can be removed.
+    hasLandmarks = true;
+  }
   return formattedLandmarks;
 }
 
