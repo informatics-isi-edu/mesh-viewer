@@ -92,15 +92,7 @@ jQuery(document).ready(function() {
     return;
   }
 
-  // set the height of meshes slideout
-  var h=window.innerHeight;
-  var m= document.getElementById('meshes');
-  var h= Math.floor(h*0.80);
-  var hh=h+"px";
-//  window.console.log("height is..",hh);
-  if(m) {
-    m.style.maxHeight=hh;
-  }
+  setupViewerSidebarMaxHeight();
 
   processArguments().then(function(model) {
 
@@ -128,6 +120,24 @@ jQuery(document).ready(function() {
     ren3d.render();
   })
 })
+
+
+// Setting the max height enforces when the viewer will start overflowing content
+// into a vertical scrollbar
+function setupViewerSidebarMaxHeight() {
+  //The sidebars we want to set
+  const sidebars = ['meshes', 'landmarks']
+  //The height we will set them to
+  const maxHeight = Math.floor(window.innerHeight * 0.80) + "px";
+
+  sidebars.forEach(function (viewerElementName) {
+    var element = document.getElementById(viewerElementName);
+    if (element) {
+      element.style.maxHeight = maxHeight
+    }
+  });
+}
+
 
 function setupViewerBackground()
 {

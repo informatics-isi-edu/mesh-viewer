@@ -3,6 +3,13 @@
 var meshes_sidebar=false;
 var using_meshes_button=false;
 
+function toggleActiveSidebar(sidebarID) {
+  if (sidebarID == 'landmarks' && meshes_sidebar)
+    dismissMeshes();
+  if (sidebarID == 'meshes' && landmarks_sidebar)
+    dismissLandmarks();
+}
+
 // or could initiate a 'click' on
 // the meshesButton
 function dismissMeshes() {
@@ -27,6 +34,7 @@ function meshesClick() {
   if(clip_sidebar) {
      clipClick();
   }
+  toggleActiveSidebar('meshes');
   meshes_sidebar = !meshes_sidebar;
   if(meshes_sidebar) {
     sidebar_meshes_slideOut();

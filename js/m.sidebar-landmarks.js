@@ -102,7 +102,7 @@ function getLandmarkOrder(lmk) {
 
 function calculateLandmarkDistances() 
 {
-
+  toggleActiveSidebar('landmarks');
   jQuery('#landmarklist').empty();
 
   if (countSelectedLandmarks() < 2) {
