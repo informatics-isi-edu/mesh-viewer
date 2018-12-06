@@ -146,7 +146,7 @@ function processArguments() {
   const urlParams = new URLSearchParams(window.location.hash);
   var processedArgs = {}
   Array.from(urlParams.keys()).forEach(function(arg) {
-    var argValue = urlParams.get(arg);
+    var argValue = decodeURIComponent(urlParams.get(arg));
     // URLSearchParams was intended for queryparams and not fragments. As such it
     // will keep the '#' attached to the first arg passed in. Remove it!
     if (arg[0] == '#') {arg = arg.substr(1);}
