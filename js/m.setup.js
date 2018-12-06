@@ -27,6 +27,28 @@ var development_hostname = ''
 if (location.hostname === "localhost" || location.hostname === "127.0.0.1")
   var development_hostname = 'https://dev.facebase.org';
 
+// All arguments here are HTTP URLs. Each GET will fetch JSON.
+const URL_ARGUMENTS = {
+  'model_url': setupModel,
+  'meshes_url': setupMeshes,
+  'landmarks_url': setupLandmarks,
+}
+
+// Other fragment arguments, simply passed to the function defined below
+const GENERAL_ARGUMENTS = {
+  'anatomy_url_fragment': setupAnatomyURLFragment
+}
+
+// Arguments that can be passed to the mesh viewer. These are the defaults if
+// no value is given. Arguments must be passed as fragments, not query params
+// Example:
+// example.com/view.html#model_url=<model_url>&meshes_url=<mesh_url>
+const MESH_VIEWER_ARGUMENT_DEFAULTS = {
+  'model_url': {},
+  'meshes_url': [],
+  'landmarks_url': [],
+  'anatomy_url_fragment': null
+}
 
 /*
 #FFCC66    orange (1.00, 0.80, 0.40)
@@ -121,13 +143,6 @@ window.console.log("just started on selectLocalFiles..");
 }
 
 function processArguments() {
-  //All arguments here are HTTP URLs. Each GET will fetch JSON.
-  const supportedURLArguments = {
-    'model': setupModel,
-    'meshes': setupMeshes,
-    'landmarks': setupLandmarks,
-  }
-
   const urlParams = new URLSearchParams(window.location.hash);
   var processedArgs = {}
   Array.from(urlParams.keys()).forEach(function(arg) {
@@ -138,12 +153,15 @@ function processArguments() {
 
     // If the fragment is a URL, fetch the JSON and call the corresponding function
     // with the result
-    if (supportedURLArguments[arg] != null) {
+    if (URL_ARGUMENTS[arg] != null) {
       var promise = $.getJSON(argValue).then(function(result) {
           return result;
         }).then(function(data) {
-          return supportedURLArguments[arg](data)
+          return URL_ARGUMENTS[arg](data)
         });
+      processedArgs[arg] = promise;
+    } else if (GENERAL_ARGUMENTS[arg] != null) {
+      var promise = Promise.resolve(GENERAL_ARGUMENTS[arg](argValue));
       processedArgs[arg] = promise;
     } else {
       console.warn('The following argument is not supported: ', arg);
@@ -161,7 +179,7 @@ function processArguments() {
     for(var i = 0; i < promiseKeys.length; i++) {
       mappedResults[promiseKeys[i]] = values[i];
     }
-    return mappedResults;
+    return postSetup(mappedResults);
   }).catch(function(response) {
     console.error('Failed to process all arguments. Please fix the failing argument before continuing.', response)
   });
@@ -169,11 +187,12 @@ function processArguments() {
 
 // Defaults if not present
 function setupDefaults() {
-  return {
-    'model': {},
-    'meshes': [],
-    'landmarks': []
-  }
+  return MESH_VIEWER_ARGUMENT_DEFAULTS;
+}
+
+// Do no processing on the arg itself, this will be handled in postSetup()
+function setupAnatomyURLFragment(urlTemplate) {
+  return urlTemplate
 }
 
 function setupModel(model) {
@@ -195,7 +214,9 @@ function setupModel(model) {
     model_clip = model_settings.clip || model_clip;
     model_measurement = model_settings.model_measurements || model_measurement;
     model_unitconversion = model_settings.unitconversion || model_unitconversion;
+    return 'Global Variables for model id "' + model_id + '" have been set.'
   }
+  console.warning('Model not properly set, continuing with defaults...')
 }
 
 function setupMeshes(meshes) {
@@ -203,8 +224,8 @@ function setupMeshes(meshes) {
   meshes.forEach(function (mesh) {
     var formattedMesh = {
       'id': mesh.RID,
-      'link': null,
-      'label': mesh.label,
+      'link': mesh.link || {'url': null, 'label': null},
+      'label': mesh.anatomy,
       'description': mesh.description,
       'url': development_hostname + mesh.url,
       'opacity': mesh.opacity,
@@ -225,7 +246,7 @@ function setupLandmarks(landmarks) {
       'point': [landmark.point_x, landmark.point_y, landmark.point_z],
       'color': parseColor(landmark.color_r, landmark.color_b, landmark.color_g),
       'label': landmark.label || '',
-      'link': landmark.link || {'link': null, 'label': null},
+      'link': landmark.link || {'url': null, 'label': null},
       'radius': landmark.radius || 0.1,
     }
     formattedLandmarks.push(formattedLandmark);
@@ -240,6 +261,22 @@ function setupLandmarks(landmarks) {
     hasLandmarks = true;
   }
   return formattedLandmarks;
+}
+
+function postSetup(model) {
+  var formattedModel = {
+    'model': model['model_url'],
+    'meshes': model['meshes_url'],
+    'landmarks': model['landmarks_url'],
+  }
+  if (model.anatomy_url_fragment) {
+    function setURL(meshOrLandmark) {
+      meshOrLandmark.link.url = model.anatomy_url_fragment + meshOrLandmark.id;
+    }
+    formattedModel.meshes.forEach(setURL);
+    formattedModel.landmarks.forEach(setURL);
+  }
+  return formattedModel;
 }
 
 function parseColor(r, b, g) {
