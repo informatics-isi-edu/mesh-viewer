@@ -6,13 +6,6 @@
 //    id, group are used for internal keys
 //
 //**************************************************************
-var hostname=window.location.hostname;
-var initial_mesh_json=null; // master mesh list
-var mesh_json=null; // this is used just for testing of adding mesh on demand
-var landmark_json=null;
-var vol_json=null;
-var view_json=null;
-var anno_json=null;
 var hasLandmarks=false;
 var hasViews=false;
 
@@ -25,6 +18,37 @@ var model_bbox=[0,0,0];
 var model_clip=null;
 var model_measurement='units';
 var model_unitconversion=1.0;
+
+// Most URLs for meshes and landmarks expect to fetch resources from the server
+// they're on, and default to the server's hostname. If you're working locally,
+// this will set the URL to pull data from that remote location instead.
+// You MUST disable CORS on your browser for this to work properly.
+var development_hostname = ''
+if (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+  var development_hostname = 'https://dev.facebase.org';
+
+// All arguments here are HTTP URLs. Each GET will fetch JSON.
+const URL_ARGUMENTS = {
+  'model_url': setupModel,
+  'meshes_url': setupMeshes,
+  'landmarks_url': setupLandmarks,
+}
+
+// Other fragment arguments, simply passed to the function defined below
+const GENERAL_ARGUMENTS = {
+  'anatomy_url_fragment': setupAnatomyURLFragment
+}
+
+// Arguments that can be passed to the mesh viewer. These are the defaults if
+// no value is given. Arguments must be passed as fragments, not query params
+// Example:
+// example.com/view.html#model_url=<model_url>&meshes_url=<mesh_url>
+const MESH_VIEWER_ARGUMENT_DEFAULTS = {
+  'model_url': {},
+  'meshes_url': [],
+  'landmarks_url': [],
+  'anatomy_url_fragment': null
+}
 
 /*
 #FFCC66    orange (1.00, 0.80, 0.40)
@@ -76,50 +100,6 @@ function chopForStub(url){
   return sss;
 }
 
-// should be a very small file and used for testing and so can ignore
-// >>Synchronous XMLHttpRequest on the main thread is deprecated
-// >>because of its detrimental effects to the end user's experience.
-function ckExist(url) {
-  var http = new XMLHttpRequest();
-  http.onreadystatechange = function () {
-    if (this.readyState == 4) {
- // okay
-    }
-  }
-  http.open("GET", url, false);
-  http.send();
-  if(http.status !== 404) {
-    return http.responseText;
-    } else {
-      return null;
-  }
-}
-
-// trim quotes only if it is a string
-function trimQ(s) {
-
-  if( s && typeof s === 'string') {
-    var str=s.trim(); // trim the ' or "
-    if( (str[0] == "\"" && str[ str.length-1 ] == "\"")
-     || (str[0] == "[" && str[ str.length-1 ] == "]")
-     || (str[0] == "\'" && str[ str.length-1 ] == "\'"))
-    str=str.substr(1,str.length-2);
-    return str;
-  }
-  return s;
-}
-
-// THIS is for internal testing only
-function setupWithDefaults()
-{
-  initial_mesh_json=$.parseJSON(foo_initial_mesh_json);
-  mesh_json=$.parseJSON(foo_mesh_json);
-  landmark_json=$.parseJSON(foo_landmark_json);
-  vol_json=$.parseJSON(foo_vol_json);
-  view_json=foo_view_json;
-  anno_json=foo_anno_json;
-}
-
 // expect ends with .obj, or .obj.gz
 function notMesh(fobj) {
   var fname=fobj.name; 
@@ -162,195 +142,148 @@ window.console.log("just started on selectLocalFiles..");
   }
 }
 
-function processArgs(args) {
-window.console.log(args[1]);
-  var params = args[1].split('&');
-  for (var i=0; i < params.length; i++) {
-    var param = unescape(params[i]);
-    var splitIndex = param.indexOf('='); 
-    if (splitIndex == -1) {
-      // only one -- expect it to be mesh json
-      var url=param.replace(new RegExp('/$'),'').trim();
-      var tmp=ckExist(url);
-      var tt=trimQ(tmp);
-      initial_mesh_json=JSON.parse(tt);
-      } else {
-        var kvp = [param.substring(0,splitIndex), param.substring(splitIndex+1,param.length)];
+function processArguments() {
+  const urlParams = new URLSearchParams(window.location.hash);
+  var processedArgs = {}
+  Array.from(urlParams.keys()).forEach(function(arg) {
+    var argValue = decodeURIComponent(urlParams.get(arg));
+    // URLSearchParams was intended for queryparams and not fragments. As such it
+    // will keep the '#' attached to the first arg passed in. Remove it!
+    if (arg[0] == '#') {arg = arg.substr(1);}
 
-var myProcessArg=function(kvp0, kvp1) {
-        switch (kvp0.trim()) {
-          case 'url': // special case, when only mesh url being passed in
-            {
-            var t=kvp1.trim();
-            // create a default mesh url json
-//{ "mesh" : [ { "url": "http://localhost/data/3mesh/JI296CCMB.obj" } ] }
-            if(initial_mesh_json == null) {
-              var tt={ "mesh" : [ { "url": t} ]};
-              initial_mesh_json= tt;
-              } else {
-                var tt= {"url":t};
-                initial_mesh_json["mesh"].push(tt); 
-            }
-            break;
-            }
-          case 'mesh': // 
-            {
-            var tmp;
-            if( typeof kvp1 === 'object') { // already in parsed
-              tmp=kvp1;
-              } else { // this is an url
-                var t=kvp1.trim();
-                var tt;
-                if(isURL(t)) {
-                  tt=ckExist(t);
-                  } else {
-                    tt=t;
-                }
-                tt=trimQ(tt);
-                tmp= JSON.parse(tt);
-            }
-            if(initial_mesh_json == null) {
-              initial_mesh_json=tmp;
-              } else {
-                 mesh_json=tmp;
-            }
-            break;
-            }
-          case 'landmark':
-            {
-            var tmp;
-            if( typeof kvp1 === 'object') { // already in parsed
-              tmp=kvp1;
-              } else { // this is an url
-                var t=kvp1.trim();
-                var tt;
-                if(isURL(t)) {
-                  tt=ckExist(t);
-                  } else {
-                    tt=t;
-                }
-                tt=trimQ(tt);
-                tmp= JSON.parse(tt);
-            }
-            landmark_json=tmp;
-            // only when there are landmark that we enable the btn
-            var p = document.getElementById('landmarkbtn');
-            if(p) {
-              p.style.display = '';
-            }
-            hasLandmarks=true;
-            break;
-            }
-          case 'volume':
-            {
-//window.console.log("NOT handling volume yet..");
-            var tmp;
-            if( typeof kvp1 === 'object') { // already in parsed
-              tmp=kvp1;
-              } else { // this is an url
-                var t=kvp1.trim();
-                var tt;
-                if(isURL(t)) {
-                  tt=ckExist(t);
-                  } else {
-                    tt=t;
-                }
-                tt=trimQ(tt);
-                tmp= JSON.parse(tt);
-            }
-            vol_json=tmp;
-            break;
-            }
-          case 'model':
-            {
-            var t=kvp1.trim();
-            var tt=ckExist(t);
-            tt=trimQ(tt);
-            var tmp= JSON.parse(tt);
-            var klist=Object.keys(tmp);
-            var mi=klist.find(function(m) { return m=='mesh' });
-            var li=klist.find(function(m) { return m=='landmark'});
-            var vi=klist.find(function(m) { return m=='view'});
-            var oi=klist.find(function(m) { return m=='volume'});
-            if(mi != undefined) {
-              myProcessArg('mesh',{ "mesh": tmp['mesh']}); 
-            }
-            if(li != undefined) {
-              myProcessArg('landmark',{"landmark": tmp['landmark']});
-            }
-            if(vi != undefined) {
-              myProcessArg('view',{"view": tmp['view']});
-            }
-            if(oi != undefined) {
-              myProcessArg('volume',{"volume": tmp['volume']});
-            }
-            if (tmp['measurement'] == undefined || tmp['measurement'] == null) {
-              console.warn('model.measurement not defined or invalid, defaulting to "' + model_measurement + '"');
-            } else {
-              model_measurement = tmp['measurement'];
-            }
-            if (tmp['unitconversion'] == undefined || Number(tmp['unitconversion']) != tmp['unitconversion']) {
-              console.warn('model.unitconversion not defined or invalid, ' +
-                           'set this value if your measurement calculations ' +
-                           'do not scale distance properly. (Current: 1 Unit = ' +
-                           model_unitconversion + '' + model_measurement + ').');
-            } else {
-              model_unitconversion = tmp['unitconversion'];
-            }
-            model_label=tmp['label'];
-            model_id=tmp['id'];
-            model_caption=tmp['caption'];
-            var _tmp=tmp['bgcolor']; // background color of viewer
-            if(_tmp) {
-              model_color=_tmp;
-              } else {
-                model_color=[1,1,1];
-            }
-            _tmp=tmp['bboxcolor']; // bounding box's color
-            if(_tmp) {
-              model_bbox=_tmp;
-              } else {
-                model_bbox=[1,1,0];
-            }
-            _tmp=tmp['clip']; // clip plane's value,change to int
-            if(_tmp) {
-              model_clip=parseInt(_tmp);
-            }
-            break;
-            }
-          case "view":
-            { // "-1,0,0,0,0,0,1,0,0,1,0,0,0,0,-10.206781387329102,1"
-            var tmp;
-            if( typeof kvp1 === 'object') { // already in parsed
-              tmp=kvp1;
-              } else { // this is an url or a string
-                var t=kvp1.trim();
-                var tt;
-                if(isURL(t)) {
-                  tt=ckExist(t);
-                  } else {
-                    tt=t;
-                }
-                tt=trimQ(tt);
-                tmp= JSON.parse(tt);
-            }
-            view_json=tmp;
-            hasViews=true;
-            break;
-            }
-          default:
-            {
-            window.console.log("HUM.. skip this arg ", kvp0);
-            break;
-            }
-        }
-} // end of myProcessArg
-       myProcessArg(kvp[0],kvp[1]);
+    // If the fragment is a URL, fetch the JSON and call the corresponding function
+    // with the result
+    if (URL_ARGUMENTS[arg] != null) {
+      var promise = $.getJSON(argValue).then(function(result) {
+          return result;
+        }).then(function(data) {
+          return URL_ARGUMENTS[arg](data)
+        });
+      processedArgs[arg] = promise;
+    } else if (GENERAL_ARGUMENTS[arg] != null) {
+      var promise = Promise.resolve(GENERAL_ARGUMENTS[arg](argValue));
+      processedArgs[arg] = promise;
+    } else {
+      console.warn('The following argument is not supported: ', arg);
     }
-  }
-  return; 
+  });
+
+  // Promise.all() requires an iterable, but our promises are tracked through an object.
+  // The following keeps two lists for keys and values and rebuilds the relationships
+  // after the promises have been resolved. There may be a better way to do this.
+  const promiseKeys = Object.keys(processedArgs);
+  var promiseValues = [];
+  promiseKeys.forEach(function(key) {promiseValues.push(processedArgs[key]);});
+  return Promise.all(promiseValues).then(function(values) {
+    var mappedResults = setupDefaults();
+    for(var i = 0; i < promiseKeys.length; i++) {
+      mappedResults[promiseKeys[i]] = values[i];
+    }
+    return postSetup(mappedResults);
+  }).catch(function(response) {
+    console.error('Failed to process all arguments. Please fix the failing argument before continuing.', response)
+  });
 }
 
+// Defaults if not present
+function setupDefaults() {
+  return MESH_VIEWER_ARGUMENT_DEFAULTS;
+}
+
+// Do no processing on the arg itself, this will be handled in postSetup()
+function setupAnatomyURLFragment(urlTemplate) {
+  return urlTemplate
+}
+
+function setupModel(model) {
+  if (model.length > 1) {
+    console.warning('Multiple model settings, settings are ambiguous', model)
+  }
+  if (model.length == 1) {
+    const model_settings = model[0];
+    model_id = model_settings.id || model_id;
+    model_caption = model_settings.caption || model_caption;
+    model_color = parseColor(model_settings.bg_color_r,
+                             model_settings.bg_color_g,
+                             model_settings.bg_color_b,
+                             ) || model_color;
+    model_bbox = parseColor(model_settings.bounding_box_color_r,
+                            model_settings.bounding_box_color_g,
+                            model_settings.bounding_box_color_b,
+                             ) || model_bbox;
+    model_clip = model_settings.clip || model_clip;
+    model_measurement = model_settings.model_measurements || model_measurement;
+    model_unitconversion = model_settings.unitconversion || model_unitconversion;
+    return 'Global Variables for model id "' + model_id + '" have been set.'
+  }
+  console.warning('Model not properly set, continuing with defaults...')
+}
+
+function setupMeshes(meshes) {
+  var formattedMeshes = []
+  meshes.forEach(function (mesh) {
+    var formattedMesh = {
+      'id': mesh.RID,
+      'link': mesh.link || {'url': null, 'label': null},
+      'label': mesh.anatomy,
+      'description': mesh.description,
+      'url': development_hostname + mesh.url,
+      'opacity': mesh.opacity,
+      'color': parseColor(mesh.color_r, mesh.color_b, mesh.color_g)
+    }
+    formattedMeshes.push(formattedMesh);
+  });
+  return formattedMeshes;
+}
+
+function setupLandmarks(landmarks) {
+  var formattedLandmarks = []
+  landmarks.forEach(function (landmark) {
+    var formattedLandmark = {
+      'id': landmark.RID,
+      'group': landmark.mesh,
+      'description': landmark.description,
+      'point': [landmark.point_x, landmark.point_y, landmark.point_z],
+      'color': parseColor(landmark.color_r, landmark.color_b, landmark.color_g),
+      'label': landmark.label || '',
+      'link': landmark.link || {'url': null, 'label': null},
+      'radius': landmark.radius || 0.1,
+    }
+    formattedLandmarks.push(formattedLandmark);
+  });
+  if (formattedLandmarks.length > 0) {
+    // Global variable that determines whether landmarks should show up in mesh list
+    // Currently in m.viewer.js, meshes and landmarks have a bit of a circular dependency
+    // on one another when both are collected, and currently require meshes to be constructed
+    // first and landmarks second, with 'hasLandmarks' existing so that meshes know landmarks
+    // do exist before they're ready. m.viewer.js will need to be refactored before 'hasLandmarks'
+    // can be removed.
+    hasLandmarks = true;
+  }
+  return formattedLandmarks;
+}
+
+function postSetup(model) {
+  var formattedModel = {
+    'model': model['model_url'],
+    'meshes': model['meshes_url'],
+    'landmarks': model['landmarks_url'],
+  }
+  if (model.anatomy_url_fragment) {
+    function setURL(meshOrLandmark) {
+      meshOrLandmark.link.url = model.anatomy_url_fragment + meshOrLandmark.id;
+    }
+    formattedModel.meshes.forEach(setURL);
+    formattedModel.landmarks.forEach(setURL);
+  }
+  return formattedModel;
+}
+
+function parseColor(r, b, g) {
+  if (r == null || b == null || g == null)
+    return null
+  return [r/255.0, g/255.0, b/255.0];
+}
 
 // http://stackoverflow.com/questions/5717093/check-if-a-javascript-string-is-a-url
 function isURL(str) {
@@ -362,222 +295,3 @@ function isURL(str) {
   '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
   return pattern.test(str);
 }
-
-
-var foo_initial_mesh_json='\
-{ "mesh" : [ { \
-      "id": "JI296CCMB",\
-      "label": "Back Skull",\
-      "url": "http://localhost/data/3mesh/JI296CCMB.obj",\
-      "color": [1.00, 0.80, 0.40],\
-      "opacity": 1,\
-      "caption": {\
-                   "description":"a skull mesh at the back of head",\
-                   "link": { "label":"gene expression",\
-                             "url":"http://localhost/meshviewer/gene.html"}\
-                  }\
-               },\
-               {\
-      "id": "Maxilla",\
-      "label": "Maxilla",\
-      "url": "http://localhost/data/3mesh/Maxilla.obj",\
-      "color": [1.00, 0.46, 0.19],\
-      "opacity": 1,\
-      "caption": {\
-                   "description":"a Mandible Maxilla",\
-                   "link": { "label":"gene expression",\
-                             "url":"http://localhost/meshviewer/gene.html"}\
-                  }\
-               }\
-  ]\
-}';
-
-var foo_mesh_json='\
-{ "mesh" : [{ \
-      "id": "Mandible",\
-      "label": "Mandible",\
-      "url": "http://localhost/data/3mesh/Mandible.obj",\
-      "color": [0.53, 0.90, 0.90],\
-      "opacity": 1,\
-      "caption": {\
-                   "description":"a Mandible Mandible",\
-                   "link": { "label":"gene expression",\
-                             "url":"http://localhost/meshviewer/gene.html"}\
-                  }\
-   }]\
-}';
-
-function mesh_load() {
-   var _m=null;
-   var _mm=null;
-   if(initial_mesh_json)
-     _m=initial_mesh_json;
-   if(mesh_json)
-     _mm=mesh_json;
-   return [_m, _mm];
-}
-
-var foo_vol_json='\
-{ "volume" : [\
-  {\
-    "id": "VOL5600", \
-    "label": "volume of JI296CCMB", \
-    "url": "http://'+hostname+'/data/3mesh/JI296CCMB_Control_P0_Hard_Tissue.transformed.nii",\
-    "color": [0.00, 0.00, 0.00],\
-    "caption": { "description":"nifti vol file for JI296CCMB",\
-                 "link": { "label":"gene expression",\
-                           "url":"http://localhost/meshviewer/gene.html"}\
-  }}]\
-}';
-
-function vol_load() {
-   if(vol_json)
-     return vol_json;
-   return(null);
-}
-
-var foo_landmark_json='\
-{  "landmark" : [ {\
-         "id": "LND5678",\
-         "label": "Posterior pt of JI296CCMB",\
-         "group": "JI296CCMB", \
-         "color": [1, 0, 0],\
-         "radius": 0.1, \
-         "point": [8.502269744873047, 6.578330039978027, 69.94249725341797],\
-         "caption": { \
-                 "description":"Tail end of Skull, JI296CCMB",\
-                 "link": { "label": "landmark",\
-                           "url":"https://www.example.com/path/to/info/about/LND5678" }\
-                    }\
-                 },\
-                 {\
-         "id": "LND5679",\
-         "label": "Most anterior superior pt of premaxilla",\
-         "group": "JI296CCMB", \
-         "color": [1, 0, 0],\
-         "radius": 0.1, \
-         "point": [15.606300354003906, 9.819620132446289,71.14600372314453],\
-         "caption": { \
-                 "description":"Front tip of Skull",\
-                 "link": { "label":"landmark",\
-                           "url":"https://www.example.com/path/to/info/about/LND5679" }\
-                    }\
-                  },\
-                  {\
-         "id": "LND5680",\
-         "label": "Anterior point of something",\
-         "group": "JI296CCMB",\
-         "color": [1, 0, 0],\
-         "radius": 0.1, \
-         "point": [7.819620132446289,10.14050006866455,67.17459869384766],\
-         "caption": { \
-                 "description":"Lowermost tip of Skull",\
-                 "link": { "label":"landmark",\
-                           "url":"https://www.example.com/path/to/info/about/LND5680" }\
-                    }\
-                  },\
-                  {\
-         "id": "LND5681",\
-         "label": "Anterior-medial point to zygomatic process",\
-         "group": "Maxilla", \
-         "color": [1, 0, 0],\
-         "radius": 0.1, \
-         "point": [13.516400337219238,11.584600448608398,70.9854965209961],\
-         "caption": { \
-                 "description":"Lowermost tip of Maxilla",\
-                 "link": { "label":"landmark",\
-                           "url":"https://www.example.com/path/to/info/about/LND5681" }\
-                    }\
-                  },\
-                  {\
-         "id": "LND5682",\
-         "label": "Superior tip of coronary process",\
-         "group": "Mandible", \
-         "color": [1, 0, 0],\
-         "radius": 0.1, \
-         "point": [11.42609977722168,12.432299613952637,70.46399688720703],\
-         "caption": { \
-                 "description":"Superior tip",\
-                 "link": { "label":"landmark",\
-                           "url":"https://www.example.com/path/to/info/about/LND5682" }\
-                    }\
-                   },\
-                   {\
-         "id": "LND5683",\
-         "label": "Most anterior pt of mandible",\
-         "group": "Mandible", \
-         "color": [1, 0, 0],\
-         "radius": 0.1, \
-         "point": [15.551799774169922,9.578940391540527,69.4209976196289],\
-         "caption": { \
-                 "description":"Anterior tip",\
-                 "link": { "label":"landmark",\
-                           "url":"https://www.example.com/path/to/info/about/LND5683" }\
-                     }\
-             } ]\
-}';
-
-function landmark_load() {
-   if(landmark_json )
-     return landmark_json;
-   return (null);
-}
-
-// new Float32Array(16)
-// {-1,0,0,0,0,-0,1,0,0,1,0,0,0,0,-10,1}
-// {0.66,-0.74,-0.09,0,-0.17,-0.03,-0.98,0,0.73,0.67,-0.15,0,0,0,-16,1}
-var foo_view_json='\
-{ "view" : [\
-  { \
-    "matrix": [ 0.3939458131790161, -0.14428237080574036, 0.9077383279800415, 0, 0.6927173733711243, -0.6025053858757019, -0.3963961601257324, 0, 0.6041101813316345, 0.784964919090271, -0.13740763068199158, 0, 0, 0, -10, 1 ] \
-  }\
- ]\
-}';
-
-// just one for now
-function view_load() {
-   if(view_json) {
-       var _v= view_json['view'][0]['matrix'];
-     return _v;
-   } 
-   return null;
-}
-
-/**************
-not in use yet
-**************/
-var foo_anno_json='\
-{ "annotation" : [\
-  {\
-    "type": "xtk_mesh",\
-    "id": 4124939659,\
-    "event": "INFO",\
-    "data": {\
-      "src": "JI296CCMB",\
-      "context": {\
-          "url":"http://'+hostname+'/MeshViewer/view.html",\
-          "camera": [0, 10, 0],\
-          "center": [10.45, 9.94, 70.44],\
-          "viewport": { "width": 500, "height": 400 },\
-          "mesh" : "url=http://'+hostname+'/data/3mesh/JI296CCMB.obj&url=http://'+hostname+'/data/3mesh/Mandible.obj&url=http://'+hostname+'/data/3mesh/Maxilla.obj",\
-          "volume" : "url=http://'+hostname+'/data/3mesh/JI296CCMB.nii",\
-          "view" : { "matrix" : [ 0.3939458131790161, -0.14428237080574036, 0.9077383279800415, 0, 0.6927173733711243, -0.6025053858757019, -0.3963961601257324, 0, 0.6041101813316345, 0.784964919090271, -0.13740763068199158, 0, 0, 0, -10, 1 ] }\
-      },\
-      "text": "this is a annotation for skull of JI296CCMB",\
-      "shape": "rect",\
-      "x": 0,\
-      "y": 0,\
-      "width": 0,\
-      "height": 0\
-    }\
-  }\
- ]\
-}';
-
-function anno_load() {
-   if(anno_json)
-     return $.parseJSON(anno_json);
-   return null;
-}
-
-

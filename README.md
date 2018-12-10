@@ -43,103 +43,126 @@ Example URL with query parameters:
 
 ## Model specification
 
-The model specification is a JSON formatted document describing the model
-properties, volumes, meshes, and landmarks associated with the model.
+The model specification is a combination of URL fragments that describe what to
+render in the mesh viewer. The main options do not contain the info directly, but
+specify URLs to JSON containing the complete info at a remote location. Note that
+CORS is not supported, and all URLs must originate from the main site.
 
-The JSON payload must be a serialized object that describes the model:
-- `id`: the identifier of the model
-- `label`: a short text field for the name or title of the model
-- `boundingBox`: the default state of the bounding box feature. Set to `True` or `False` to show or hide the bounding box on load. Default: `False`.
-- `rotate`: the default state of the rotating animation of the model. Set to `True` or `False` to enable or disable animation on load. Default: `False`.
-- `measurement`: the units of distance measurement. Set to a string "cm", "inches", "kilometers"
-- `unitconversion`: the conversion of mesh-viewer units to real world measurement for distance. Computed as unitconversion * Unit distance between points.
-- `bgcolor`: an array of float values indicating RGB for background color
-- `mesh`: an array of `mesh` objects described next
-- `volume`: a `volume` object described below
-- `landmark`: an array of `landmark` objects described below
+Currently, these options exist:
 
-The `mesh` objects include the following fields:
-- `id`: the identifier of the mesh
-- `url`: the web resource location of the mesh file in `.obj` format
-- `label`: a short text field for the name or title of the mesh
-- `link`: a web resource that this object may reference
-  - `label`: the display label for the link
-  - `url`: the URL for the link
-- `color`: an array of float values indicating RGB color
+* `model_url` - HTTP URL to general settings on the mesh-viewer
+* `mesh_url` - HTTP URL to JSON list containing mesh objects
+* `landmark_url` - HTTP URL to JSON list containing landmark objects
+* `anatomy_url_fragment` - Partial URL prefix for which a mesh or landmark _id_
+    can be appended to form a complete URL to that mesh or landmarks detail page
 
-The `volume` object includes the following fields:
-- `id`: the identifier of the volume
-- `url`: the web resource location of the volume file
-- `label`: a short text field for the name or title of the volume
-- `link`: a web resource that this object may reference
-  - `label`: the display label for the link
-  - `url`: the URL for the link
+### Model URL Specification
 
-The `landmark` objects include the following fields:
-- `id`: the identifier of the landmark
-- `group`: the group identifier of the landmark which must indicate the object,
-  mesh, to which it belongs
-- `label`: a short text field for the name or title of the landmark
-- `link`: a web resource that this object may reference
-  - `label`: the display label for the link
-  - `url`: the URL for the link
-- `radius`: a float value indicating the radius of the landmark
-- `order`: an optional integer value indicating the order landmarks should be displayed. Smaller values indicate higher precedence.
-- `point`: an array of float values indicating the XYZ coordinates of the
-  landmark
-- `color`: an array of float values indicating RGB color
+Valid options for `model_url`:
 
-## Example
+* model_id - (string) The id of the model
+* model_caption - (string) The caption of the model
+* bg_color_r, bg_color_g, bg_color_b (int [0-255]) - RGB values for the background
+* bounding_box_color_r, bounding_box_color_g, bounding_box_color_b (int [0-255]) -
+ Color of the Bounding Box
+* model_measurement - (string [inches, cm]) units of distance measurement
+* model_unitconversion - (float [1.0]) Multiplied by world-space distance to
+ convert world-space distances to model_measurement distances
 
-An example model specification for a model with one mesh and one landmark.
-
+Example:
 ```
-{
-    "id": "MOD1234",
-    "label": "My Model",
-    "bgcolor": [0.00, 0.00, 0.00]
-    "mesh" : [ {
-        "id": "MESH7890",
-        "url": "https://www.example.org/path/to/MOD1234.obj",
-        "label": "My Mesh",
-        "link": {
-            "label": "ANATOMICAL STRUCTURE",
-            "url": "https://www.example.org/path/to/info/about/ANATOMICALSTRUCTURE"
-        },
-        "caption": "This is a mesh object in a model.",
-        "color": [1.00, 0.80, 0.40]
-    } ],
-    "landmark" : [ {
-        "id": "LND5678"
-        "group": "MESH7890",
-        "label": "A point of interest",
-        "link": {
-            "label": "ANATOMICAL SITE",
-            "url": "https://www.example.org/path/to/info/about/ANATOMICALSITE"
-        },
-        "order": 1,
-        "radius": 0.1,
-        "point": [8.502269744873047, 6.578330039978027, 69.94249725341797],
-        "color": [1.00, 0.00, 0.00]
-    } ]
-}
+[
+  {
+    "id": 54,
+    "label": "E18.5 wildtype mouse - hard tissue",
+    "description": null,
+    "bg_color_r": 0,
+    "bg_color_g": 0,
+    "bg_color_b": 0,
+    "bounding_box_color_r": 255,
+    "bounding_box_color_g": 255,
+    "bounding_box_color_b": 0,
+    "rotate": false,
+    "volume": null,
+    "RID": "1-43KT",
+    "unit_conversion": null
+  }
+]
 ```
 
+### Mesh URL Specification
+
+Valid Options for `mesh_url`:
+
+* RID - (string) The ID of the Mesh.
+* url - (string) The location where the object data resides for this mesh
+* link - (object) An object containing a URL and label description of the mesh
+    * Example ```{"url": "http://example.com", "label": "Mesh URL"}
+* anatomy - (string) The label for the anatomy this mesh describes
+* description - (string) A description of the Mesh
+* opacity - (float [0-1])Opacity for this mesh
+* color_r, color_g, color_b - (int [0-255]) RGB color values for the mesh color
+
+Example:
+```
+[
+  {
+    "RID": "1-444E",
+    "url": "http://mysite.org/my_meshes.obj.gz",
+    "label": null,
+    "description": null,
+    "color_r": 66,
+    "color_g": 137,
+    "color_b": 244,
+    "opacity": 1,
+    "anatomy": "occipital bone",
+  }
+]
+```
+
+### Landmark URL Specification
+
+
+Valid Options for `landmark_url`:
+
+* RID - (string) The ID of the Landmark.
+* mesh - (string) The ID of the Mesh this landmark points
+* point_x, point_y, point_z - (float [-inf,inf]) The location of the landmark
+* url - (string) The location where the object data resides for this mesh
+* link - (object) An object containing a URL and label description of the mesh
+    * Example ```{"url": "http://example.com", "label": "Mesh URL"}
+* anatomy - (string) The label for the anatomy this mesh describes
+* description - (string) A description of the Mesh
+* opacity - (float [0-1])Opacity for this mesh
+* color_r, color_g, color_b - (int [0-255]) RGB color values for the mesh color
+* radius - (float [typically 0.1]) The radius of the spherical marker denoting the landmark.
+
+```
+[
+  {
+    "RID": "1-4452",
+    "mesh": "1-43E0",
+    "label": "Inferior point of mandibular body",
+    "description": null,
+    "point_x": 7.8618,
+    "point_y": 2.5692,
+    "point_z": 1.8701,
+    "radius": 0.1,
+    "color_r": 0,
+    "color_g": 0,
+    "color_b": 255,
+    "anatomy": "mandible",
+    "anatomy_id": "1-4646"
+  }
+]
+```
+
+### Examples
 An Example with view 
 
 ```
-view.html?model=http://localhost/data/3mesh/3model.json&view=http://localhost/data/3mesh/3view.json
+view.html#model_url=http://localhost/mymodelsettings.json&mesh_url=http://localhost/mymeshes.json
 ```
 
-the 3view.json
-
-```
-{
-  "view" : [ {
-      "matrix": [ -0.39207977056503296, -0.29684534668922424, 0.8707215785980225, 0, 0.6848435401916504, -0.7261472940444946, 0.06082262843847275, 0, 0.6142174601554871, 0.620155394077301, 0.48800042271614075, 0, 0, 0, -10.206781387329102, 1 ]
-}]
-}
-
-```
 
 Sample plots are sample1.png, sample2.png

@@ -69,6 +69,7 @@ html, body {
 <script type="text/javascript" src="js/m.viewer.js"></script>
 <script type="text/javascript" src="js/m.control.js"></script>
 <script type="text/javascript" src="js/m.setup.js"></script>
+<script type="text/javascript" src="js/m.xtk-event-overrides.js"></script>
 <script type="text/javascript" src="js/m.sidebar.js"></script>
 
 <!-- testing
@@ -97,7 +98,7 @@ html, body {
       <button id="landmarkbtn" class="btn btn-success" title="show or hide landmarks on the model"  onclick="toggleAllLandmark()" style="display:none;">
            <span class="glyphicon glyphicon-map-marker"></span>
               Show landmarks</button>
-      <button id="calculatedistbtn" class="btn btn-success" title="Calculate distances for selected landamrks"  onclick="calculateLandmarkDistances()">
+      <button id="calculatedistbtn" class="btn btn-success" title="Calculate distances for selected landamrks"  onclick="calculateLandmarkDistances()" style="display:none;">
            <span class="glyphicon glyphicon-screenshot"></span>
               Calculate Distances</button>
       <button id="boxbtn" class="btn btn-success" title="show or hide model bounding box" onclick="toggleBox();">

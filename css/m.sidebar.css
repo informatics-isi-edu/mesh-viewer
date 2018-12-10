@@ -59,7 +59,9 @@
 
 .navigationLi {
 	width: 100%;
-        overflow: scroll;
+    overflow: scroll;
+    //Set dynamically by m.viewer.js
+    //max-height: 804px
 }
 
 .menu {
