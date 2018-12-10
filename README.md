@@ -84,6 +84,7 @@ The `landmark` objects include the following fields:
   - `label`: the display label for the link
   - `url`: the URL for the link
 - `radius`: a float value indicating the radius of the landmark
+- `order`: an optional integer value indicating the order landmarks should be displayed. Smaller values indicate higher precedence.
 - `point`: an array of float values indicating the XYZ coordinates of the
   landmark
 - `color`: an array of float values indicating RGB color
@@ -116,6 +117,7 @@ An example model specification for a model with one mesh and one landmark.
             "label": "ANATOMICAL SITE",
             "url": "https://www.example.org/path/to/info/about/ANATOMICALSITE"
         },
+        "order": 1,
         "radius": 0.1,
         "point": [8.502269744873047, 6.578330039978027, 69.94249725341797],
         "color": [1.00, 0.00, 0.00]

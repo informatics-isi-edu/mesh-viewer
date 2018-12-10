@@ -96,39 +96,54 @@ function landmarksClick_btn()
   }
 }
 
+function getLandmarkOrder(lmk) {
+    return isNaN(lmk[1].order) ? Number.MAX_VALUE: lmk[1].order;
+}
+
 function calculateLandmarkDistances() 
 {
 
   jQuery('#landmarklist').empty();
 
-  if (countSelectedLandmarks() < 2)
-  {
+  if (countSelectedLandmarks() < 2) {
     return
   }
 
-  var lmark_calculations = []
-  for(var i = 0; i < landmarks.length; i++)
+  var lmark_list = landmarks;
+  // Check if any landmarks have 'order' set on them. If any do, treat the whole set as 'ordered'.
+  var landmarks_ordered = landmarks.some(function(lmk) {return getLandmarkOrder(lmk) != Number.MAX_VALUE});
+  if (landmarks_ordered) {
+    lmark_list.sort(function(a, b) {return getLandmarkOrder(a) - getLandmarkOrder(b)});
+  }
+
+  for(var i = 0; i < lmark_list.length; i++)
   {
-    if (!landmarks[i][0].visible)
+    if (!lmark_list[i][0].visible)
       continue;
 
     var lmark_calculation = {
-      'landmark': landmarks[i][1],
+      'landmark': lmark_list[i][1],
       'distances': []
     }
-    addLandmarkSidebarEntry(getLabel(lmark_calculation.landmark),
+    var prefix = '';
+    if (landmarks_ordered) {
+      var lmk_order = getLandmarkOrder(lmark_list[i]);
+      //If the order was set to be last, list (N) instead of the set order
+      prefix = (lmk_order == Number.MAX_VALUE) ? '(N): ': '(' + lmk_order + '): ';
+    }
+    addLandmarkSidebarEntry(prefix + getLabel(lmark_calculation.landmark),
                             lmark_calculation.landmark.id,
                             i,
                             getHref(lmark_calculation.landmark));
 
 
-    for(var j = 0; j < landmarks.length; j++)
+    for(var j = 0; j < lmark_list.length; j++)
     {
-      if (!landmarks[j][0].visible || i == j)
+      if (!lmark_list[j][0].visible || i == j)
         continue;
 
-      var lm = landmarks[j][1];
-      var dist = calculateLandmarkDistance(landmarks[i], landmarks[j]);
+      var lm = lmark_list[j][1];
+      var dist = calculateLandmarkDistance(lmark_list[i], lmark_list[j]);
       var actual_distance = dist * model_unitconversion;
       lmark_calculation.distances.push({
         'landmark': lm,
