@@ -1,64 +1,67 @@
 # mesh-viewer
 
-This is a 3D model viewer that renders volumes, meshes and landmarks.
+This is a 3D model viewer that renders meshes and landmarks.
 
 ## Features
 
-Stable features:
 - render one or more meshes in a scene
 - each mesh associated with a label and a color
-- each label may link to another web resource
+- labels may be based on anatomy terms and link to web resources detailing the anatomy term
 - optional bounding box
 - optional animation to rotate the model
 - reset the model to its original orientation and zoom level
-- support for Wavefront Object (.obj) format meshes
-
-In development features:
-- render an associated volume
+- support for Wavefront Object (.obj) format meshes and to non-standard compressed meshes (.obj.gz)
 - display landmarks
-- support for NIfTI, TIFF, and OME-TIFF volumes
+- simple straigh-line distance measurement between landmarks
 
 ## Interface
 
-The viewer is accessed view its `view.html` page and expects a query parameter
-indicating web resource location (URL) of the model specification.
+The viewer is accessed view its `view.html` page and expects a set of query parameters
+indicating web resource locations (URL) of the model specification. Note that
+CORS is not supported, and all URLs must originate from the main site.
+
+## Query Option Parameters
+
+The model specification is a combination of JSON documents that describe what to
+render in the mesh viewer. The specification is loaded from one or more web resources
+indicated by the core query option parameters. These URLs should be URL-encoded in
+order to be safely passed to the mesh viewer.
+
+The core options for specifying the model specification are:
+
+* `model_url` - HTTP URL to the model object
+* `mesh_url` - HTTP URL to JSON list containing mesh objects
+* `landmark_url` - HTTP URL to JSON list containing landmark objects
+* `anatomy_url_fragment` - Partial URL prefix for which a mesh's or landmark's
+  `anatomy_id` can be appended to form a complete URL to that mesh's or landmark's 
+  associated anatomy detail page. Example: `https://example.org/id/` to which an
+  id (e.g., `1-3406`) is appended and the client can be redirected to it.
+
+For example:
 
 ```
-http://example.org/view.html?model=path/to/model.json
+view.html#model_url=http%3A%2F%2Fexample.org%2Fpath%2Fto%2Fmodel&mesh_url=http%3A%2F%2Fexample.org%2Fpath%2Fto%2Fmeshes&anatomy_url_fragment=http:%2F%2Fexample.org%2Fid%2F
 ```
 
-### Query Param Options
+### Extra Query Options
 
-Extra options can be passed via query params:
+In addition to the core query parameters for specifying the model, meshes and landmarks, these extra 
+options can be passed to modfy the viewer's behavior:
 
 - `showmeshes`: Show the meshes panel on startup. Set to a Boolean value. Default: `false`. 
 - `target-url`: Open URLs provided by *this* Mesh Viewer in another iframe on the same page with the provided HTML class ID. This assumes you have two iframes, one running this mesh viewer and another that will change based on the links clicked in this mesh viewer. This applies to all `mesh.link.url` and `landmark.link.url` links in the model loaded by this Mesh Viewer. Default: `None`.
 
 Example URL with query parameters:
+
 ```
 <iframe 
-  src="http://example.org/view.html?model=path/to/model.json&showmeshes=true&target-url=my-other-iframe">
+  src="view.html#model_url=http%3A%2F%2Fexample.org%2Fpath%2Fto%2Fmodel&mesh_url=http%3A%2F%2Fexample.org%2Fpath%2Fto%2Fmeshes&anatomy_url_fragment=http:%2F%2Fexample.org%2Fid%2F&showmeshes=true&target-url=my-other-iframe">
 </iframe>
 ```
 
-## Model specification
+### Model Specification
 
-The model specification is a combination of URL fragments that describe what to
-render in the mesh viewer. The main options do not contain the info directly, but
-specify URLs to JSON containing the complete info at a remote location. Note that
-CORS is not supported, and all URLs must originate from the main site.
-
-Currently, these options exist:
-
-* `model_url` - HTTP URL to general settings on the mesh-viewer
-* `mesh_url` - HTTP URL to JSON list containing mesh objects
-* `landmark_url` - HTTP URL to JSON list containing landmark objects
-* `anatomy_url_fragment` - Partial URL prefix for which a mesh or landmark _id_
-    can be appended to form a complete URL to that mesh or landmarks detail page
-
-### Model URL Specification
-
-Valid options for `model_url`:
+Valid properties for model specification referenced by `model_url`:
 
 * model_id - (string) The id of the model
 * model_caption - (string) The caption of the model
@@ -90,15 +93,16 @@ Example:
 ]
 ```
 
-### Mesh URL Specification
+### Mesh Specification
 
-Valid Options for `mesh_url`:
+Valid properties for meshes specification referenced by `mesh_url`:
 
 * RID - (string) The ID of the Mesh.
 * url - (string) The location where the object data resides for this mesh
 * link - (object) An object containing a URL and label description of the mesh
     * Example ```{"url": "http://example.com", "label": "Mesh URL"}
 * anatomy - (string) The label for the anatomy this mesh describes
+* anatomy_id - (string) The id for the anatomy term (optional)
 * description - (string) A description of the Mesh
 * opacity - (float [0-1])Opacity for this mesh
 * color_r, color_g, color_b - (int [0-255]) RGB color values for the mesh color
@@ -116,14 +120,14 @@ Example:
     "color_b": 244,
     "opacity": 1,
     "anatomy": "occipital bone",
+    "anatomy_id": "1-3406"
   }
 ]
 ```
 
-### Landmark URL Specification
+### Landmark Specification
 
-
-Valid Options for `landmark_url`:
+Valid properties for landmark specification referenced by `landmark_url`:
 
 * RID - (string) The ID of the Landmark.
 * mesh - (string) The ID of the Mesh this landmark points
@@ -132,6 +136,7 @@ Valid Options for `landmark_url`:
 * link - (object) An object containing a URL and label description of the mesh
     * Example ```{"url": "http://example.com", "label": "Mesh URL"}
 * anatomy - (string) The label for the anatomy this mesh describes
+* anatomy_id - (string) The id for the anatomy term (optional)
 * description - (string) A description of the Mesh
 * opacity - (float [0-1])Opacity for this mesh
 * color_r, color_g, color_b - (int [0-255]) RGB color values for the mesh color
@@ -152,17 +157,7 @@ Valid Options for `landmark_url`:
     "color_g": 0,
     "color_b": 255,
     "anatomy": "mandible",
-    "anatomy_id": "1-4646"
+    "anatomy_id": "1-340A"
   }
 ]
 ```
-
-### Examples
-An Example with view 
-
-```
-view.html#model_url=http://localhost/mymodelsettings.json&mesh_url=http://localhost/mymeshes.json
-```
-
-
-Sample plots are sample1.png, sample2.png
