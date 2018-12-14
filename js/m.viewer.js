@@ -512,6 +512,7 @@ function preloadLandmarks(landmarks)
     show_landmark=true;
     $('#landmarkbtn').addClass('pick');
   }
+  updateCalculateDistanceButton()
 }
 
 // similar to selectLandmark but for view.html
@@ -527,6 +528,7 @@ function toggleAllLandmark()
       $('#landmarkbtn').removeClass('pick');
       setLandmarksActive(false)
   }
+  updateCalculateDistanceButton()
 }
 
 // Enable or disable all landmarks, set to true or false based on the 'state'
@@ -545,6 +547,11 @@ function setLandmarksActive(state, filterFunction=null) {
       landmarklist[_g][_i].visible=state;
     }
   }
+}
+
+function updateCalculateDistanceButton() {
+  const state = getMeshesWithMultipleActiveLandmarks().length == 0;
+  $('#calculatedistbtn').prop('disabled', state);
 }
 
 
@@ -650,6 +657,22 @@ function openMesh(i,label_name,opacity_name,landmark_name,opacity_btn) {
       setLandmarksActive(false, filterByMesh)
     }
   }
+  updateCalculateDistanceButton()
+}
+
+function getMeshesWithMultipleActiveLandmarks() {
+  var meshesWithVisibleLandmarks = meshs.filter(function (mesh) {
+    const meshKey = mesh[1].id.toLowerCase();
+    if (landmarklist.hasOwnProperty(meshKey) && landmarklist[meshKey].length > 1) {
+      const activeLandmarks = landmarklist[meshKey].filter(function (landmark) {
+        return landmark.visible;
+      })
+      if (activeLandmarks.length > 1) {
+        return mesh;
+      }
+    }
+  });
+  return meshesWithVisibleLandmarks;
 }
 
 function toggleOpacityIcon(btn) {
@@ -838,6 +861,7 @@ function toggleLandmark(g,i) {
          }
      }
   }
+  updateCalculateDistanceButton();
 }
 
 function toggleLabel() {

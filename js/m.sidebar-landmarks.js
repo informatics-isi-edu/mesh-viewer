@@ -105,9 +105,16 @@ function calculateLandmarkDistances()
   toggleActiveSidebar('landmarks');
   jQuery('#landmarklist').empty();
 
-  if (countSelectedLandmarks() < 2) {
+  var meshListWithLandmarks = getMeshesWithMultipleActiveLandmarks()
+  if (meshListWithLandmarks <= 1) {
+    console.debug('No mesh with active landmarks to display, aborting distance calculation.')
     return
   }
+  //Grab first one in list
+  var mesh = meshListWithLandmarks[0]
+
+  function allOtherMeshes(meshID, landmarkID) {return mesh[1].id.toLowerCase() != meshID}
+  setLandmarksActive(false, allOtherMeshes)
 
   var lmark_list = landmarks;
   // Check if any landmarks have 'order' set on them. If any do, treat the whole set as 'ordered'.
@@ -167,19 +174,6 @@ function calculateLandmarkDistance(landmark1, landmark2)
   p1 = new X.vector(lp1[0], lp1[1], lp1[2]);
   p2 = new X.vector(lp2[0], lp2[1], lp2[2]);
   return X.vector.distance(p1, p2);
-}
-
-function countSelectedLandmarks()
-{
-  var num_selected = 0;
-  landmarks.forEach(function(landmark)
-  {
-    if (landmark[0].visible)
-    {
-      num_selected++;
-    }
-  });
-  return num_selected;
 }
 
 
