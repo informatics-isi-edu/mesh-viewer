@@ -512,6 +512,7 @@ function preloadLandmarks(landmarks)
     show_landmark=true;
     $('#landmarkbtn').addClass('pick');
   }
+  updateCalculateDistanceButton()
 }
 
 // similar to selectLandmark but for view.html
@@ -521,22 +522,36 @@ function toggleAllLandmark()
   show_landmark = !show_landmark;
   var _list=document.getElementsByName("landmark");
   if(show_landmark) {
-    $('#landmarkbtn').addClass('pick');
-    for (var i=0; i<_list.length;i++) {
-      var _g=(_list[i].id).split('_').shift();
-      var _i=_list[i].value-1;
-      _list[i].checked=true;
-      landmarklist[_g][_i].visible=true;
-    }
+      $('#landmarkbtn').addClass('pick');
+      setLandmarksActive(true)
     } else {
       $('#landmarkbtn').removeClass('pick');
-      for (var i=0; i<_list.length;i++) {
-        var _g=(_list[i].id).split('_').shift();
-        var _i=_list[i].value-1;
-        _list[i].checked=false;
-        landmarklist[_g][_i].visible=false;
-      }
+      setLandmarksActive(false)
   }
+  updateCalculateDistanceButton()
+}
+
+// Enable or disable all landmarks, set to true or false based on the 'state'
+// parameter. Optionally, filterFunction can be passed in to choose which
+// landmarks are set to the new state.
+// filterFunction Example setting only landmarks for 'myMeshID':
+// setLandmarksActive(true, function(landmarkGroup, landmarkID) {return landmarkGroup===myMeshID;})
+function setLandmarksActive(state, filterFunction=null) {
+
+  var _list=document.getElementsByName("landmark");
+  for (var i=0; i<_list.length;i++) {
+    var _g=(_list[i].id).split('_').shift();
+    var _i=_list[i].value-1;
+    if (filterFunction == null || filterFunction(_g, _i) == true) {
+      _list[i].checked=state;
+      landmarklist[_g][_i].visible=state;
+    }
+  }
+}
+
+function updateCalculateDistanceButton() {
+  const state = getMeshesWithMultipleActiveLandmarks().length == 0;
+  $('#calculatedistbtn').prop('disabled', state);
 }
 
 
@@ -618,8 +633,12 @@ function openMesh(i,label_name,opacity_name,landmark_name,opacity_btn) {
   var sliderDiv=opacity_name+'Div';
   document.getElementById(landmarkDiv).style.display = 'none';
   document.getElementById(sliderDiv).style.display = 'none';
-
   var _mesh=meshs[i][0];
+
+  function filterByMesh(meshID, landmarkID) {
+    return meshs[i][1].id.toLowerCase() === meshID;
+  }
+
   var eye='#'+label_name;
   var _btn=i+"_opacity";
   _mesh.visible = !_mesh.visible;
@@ -627,11 +646,33 @@ function openMesh(i,label_name,opacity_name,landmark_name,opacity_btn) {
     $(eye).removeClass('glyphicon-eye-close').addClass('glyphicon-eye-open');
     document.getElementById(_btn).disabled=false;
     document.getElementById(opacity_btn).style.color="#407CCA";
-    } else {
-      $(eye).removeClass('glyphicon-eye-open').addClass('glyphicon-eye-close');
-      document.getElementById(_btn).disabled=true;
-      document.getElementById(opacity_btn).style.color="#DCDCDC";
+    if (show_landmark && landmarklist.hasOwnProperty(meshs[i][1].id.toLowerCase())) {
+      setLandmarksActive(true, filterByMesh)
+    }
+  } else {
+    $(eye).removeClass('glyphicon-eye-open').addClass('glyphicon-eye-close');
+    document.getElementById(_btn).disabled=true;
+    document.getElementById(opacity_btn).style.color="#DCDCDC";
+    if (landmarklist.hasOwnProperty(meshs[i][1].id.toLowerCase())) {
+      setLandmarksActive(false, filterByMesh)
+    }
   }
+  updateCalculateDistanceButton()
+}
+
+function getMeshesWithMultipleActiveLandmarks() {
+  var meshesWithVisibleLandmarks = meshs.filter(function (mesh) {
+    const meshKey = mesh[1].id.toLowerCase();
+    if (landmarklist.hasOwnProperty(meshKey) && landmarklist[meshKey].length > 1) {
+      const activeLandmarks = landmarklist[meshKey].filter(function (landmark) {
+        return landmark.visible;
+      })
+      if (activeLandmarks.length > 1) {
+        return mesh;
+      }
+    }
+  });
+  return meshesWithVisibleLandmarks;
 }
 
 function toggleOpacityIcon(btn) {
@@ -820,6 +861,7 @@ function toggleLandmark(g,i) {
          }
      }
   }
+  updateCalculateDistanceButton();
 }
 
 function toggleLabel() {
@@ -1100,6 +1142,14 @@ function addLandmark(p) {
 
   
   landmarks.push([_s, p]);
+  // NOTE: This sets a new property to the built-in Array named "_g", which makes
+  // this behave more like an object than an array. The Array itself will always be
+  // empty. In order to access the elements, one would need to access the newly
+  // defined property "_g". If a mesh does not have landmarks, attempting to access
+  // them in this array will return undefined or raise an error. At the very least,
+  // this should probably be changed into an object. A longer term fix may be defining
+  // mesh-viewer specific Mesh and Landmark objects, which contain methods that complement
+  // one another such as 'mesh.getLandmarks()'.
   if( landmarklist[_g] == null ) {
     landmarklist[_g]=[];
     landmarklist[_g].push(_s);
