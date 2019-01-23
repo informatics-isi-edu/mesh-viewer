@@ -12,22 +12,24 @@ This is a 3D model viewer that renders meshes and landmarks.
 - reset the model to its original orientation and zoom level
 - support for Wavefront Object (.obj) format meshes and to non-standard compressed meshes (.obj.gz)
 - display landmarks
-- simple straigh-line distance measurement between landmarks
+- simple straight-line distance measurement between landmarks
 
 ## Interface
 
-The viewer is accessed view its `view.html` page and expects a set of query parameters
-indicating web resource locations (URL) of the model specification. Note that
-CORS is not supported, and all URLs must originate from the main site.
+The viewer is accessed view its `view.html` page and expects a set of parameters
+indicating web resource locations (URL) of the model specification. The parameters are
+passed as part of the fragment identifier (i.e., following the `#` of the URL).
 
-## Query Option Parameters
+## Parameters
 
 The model specification is a combination of JSON documents that describe what to
 render in the mesh viewer. The specification is loaded from one or more web resources
-indicated by the core query option parameters. These URLs should be URL-encoded in
-order to be safely passed to the mesh viewer.
+indicated by the core parameters. These URLs should be URL-encoded in order to be safely 
+passed to the mesh viewer.
 
-The core options for specifying the model specification are:
+### Core Parameters
+
+The core parameters for specifying the model specification are:
 
 * `model_url` - HTTP URL to the model object
 * `mesh_url` - HTTP URL to JSON list containing mesh objects
@@ -43,13 +45,13 @@ For example:
 view.html#model_url=http%3A%2F%2Fexample.org%2Fpath%2Fto%2Fmodel&mesh_url=http%3A%2F%2Fexample.org%2Fpath%2Fto%2Fmeshes&anatomy_url_fragment=http:%2F%2Fexample.org%2Fid%2F
 ```
 
-### Extra Query Options
+### Additional Parameters
 
-In addition to the core query parameters for specifying the model, meshes and landmarks, these extra 
+In addition to the core parameters for specifying the model, meshes and landmarks, these extra 
 options can be passed to modfy the viewer's behavior:
 
 - `showmeshes`: Show the meshes panel on startup. Set to a Boolean value. Default: `false`. 
-- `target-url`: Open URLs provided by *this* Mesh Viewer in another iframe on the same page with the provided HTML class ID. This assumes you have two iframes, one running this mesh viewer and another that will change based on the links clicked in this mesh viewer. This applies to all `mesh.link.url` and `landmark.link.url` links in the model loaded by this Mesh Viewer. Default: `None`.
+- `target-url`: Open URLs provided by *this* Mesh Viewer in another iframe on the same page with the provided HTML class ID. This assumes you have two iframes, one running this mesh viewer and another that will change based on the links clicked in this mesh viewer. This applies to all links from mesh and landmark labels that are formed by the `anatomy_url_fragment/anatomy_id` if given. Default: `None`.
 
 Example URL with query parameters:
 
@@ -96,7 +98,7 @@ Valid properties for meshes specification referenced by `mesh_url`:
 * url - (string) The location where the object data resides for this mesh
 * anatomy - (string) If given, the value for anatomy will be used as the display label for the mesh.
 * anatomy_id - (string) ID for the anatomy. Used with `anatomy_url_fragment` for constructing a link back to the anatomy.
-* label - (string) Can be as an alternative for the display label for the mesh, if the `anatomy` is not given.
+* label - (string) Can be used as an alternative for the display label for the mesh, if the `anatomy` is not given.
 * opacity - (float [0-1])Opacity for this mesh
 * color_r, color_g, color_b - (int [0-255]) RGB color values for the mesh color
 
@@ -125,7 +127,7 @@ Valid properties for landmark specification referenced by `landmark_url`:
 * mesh - (string) The ID of the Mesh this landmark points
 * anatomy - (string) If given, the value for `anatomy` will be used as the display label for the landmark.
 * anatomy_id - (string) ID for the anatomy. Used with `anatomy_url_fragment` for constructing a link back to the anatomy.
-* label - (string) Can be as an alternative for the display label for the landmark, if the `anatomy` is not given.
+* label - (string) Can be used as an alternative for the display label for the landmark, if the `anatomy` is not given.
 * point_x, point_y, point_z - (float [-inf,inf]) The location of the landmark
 * color_r, color_g, color_b - (int [0-255]) RGB color values for the mesh color
 * radius - (float [typically 0.1]) The radius of the spherical marker denoting the landmark.
