@@ -16,7 +16,7 @@ var model_caption=null;
 var model_color=[1,1,1];
 var model_bbox=[0,0,0];
 var model_clip=null;
-var model_measurement='units';
+var model_measurement='mm';
 var model_unitconversion=1.0;
 
 // Most URLs for meshes and landmarks expect to fetch resources from the server

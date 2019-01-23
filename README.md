@@ -67,7 +67,7 @@ Valid properties for model specification referenced by `model_url`:
 * bg_color_r, bg_color_g, bg_color_b (int [0-255]) - RGB values for the background
 * bounding_box_color_r, bounding_box_color_g, bounding_box_color_b (int [0-255]) -
  Color of the Bounding Box
-* units - (string [units]) type of distance measurement, such as 'cm', or 'inches'.
+* units - (string Default: 'mm') type of distance measurement, such as inches. Defaults to 'mm'.
 * unit_conversion - (float [1.0]) Multiplied by world-space distance to
  convert world-space distances to model_measurement distances
 
@@ -82,7 +82,7 @@ Example:
     "bounding_box_color_r": 255,
     "bounding_box_color_g": 255,
     "bounding_box_color_b": 0,
-    "units": "units",
+    "units": "mm",
     "unit_conversion": 1.0
   }
 ]
