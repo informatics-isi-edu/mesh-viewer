@@ -212,8 +212,8 @@ function setupModel(model) {
                             model_settings.bounding_box_color_b,
                              ) || model_bbox;
     model_clip = model_settings.clip || model_clip;
-    model_measurement = model_settings.measurement || model_measurement;
-    model_unitconversion = model_settings.unitconversion || model_unitconversion;
+    model_measurement = model_settings.units || model_measurement;
+    model_unitconversion = model_settings.unit_conversion || model_unitconversion;
     return 'Global Variables for model id "' + model_id + '" have been set.'
   }
   console.warning('Model not properly set, continuing with defaults...')

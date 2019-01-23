@@ -67,8 +67,8 @@ Valid properties for model specification referenced by `model_url`:
 * bg_color_r, bg_color_g, bg_color_b (int [0-255]) - RGB values for the background
 * bounding_box_color_r, bounding_box_color_g, bounding_box_color_b (int [0-255]) -
  Color of the Bounding Box
-* measurement - (string [inches, cm]) units of distance measurement
-* unitconversion - (float [1.0]) Multiplied by world-space distance to
+* units - (string [units]) type of distance measurement, such as 'cm', or 'inches'.
+* unit_conversion - (float [1.0]) Multiplied by world-space distance to
  convert world-space distances to model_measurement distances
 
 Example:
@@ -82,8 +82,8 @@ Example:
     "bounding_box_color_r": 255,
     "bounding_box_color_g": 255,
     "bounding_box_color_b": 0,
-    "measurement": "cm",
-    "unitconversion": 1.0
+    "units": "units",
+    "unit_conversion": 1.0
   }
 ]
 ```
@@ -94,9 +94,9 @@ Valid properties for meshes specification referenced by `mesh_url`:
 
 * RID - (string) The ID of the Mesh.
 * url - (string) The location where the object data resides for this mesh
-* anatomy - (string) Name of the anatomy this mesh points
+* anatomy - (string) If given, the value for anatomy will be used as the display label for the mesh.
 * anatomy_id - (string) ID for the anatomy. Used with `anatomy_url_fragment` for constructing a link back to the anatomy.
-* label - (string) Can be used instead of `anatomy` as an alternative description.
+* label - (string) Can be as an alternative for the display label for the mesh, if the `anatomy` is not given.
 * opacity - (float [0-1])Opacity for this mesh
 * color_r, color_g, color_b - (int [0-255]) RGB color values for the mesh color
 
@@ -123,9 +123,9 @@ Valid properties for landmark specification referenced by `landmark_url`:
 
 * RID - (string) The ID of the Landmark.
 * mesh - (string) The ID of the Mesh this landmark points
-* anatomy - (string) Name of the anatomy this landmark points
+* anatomy - (string) If given, the value for `anatomy` will be used as the display label for the landmark.
 * anatomy_id - (string) ID for the anatomy. Used with `anatomy_url_fragment` for constructing a link back to the anatomy.
-* label - (string) Can be used instead of `anatomy` as an alternative description.
+* label - (string) Can be as an alternative for the display label for the landmark, if the `anatomy` is not given.
 * point_x, point_y, point_z - (float [-inf,inf]) The location of the landmark
 * color_r, color_g, color_b - (int [0-255]) RGB color values for the mesh color
 * radius - (float [typically 0.1]) The radius of the spherical marker denoting the landmark.
