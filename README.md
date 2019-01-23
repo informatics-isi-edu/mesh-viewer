@@ -63,32 +63,27 @@ Example URL with query parameters:
 
 Valid properties for model specification referenced by `model_url`:
 
-* model_id - (string) The id of the model
-* model_caption - (string) The caption of the model
+* RID - (string) The id of the model
 * bg_color_r, bg_color_g, bg_color_b (int [0-255]) - RGB values for the background
 * bounding_box_color_r, bounding_box_color_g, bounding_box_color_b (int [0-255]) -
  Color of the Bounding Box
-* model_measurement - (string [inches, cm]) units of distance measurement
-* model_unitconversion - (float [1.0]) Multiplied by world-space distance to
+* units - (string Default: 'mm') type of distance measurement, such as inches. Defaults to 'mm'.
+* unit_conversion - (float [1.0]) Multiplied by world-space distance to
  convert world-space distances to model_measurement distances
 
 Example:
 ```
 [
   {
-    "id": 54,
-    "label": "E18.5 wildtype mouse - hard tissue",
-    "description": null,
+    "RID": "1-43KT",
     "bg_color_r": 0,
     "bg_color_g": 0,
     "bg_color_b": 0,
     "bounding_box_color_r": 255,
     "bounding_box_color_g": 255,
     "bounding_box_color_b": 0,
-    "rotate": false,
-    "volume": null,
-    "RID": "1-43KT",
-    "unit_conversion": null
+    "units": "mm",
+    "unit_conversion": 1.0
   }
 ]
 ```
@@ -99,11 +94,9 @@ Valid properties for meshes specification referenced by `mesh_url`:
 
 * RID - (string) The ID of the Mesh.
 * url - (string) The location where the object data resides for this mesh
-* link - (object) An object containing a URL and label description of the mesh
-    * Example ```{"url": "http://example.com", "label": "Mesh URL"}
-* anatomy - (string) The label for the anatomy this mesh describes
-* anatomy_id - (string) The id for the anatomy term (optional)
-* description - (string) A description of the Mesh
+* anatomy - (string) If given, the value for anatomy will be used as the display label for the mesh.
+* anatomy_id - (string) ID for the anatomy. Used with `anatomy_url_fragment` for constructing a link back to the anatomy.
+* label - (string) Can be as an alternative for the display label for the mesh, if the `anatomy` is not given.
 * opacity - (float [0-1])Opacity for this mesh
 * color_r, color_g, color_b - (int [0-255]) RGB color values for the mesh color
 
@@ -113,14 +106,13 @@ Example:
   {
     "RID": "1-444E",
     "url": "http://mysite.org/my_meshes.obj.gz",
+    "anatomy":"frontal suture",
+    "anatomy_id":"1-4FC4",
     "label": null,
-    "description": null,
     "color_r": 66,
     "color_g": 137,
     "color_b": 244,
-    "opacity": 1,
-    "anatomy": "occipital bone",
-    "anatomy_id": "1-3406"
+    "opacity": 1
   }
 ]
 ```
@@ -131,14 +123,10 @@ Valid properties for landmark specification referenced by `landmark_url`:
 
 * RID - (string) The ID of the Landmark.
 * mesh - (string) The ID of the Mesh this landmark points
+* anatomy - (string) If given, the value for `anatomy` will be used as the display label for the landmark.
+* anatomy_id - (string) ID for the anatomy. Used with `anatomy_url_fragment` for constructing a link back to the anatomy.
+* label - (string) Can be as an alternative for the display label for the landmark, if the `anatomy` is not given.
 * point_x, point_y, point_z - (float [-inf,inf]) The location of the landmark
-* url - (string) The location where the object data resides for this mesh
-* link - (object) An object containing a URL and label description of the mesh
-    * Example ```{"url": "http://example.com", "label": "Mesh URL"}
-* anatomy - (string) The label for the anatomy this mesh describes
-* anatomy_id - (string) The id for the anatomy term (optional)
-* description - (string) A description of the Mesh
-* opacity - (float [0-1])Opacity for this mesh
 * color_r, color_g, color_b - (int [0-255]) RGB color values for the mesh color
 * radius - (float [typically 0.1]) The radius of the spherical marker denoting the landmark.
 
@@ -147,17 +135,16 @@ Valid properties for landmark specification referenced by `landmark_url`:
   {
     "RID": "1-4452",
     "mesh": "1-43E0",
+    "anatomy": null,
+    "anatomy_id": null,
     "label": "Inferior point of mandibular body",
-    "description": null,
     "point_x": 7.8618,
     "point_y": 2.5692,
     "point_z": 1.8701,
-    "radius": 0.1,
     "color_r": 0,
     "color_g": 0,
     "color_b": 255,
-    "anatomy": "mandible",
-    "anatomy_id": "1-340A"
+    "radius": 0.1,
   }
 ]
 ```

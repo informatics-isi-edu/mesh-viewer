@@ -16,7 +16,7 @@ var model_caption=null;
 var model_color=[1,1,1];
 var model_bbox=[0,0,0];
 var model_clip=null;
-var model_measurement='units';
+var model_measurement='mm';
 var model_unitconversion=1.0;
 
 // Most URLs for meshes and landmarks expect to fetch resources from the server
@@ -30,8 +30,8 @@ if (location.hostname === "localhost" || location.hostname === "127.0.0.1")
 // All arguments here are HTTP URLs. Each GET will fetch JSON.
 const URL_ARGUMENTS = {
   'model_url': setupModel,
-  'meshes_url': setupMeshes,
-  'landmarks_url': setupLandmarks,
+  'mesh_url': setupMeshes,
+  'landmark_url': setupLandmarks,
 }
 
 // Other fragment arguments, simply passed to the function defined below
@@ -45,8 +45,8 @@ const GENERAL_ARGUMENTS = {
 // example.com/view.html#model_url=<model_url>&meshes_url=<mesh_url>
 const MESH_VIEWER_ARGUMENT_DEFAULTS = {
   'model_url': {},
-  'meshes_url': [],
-  'landmarks_url': [],
+  'mesh_url': [],
+  'landmark_url': [],
   'anatomy_url_fragment': null
 }
 
@@ -212,8 +212,8 @@ function setupModel(model) {
                             model_settings.bounding_box_color_b,
                              ) || model_bbox;
     model_clip = model_settings.clip || model_clip;
-    model_measurement = model_settings.model_measurements || model_measurement;
-    model_unitconversion = model_settings.unitconversion || model_unitconversion;
+    model_measurement = model_settings.units || model_measurement;
+    model_unitconversion = model_settings.unit_conversion || model_unitconversion;
     return 'Global Variables for model id "' + model_id + '" have been set.'
   }
   console.warning('Model not properly set, continuing with defaults...')
@@ -224,9 +224,9 @@ function setupMeshes(meshes) {
   meshes.forEach(function (mesh) {
     var formattedMesh = {
       'id': mesh.RID,
-      'link': mesh.link || {'url': null, 'label': null},
-      'label': mesh.anatomy,
-      'description': mesh.description,
+      'link': {'url': null, 'label': null},
+      'label': mesh.anatomy || mesh.label,
+      'anatomy_id': mesh.anatomy_id,
       'url': development_hostname + mesh.url,
       'opacity': mesh.opacity,
       'color': parseColor(mesh.color_r, mesh.color_b, mesh.color_g)
@@ -241,13 +241,13 @@ function setupLandmarks(landmarks) {
   landmarks.forEach(function (landmark) {
     var formattedLandmark = {
       'id': landmark.RID,
+      'link': {'url': null, 'label': null},
+      'label': landmark.anatomy || landmark.label,
+      'anatomy_id': landmark.anatomy_id,
       'group': landmark.mesh,
-      'description': landmark.description,
       'point': [landmark.point_x, landmark.point_y, landmark.point_z],
-      'color': parseColor(landmark.color_r, landmark.color_b, landmark.color_g),
-      'label': landmark.label || '',
-      'link': landmark.link || {'url': null, 'label': null},
       'radius': landmark.radius || 0.1,
+      'color': parseColor(landmark.color_r, landmark.color_b, landmark.color_g),
     }
     formattedLandmarks.push(formattedLandmark);
   });
@@ -266,12 +266,14 @@ function setupLandmarks(landmarks) {
 function postSetup(model) {
   var formattedModel = {
     'model': model['model_url'],
-    'meshes': model['meshes_url'],
-    'landmarks': model['landmarks_url'],
+    'meshes': model['mesh_url'],
+    'landmarks': model['landmark_url'],
   }
   if (model.anatomy_url_fragment) {
     function setURL(meshOrLandmark) {
-      meshOrLandmark.link.url = model.anatomy_url_fragment + meshOrLandmark.id;
+      if (meshOrLandmark.anatomy_id) {
+        meshOrLandmark.link.url = model.anatomy_url_fragment + meshOrLandmark.anatomy_id;
+      }
     }
     formattedModel.meshes.forEach(setURL);
     formattedModel.landmarks.forEach(setURL);
