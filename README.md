@@ -1,18 +1,19 @@
 # mesh-viewer
 
-This is a 3D model viewer that renders meshes and landmarks.
+3D model viewer for rendering surface meshes and landmarks.
 
 ## Features
 
-- render one or more meshes in a scene
-- each mesh associated with a label and a color
-- labels may be based on anatomy terms and link to web resources detailing the anatomy term
-- optional bounding box
-- optional animation to rotate the model
-- reset the model to its original orientation and zoom level
+- render 1+ mesh objects in a model
 - support for Wavefront Object (.obj) format meshes and to non-standard compressed meshes (.obj.gz)
-- display landmarks
+- automatically computes normals for smooth appearance
+- render 1+ landmarks (a.k.a., points of interest)
+- specify display names for each mesh or landmark and optionally link to web resources
+- zoom in/out/reset
+- animated rotation
+- specify colors for meshes and landmarks
 - simple straight-line distance measurement between landmarks
+- and other features
 
 ## Interface
 
@@ -63,9 +64,9 @@ Example URL with query parameters:
 
 ### Model Specification
 
-Valid properties for model specification referenced by `model`:
+A JSON *singleton* array of an object (if more than one object given only the first will be used). Valid properties for model object:
 
-* RID - (string) The id of the model
+* RID - (string) The ID of the model
 * BG_Color_R, BG_Color_G, BG_Color_B (int [0-255]) - RGB values for the background
 * Bounding_Box_Color_R, Bounding_Box_Color_G, Bounding_Box_Color_B (int [0-255]) -
  Color of the Bounding Box
