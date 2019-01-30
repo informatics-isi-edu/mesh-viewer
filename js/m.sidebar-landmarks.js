@@ -25,15 +25,9 @@ function addLandmarkSidebarEntry(label,name,i,href)
   var _bb='';
   var _bbb='<button id="'+_landmark_name_n+'" class="pull-left"  style="display:inline-block;outline: none;border:none; background-color:white; padding:0px 5px 0px 0px;"  onClick="openLandmark('+i+',\''+_opacity_name+'\',\''+_landmark_list+'\')" title="click to expand landmarks"><span class="glyphicon glyphicon-map-marker" style="color:#407CCA"></span> </button>';
 
-  // If a URL was specified in the query params, set it for all <a> tags. 
-  // This enables these links to be opened within another iframe. 
-  _target = '';
-  if (targetURL != undefined) {
-    _target = ' target="' + targetURL + '" ';
-  }
   html_label = '';
   if (href != undefined) {
-    html_label = '<a href="'+href+'"'+_target+'>'+label+'<span class="glyphicon glyphicon-link" style="font-size:2px;color:#aeaeae"></span></a>'
+    html_label = '<a href="'+href+'">'+label+'<span class="glyphicon glyphicon-link" style="font-size:2px;color:#aeaeae"></span></a>'
   } else {
     html_label = '<p>'+label+'</p>'
   }

@@ -1,4 +1,4 @@
-
+var firstTimeLoad = true;
 
 function onRender() {
 
@@ -17,6 +17,11 @@ function onRender() {
     if(spin_view) {
       ren3d.camera.rotate([1, 0]);
     }
+
+    if (firstTimeLoad && openMeshPanelOnStart) {
+        meshesClick();
+    }
+    firstTimeLoad = false;
 
 }
 
