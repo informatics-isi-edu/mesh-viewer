@@ -128,7 +128,7 @@ A JSON array of objects. Valid properties for landmark objects:
 * Label - (string) The display label for the landmark. *OPTIONAL*: if not given, the `Label_Alt` will be used.
 * Label_Alt - (string) Used as the display label *if* the `Label` is `null`. *OPTIONAL*: if not given a display name will be generated (e.g., L1, L2,...).
 * Label_RID - (string) The ID for the label. Used with `resolver` for constructing a link for the label. *OPTIONAL*: if not given, the label will be displayed but not linkable.
-* Point_X, Point_Y, point_Z - (float [-inf,inf]) The location of the landmark
+* Point_X, Point_Y, Point_Z - (float [-inf,inf]) The location of the landmark
 * Color_R, Color_G, Color_B - (int [0-255]) RGB color values for the mesh color
 * Radius - (float [typically 0.1]) The radius of the spherical marker denoting the landmark.
 
