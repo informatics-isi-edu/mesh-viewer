@@ -36,7 +36,9 @@ const URL_ARGUMENTS = {
 
 // Other fragment arguments, simply passed to the function defined below
 const GENERAL_ARGUMENTS = {
-  'anatomy_url_fragment': setupAnatomyURLFragment
+  'anatomy_url_fragment': rawValue,
+  'target-url': rawValue,
+  'showmeshes': rawValue,
 }
 
 // Arguments that can be passed to the mesh viewer. These are the defaults if
@@ -47,7 +49,9 @@ const MESH_VIEWER_ARGUMENT_DEFAULTS = {
   'model_url': {},
   'mesh_url': [],
   'landmark_url': [],
-  'anatomy_url_fragment': null
+  'anatomy_url_fragment': null,
+  'target-url': null,
+  'showmeshes': false,
 }
 
 /*
@@ -191,8 +195,8 @@ function setupDefaults() {
 }
 
 // Do no processing on the arg itself, this will be handled in postSetup()
-function setupAnatomyURLFragment(urlTemplate) {
-  return urlTemplate
+function rawValue(option) {
+  return option;
 }
 
 function setupModel(model) {
@@ -268,6 +272,8 @@ function postSetup(model) {
     'model': model['model_url'],
     'meshes': model['mesh_url'],
     'landmarks': model['landmark_url'],
+    'showmeshes': model['showmeshes'],
+    'targetURL': model['target-url']
   }
   if (model.anatomy_url_fragment) {
     function setURL(meshOrLandmark) {
