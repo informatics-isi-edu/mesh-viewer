@@ -272,7 +272,7 @@ function postSetup(model) {
     'meshes': model['mesh'],
     'landmarks': model['landmark'],
     'showmeshes': model['showmeshes'],
-    'targetURL': model['target'],
+    'target': model['target'],
     'resolver': model['resolver'],
   }
   if (formattedModel.resolver) {

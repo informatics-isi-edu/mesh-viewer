@@ -103,7 +103,7 @@ jQuery(document).ready(function() {
     });
 
     openMeshPanelOnStart = model.showmeshes;
-    setTargetOnURLs(model.targetURL);
+    setTargetOnURLs(model.target);
 
     if(initial_mesh_list)
       need2Show=true;
@@ -142,13 +142,13 @@ function setupViewerSidebarMaxHeight() {
 }
 
 
-function setTargetOnURLs(targetURL) {
-  if (!targetURL) {
+function setTargetOnURLs(target) {
+  if (!target) {
     return;
   }
 
   meshes = $('.mesh-viewer-link').each(function() {
-    $(this).attr('target', targetURL);
+    $(this).attr('target', target);
   });
 }
 
