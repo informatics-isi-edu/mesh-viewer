@@ -208,12 +208,12 @@ function setupModel(model) {
     model_id = model_settings.RID || model_id;
     model_caption = model_settings.caption || model_caption;
     model_color = parseColor(model_settings['BG_Color_R'],
-                             model_settings['BG_Color_B'],
                              model_settings['BG_Color_G'],
+                             model_settings['BG_Color_B'],
                              ) || model_color;
     model_bbox = parseColor(model_settings['Bounding_Box_Color_R'],
-                            model_settings['Bounding_Box_Color_B'],
                             model_settings['Bounding_Box_Color_G'],
+                            model_settings['Bounding_Box_Color_B'],
                              ) || model_bbox;
     model_clip = model_settings.Clip || model_clip;
     model_measurement = model_settings.Units || model_measurement;
@@ -232,7 +232,7 @@ function setupMeshes(meshes) {
       'label': mesh['Label'] || mesh['Label_Alt'],
       'url': development_hostname + mesh['URL'],
       'opacity': mesh['Opacity'],
-      'color': parseColor(mesh.Color_R, mesh.Color_B, mesh.Color_G)
+      'color': parseColor(mesh.Color_R, mesh.Color_G, mesh.Color_B)
     }
     formattedMeshes.push(formattedMesh);
   });
@@ -250,7 +250,7 @@ function setupLandmarks(landmarks) {
       'group': landmark['Mesh'],
       'point': [landmark['Point_X'], landmark['Point_Y'], landmark['Point_Z']],
       'radius': landmark['Radius'] || 0.1,
-      'color': parseColor(landmark['Color_R'], landmark['Color_B'], landmark['Color_G']),
+      'color': parseColor(landmark['Color_R'], landmark['Color_G'], landmark['Color_B']),
     }
     formattedLandmarks.push(formattedLandmark);
   });
@@ -272,12 +272,13 @@ function postSetup(model) {
     'meshes': model['mesh'],
     'landmarks': model['landmark'],
     'showmeshes': model['showmeshes'],
-    'targetURL': model['resolver']
+    'targetURL': model['target'],
+    'resolver': model['resolver'],
   }
-  if (formattedModel.targetURL) {
+  if (formattedModel.resolver) {
     function setURL(meshOrLandmark) {
       if (meshOrLandmark['Label_RID']) {
-        meshOrLandmark.link.url = formattedModel.targetURL + meshOrLandmark['Label_RID'];
+        meshOrLandmark.link.url = formattedModel.resolver + meshOrLandmark['Label_RID'];
       }
     }
     formattedModel.meshes.forEach(setURL);
