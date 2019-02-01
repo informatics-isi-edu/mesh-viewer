@@ -245,7 +245,7 @@ function setupLandmarks(landmarks) {
     var formattedLandmark = {
       'id': landmark.RID,
       'link': {'url': null, 'label': null},
-      'label': mesh['Label'] || mesh['Label_Alt'],
+      'label': landmark['Label'] || landmark['Label_Alt'],
       'labelRID': landmark['Label_RID'] ,
       'group': landmark['Mesh'],
       'point': [landmark['Point_X'], landmark['Point_Y'], landmark['Point_Z']],
