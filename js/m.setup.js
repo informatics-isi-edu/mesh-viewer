@@ -287,8 +287,8 @@ function postSetup(model) {
   return formattedModel;
 }
 
-function parseColor(r, b, g) {
-  if (r == null || b == null || g == null)
+function parseColor(r, g, b) {
+  if (r == null || g == null || b == null)
     return null
   return [r/255.0, g/255.0, b/255.0];
 }
