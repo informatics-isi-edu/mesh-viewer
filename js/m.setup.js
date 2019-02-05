@@ -223,13 +223,20 @@ function setupModel(model) {
   console.warning('Model not properly set, continuing with defaults...')
 }
 
+function getFormattedLabel(meshOrLandmark) {
+  if (meshOrLandmark['Label'] && meshOrLandmark['Label_Alt']) {
+    return meshOrLandmark['Label'] + ' (' + meshOrLandmark['Label_Alt'] + ')';
+  }
+  return meshOrLandmark['Label'] || meshOrLandmark['Label_Alt'];
+}
+
 function setupMeshes(meshes) {
   var formattedMeshes = []
   meshes.forEach(function (mesh) {
     var formattedMesh = {
       'id': mesh['RID'],
       'link': {'url': null, 'label': null},
-      'label': mesh['Label'] || mesh['Label_Alt'],
+      'label': getFormattedLabel(mesh),
       'labelRID': mesh['Label_RID'],
       'url': development_hostname + mesh['URL'],
       'opacity': mesh['Opacity'],
@@ -246,7 +253,7 @@ function setupLandmarks(landmarks) {
     var formattedLandmark = {
       'id': landmark.RID,
       'link': {'url': null, 'label': null},
-      'label': landmark['Label'] || landmark['Label_Alt'],
+      'label': getFormattedLabel(landmark),
       'labelRID': landmark['Label_RID'] ,
       'group': landmark['Mesh'],
       'point': [landmark['Point_X'], landmark['Point_Y'], landmark['Point_Z']],
