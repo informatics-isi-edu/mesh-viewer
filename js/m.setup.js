@@ -237,6 +237,7 @@ function setupMeshes(meshes) {
       'id': mesh['RID'],
       'link': {'url': null, 'label': null},
       'label': getFormattedLabel(mesh),
+      'labelRID': mesh['Label_RID'],
       'url': development_hostname + mesh['URL'],
       'opacity': mesh['Opacity'],
       'color': parseColor(mesh.Color_R, mesh.Color_G, mesh.Color_B)
@@ -284,8 +285,8 @@ function postSetup(model) {
   }
   if (formattedModel.resolver) {
     function setURL(meshOrLandmark) {
-      if (meshOrLandmark['Label_RID']) {
-        meshOrLandmark.link.url = formattedModel.resolver + meshOrLandmark['Label_RID'];
+      if (meshOrLandmark['labelRID']) {
+        meshOrLandmark.link.url = formattedModel.resolver + meshOrLandmark['labelRID'];
       }
     }
     formattedModel.meshes.forEach(setURL);
