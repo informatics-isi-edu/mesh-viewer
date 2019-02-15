@@ -161,7 +161,16 @@ function processArguments() {
       var promise = $.getJSON(argValue).then(function(result) {
           return result;
         }).then(function(data) {
-          return URL_ARGUMENTS[arg](data)
+          try {
+            return URL_ARGUMENTS[arg](data)
+          } catch (err) {
+            console.error('Failed to process JSON  after successful fetch for "' + arg +
+            '" with a value of ' + '"' + argValue + '"', err)
+            console.debug('Data for "' + arg + '"', data)
+          }
+        }).fail(function(error) {
+          console.error('Failed to fetch JSON for "' + arg + '" with a value of ' +
+                        '"' + argValue + '"')
         });
       processedArgs[arg] = promise;
     } else if (GENERAL_ARGUMENTS[arg] != null) {
@@ -185,7 +194,8 @@ function processArguments() {
     }
     return postSetup(mappedResults);
   }).catch(function(response) {
-    console.error('Failed to process all arguments. Please fix the failing argument before continuing.', response)
+    console.error(response)
+    throw 'Failed to process all arguments. Please fix the failing argument before continuing.'
   });
 }
 
@@ -231,6 +241,9 @@ function getFormattedLabel(meshOrLandmark) {
 }
 
 function setupMeshes(meshes) {
+  if (meshes === undefined || meshes.length == 0) {
+    throw 'No Meshes available, nothing to display.'
+  }
   var formattedMeshes = []
   meshes.forEach(function (mesh) {
     var formattedMesh = {
