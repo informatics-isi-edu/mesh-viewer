@@ -121,6 +121,10 @@ jQuery(document).ready(function() {
 
     // Render the scene!
     ren3d.render();
+  }).catch(function(error) {
+    console.error(error)
+    console.error('Error loading arguments, aborting initialization')
+    $('#loading h3').html('Unable To Load Resources')
   })
 })
 
